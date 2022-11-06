@@ -1,1 +1,22 @@
 <h1 th:text="${'Testing for ' + name}">Testing for ...</h1>
+
+<table>
+  <tr>
+    <td>Id</td>
+    <td>Name</td>
+    <td>Created at</td>
+  </tr>
+  <tr th:each="entry : ${entries}">
+    <td th:text="${{entry.id}}">1</td>
+    <td th:text="${{entry.name}}">Louis</td>
+    <td th:text="${{entry.createdAt}}">(timestamp)</td>
+  </tr>
+</table>
+
+<form method="post" th:action="@{/test/make}">
+  <p>
+    <span>Name:</span>
+    <input type="text" name="name" id="name" />
+    <input type="submit" value="Send" />
+  </p>
+</form>
