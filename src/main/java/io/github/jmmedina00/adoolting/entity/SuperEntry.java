@@ -40,4 +40,8 @@ public class SuperEntry {
   public Date getCreatedAt() {
     return createdAt;
   }
+
+  public void delete() {
+    deletedAt = new Date();
+  }
 }
