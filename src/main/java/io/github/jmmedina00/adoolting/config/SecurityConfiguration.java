@@ -29,22 +29,22 @@ public class SecurityConfiguration {
             .permitAll()
       )
       .formLogin()
-      .loginPage("/");
+      .loginPage("/")
+      .loginProcessingUrl("/login");
     return http.build();
   }
 
   @Bean
   public UserDetailsService userDetailsService() {
+    // Will need to extend the UserDetails class to get the info that I need...
     UserDetails clara = User
-      .withDefaultPasswordEncoder()
-      .username("clara")
-      .password("test")
+      .withUsername("clara")
+      .password(passwordEncoder().encode("test"))
       .roles("USER")
       .build();
     UserDetails mario = User
-      .withDefaultPasswordEncoder()
-      .username("mario")
-      .password("1234")
+      .withUsername("mario")
+      .password(passwordEncoder().encode("1234"))
       .roles("USER")
       .build();
 

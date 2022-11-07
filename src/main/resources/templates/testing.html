@@ -1,4 +1,4 @@
-<h1 th:text="${'Testing for ' + name}">Testing for ...</h1>
+<h1>Testing for <span sec:authentication="name">user</span></h1>
 
 <table>
   <tr>
