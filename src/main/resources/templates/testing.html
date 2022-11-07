@@ -2,12 +2,14 @@
 
 <table>
   <tr>
+    <td>Icon</td>
     <td>Id</td>
     <td>Name</td>
     <td>Created at</td>
     <td>Delete</td>
   </tr>
   <tr th:each="entry : ${entries}">
+    <td><img height="100" th:src="@{/cdn/icon/__${entry.id}__.jpg}" /></td>
     <td th:text="${{entry.id}}">1</td>
     <td th:text="${{entry.name}}">Louis</td>
     <td th:text="${{entry.createdAt}}">(timestamp)</td>
