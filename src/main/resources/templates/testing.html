@@ -1,12 +1,15 @@
-<h1>Testing for <span sec:authentication="name">user</span></h1>
+<h1>
+  <span th:text="#{test_title}"></span>
+  <span sec:authentication="name">user</span>
+</h1>
 
 <table>
   <tr>
-    <td>Icon</td>
+    <td th:text="#{icon}">Icon</td>
     <td>Id</td>
-    <td>Name</td>
-    <td>Created at</td>
-    <td>Delete</td>
+    <td th:text="#{name}">Name</td>
+    <td th:text="#{created_at}">Created at</td>
+    <td th:text="#{delete}">Delete</td>
   </tr>
   <tr th:each="entry : ${entries}">
     <td><img height="100" th:src="@{/cdn/icon/__${entry.id}__.jpg}" /></td>
@@ -15,7 +18,7 @@
     <td th:text="${{entry.createdAt}}">(timestamp)</td>
     <td>
       <form method="post" th:action="@{/test/delete/__${entry.id}__}">
-        <input type="submit" value="Delete" />
+        <input type="submit" th:value="#{delete}" />
       </form>
     </td>
   </tr>
@@ -23,7 +26,7 @@
 
 <form method="post" th:action="@{/test/make}">
   <p>
-    <span>Name:</span>
+    <span th:text="#{name} + ':'">Name:</span>
     <input type="text" name="name" id="name" />
     <input type="submit" value="Send" />
   </p>
