@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/test")
@@ -35,6 +36,14 @@ public class TestController {
   public String delete(@PathVariable("entryId") String id) {
     Long convertedId = Long.parseLong(id);
     superEntryService.deleteEntry(convertedId);
+    return "redirect:/test";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/upload")
+  public String uploadImage(@RequestParam("image") MultipartFile file)
+    throws Exception {
+    superEntryService.saveImage(file);
+
     return "redirect:/test";
   }
 }
