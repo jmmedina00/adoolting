@@ -31,3 +31,11 @@
     <input type="submit" value="Send" />
   </p>
 </form>
+
+<form method="post" th:action="@{/test/upload}" enctype="multipart/form-data">
+  <p>
+    <span>File</span>
+    <input type="file" name="image" accept="image/png, image/jpg" />
+    <input type="submit" value="Send" />
+  </p>
+</form>
