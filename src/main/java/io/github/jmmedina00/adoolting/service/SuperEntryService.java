@@ -79,21 +79,21 @@ public class SuperEntryService {
     // https://stackoverflow.com/questions/4756268/how-to-resize-the-buffered-image-n-graphics-2d-in-java
     BufferedImage target128 = new BufferedImage(128, 128, source.getType());
     Graphics2D graphics128 = target128.createGraphics();
-    graphics128.drawImage(target128, 0, 0, 128, 128, null);
+    graphics128.drawImage(source, 0, 0, 128, 128, null);
     graphics128.dispose();
     ImageIO.write(
       target128,
-      "jpg",
+      "jpeg",
       new File("./data/cdn/test/big/" + filename)
     );
 
     BufferedImage target64 = new BufferedImage(64, 64, source.getType());
     Graphics2D graphics64 = target64.createGraphics();
-    graphics64.drawImage(target64, 0, 0, 64, 64, null);
+    graphics64.drawImage(source, 0, 0, 64, 64, null);
     graphics64.dispose();
     ImageIO.write(
-      target128,
-      "jpg",
+      target64,
+      "jpeg",
       new File("./data/cdn/test/smol/" + filename)
     );
   }
