@@ -15,6 +15,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +28,9 @@ public class SuperEntryService {
   private JobScheduler jobScheduler;
 
   private Random random = new Random();
+
+  @Value("${user.dir}")
+  private String workDirectory;
 
   public List<SuperEntry> getEntries() {
     return superEntryRepository.findByDeletedAtIsNull();
@@ -46,7 +50,7 @@ public class SuperEntryService {
 
   public void saveImage(MultipartFile file) throws Exception {
     String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-    String path = "./data/test/" + random.nextInt() + extension;
+    String path = workDirectory + "/data/cdn/test/" + random.nextInt() + "." + extension;
 
     File fileToWrite = new File(path);
     file.transferTo(fileToWrite);
