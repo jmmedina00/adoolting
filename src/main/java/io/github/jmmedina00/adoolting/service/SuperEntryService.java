@@ -12,20 +12,26 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
+import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
 import org.apache.commons.io.FilenameUtils;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class SuperEntryService {
@@ -37,6 +43,12 @@ public class SuperEntryService {
 
   @Autowired
   private JavaMailSender emailSender;
+
+  @Autowired
+  private TemplateEngine templateEngine;
+
+  @Autowired
+  private MessageSource messageSource;
 
   @Value("${EMAIL_ADDRESS}")
   private String sender;
@@ -56,7 +68,9 @@ public class SuperEntryService {
   public void createEntry(String name) {
     SuperEntry entry = new SuperEntry(name);
     superEntryRepository.save(entry);
-    jobScheduler.enqueue(() -> sendMeEmail(name));
+    jobScheduler.enqueue(
+      () -> sendMeEmail(name, LocaleContextHolder.getLocale())
+    );
   }
 
   public void deleteEntry(Long id) {
@@ -76,12 +90,18 @@ public class SuperEntryService {
   }
 
   @Job(name = "Send email")
-  public void sendMeEmail(String name) throws Exception {
-    SimpleMailMessage message = new SimpleMailMessage();
+  public void sendMeEmail(String name, Locale locale) throws Exception {
+    Context context = new Context();
+    context.setVariable("name", name);
+
+    String contents = templateEngine.process("mail/test", context);
+    String subject = messageSource.getMessage("greeting", null, locale);
+
+    MimeMessage message = emailSender.createMimeMessage();
     message.setFrom(sender);
-    message.setTo(receiver);
-    message.setSubject("Test from Spring");
-    message.setText("This is a test from Spring by " + name + ". Did this email reach you?");
+    message.setRecipients(Message.RecipientType.TO, receiver);
+    message.setSubject(subject);
+    message.setText(contents, "UTF-8", "html");
     emailSender.send(message);
   }
 
