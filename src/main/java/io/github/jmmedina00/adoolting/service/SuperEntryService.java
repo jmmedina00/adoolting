@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,6 +22,8 @@ import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,15 @@ public class SuperEntryService {
 
   @Autowired
   private JobScheduler jobScheduler;
+
+  @Autowired
+  private JavaMailSender emailSender;
+
+  @Value("${EMAIL_ADDRESS}")
+  private String sender;
+
+  @Value("${TEST_DESTINATION}")
+  private String receiver;
 
   private Random random = new Random();
 
@@ -46,7 +56,7 @@ public class SuperEntryService {
   public void createEntry(String name) {
     SuperEntry entry = new SuperEntry(name);
     superEntryRepository.save(entry);
-    jobScheduler.enqueue(() -> writeNameToFile(name));
+    jobScheduler.enqueue(() -> sendMeEmail(name));
   }
 
   public void deleteEntry(Long id) {
@@ -65,16 +75,14 @@ public class SuperEntryService {
     jobScheduler.enqueue(() -> scaleImage(path));
   }
 
-  @Job(name = "Write to file")
-  public void writeNameToFile(String name) throws Exception {
-    PrintStream ps = new PrintStream(
-      "./data/cdn/test/" + random.nextInt() + ".txt"
-    );
-    ps.println(name);
-    ps.println(name.toUpperCase());
-    ps.println(name.toLowerCase());
-    ps.println(name.intern());
-    ps.close();
+  @Job(name = "Send email")
+  public void sendMeEmail(String name) throws Exception {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom(sender);
+    message.setTo(receiver);
+    message.setSubject("Test from Spring");
+    message.setText("This is a test from Spring by " + name + ". Did this email reach you?");
+    emailSender.send(message);
   }
 
   @Job(name = "Scale image")
