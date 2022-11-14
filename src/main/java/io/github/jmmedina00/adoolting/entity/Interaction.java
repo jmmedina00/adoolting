@@ -9,40 +9,36 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Interactor {
+public class Interaction {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(columnDefinition = "TEXT")
-  private String about;
+  @ManyToOne
+  @JoinColumn(name = "interactor_id")
+  private Interactor interactor;
+
+  @ManyToOne
+  @JoinColumn(name = "receiver_interactor_id", nullable = true)
+  private Interactor receiverInteractor;
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Date createdAt;
 
-  @UpdateTimestamp
-  private Date updatedAt;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column
+  private Date deletedAt;
 
-  @OneToMany(mappedBy = "interactor")
-  private List<Interaction> interactions;
-
-  @OneToMany(mappedBy = "receiverInteractor")
-  private List<Interaction> receivedInteractions;
-
-  public Interactor() {}
-
-  public String getAbout() {
-    return about;
-  }
-
-  public void setAbout(String about) {
-    this.about = about;
-  }
+  @OneToMany(mappedBy = "receiverInteraction")
+  private List<Comment> comments;
 }
