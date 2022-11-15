@@ -8,3 +8,49 @@
 
   <input type="submit" />
 </form>
+
+<form th:action="@{/register}" th:object="${user}" method="post" enctype="utf8">
+  <div>
+    <label>First</label>
+    <input th:field="*{firstName}" />
+    <p th:each="error: ${#fields.errors('firstName')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Last</label>
+    <input th:field="*{lastName}" />
+    <p th:each="error: ${#fields.errors('lastName')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Email</label>
+    <input th:field="*{email}" />
+    <p th:each="error: ${#fields.errors('email')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Confirm email</label>
+    <input th:field="*{confirmEmail}" />
+    <p th:each="error: ${#fields.errors('confirmEmail')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Password</label>
+    <input th:field="*{password}" type="password" />
+    <p th:each="error: ${#fields.errors('password')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Confirm password</label>
+    <input th:field="*{confirmPassword}" type="password" />
+    <p th:each="error: ${#fields.errors('confirmPassword')}" th:text="${error}">
+      Validation error
+    </p>
+  </div>
+  <button type="submit">Submit</button>
+</form>
