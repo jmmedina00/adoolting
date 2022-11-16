@@ -36,7 +36,7 @@ public class MainController {
     if (isAuthenticated()) {
       return "redirect:test";
     }
-    
+
     // Might have been redirected from invalid register
     if (!model.containsAttribute("user")) {
       User userDto = new User();
@@ -53,6 +53,8 @@ public class MainController {
     RedirectAttributes attributes
   ) {
     if (result.hasErrors()) {
+      // TODO: reassign global validation errors to their fields
+
       // Preserve errors and originally input values when redirecting
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.user",

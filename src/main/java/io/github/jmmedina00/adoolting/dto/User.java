@@ -1,10 +1,15 @@
 package io.github.jmmedina00.adoolting.dto;
 
+import io.github.jmmedina00.adoolting.dto.annotation.EmailMatches;
+import io.github.jmmedina00.adoolting.dto.annotation.PasswordMatches;
 import java.io.Serializable;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
 
+@EmailMatches
+@PasswordMatches
 public class User implements Serializable {
   @NotNull
   @NotEmpty
@@ -22,6 +27,7 @@ public class User implements Serializable {
 
   private String confirmEmail;
 
+  @Length(min = 6)
   @NotNull
   @NotEmpty
   private String password;
