@@ -1,7 +1,7 @@
 package io.github.jmmedina00.adoolting.dto;
 
 import java.io.Serializable;
-
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -14,6 +14,8 @@ public class User implements Serializable {
   @NotEmpty
   private String lastName;
 
+  // Additional check to ensure it's a somewhat valid domain
+  @Email(message = "Invalid email", regexp = "^.+@.+\\.[^\\.]{2,}$")
   @NotNull
   @NotEmpty
   private String email;
