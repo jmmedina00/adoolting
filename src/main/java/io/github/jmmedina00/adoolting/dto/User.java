@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.dto;
 import io.github.jmmedina00.adoolting.dto.annotation.EmailMatches;
 import io.github.jmmedina00.adoolting.dto.annotation.HasMinimumAge;
 import io.github.jmmedina00.adoolting.dto.annotation.PasswordMatches;
+import io.github.jmmedina00.adoolting.entity.enums.Gender;
 import java.io.Serializable;
 import java.util.Date;
 import javax.validation.constraints.Email;
@@ -38,6 +39,9 @@ public class User implements Serializable {
 
   private String confirmPassword;
 
+  @NotNull(message = "{error.gender}")
+  private Gender gender;
+
   @DateTimeFormat(iso = ISO.DATE)
   @HasMinimumAge
   private Date birthday;
@@ -70,6 +74,10 @@ public class User implements Serializable {
     return birthday;
   }
 
+  public Gender getGender() {
+    return gender;
+  }
+
   public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
@@ -96,5 +104,9 @@ public class User implements Serializable {
 
   public void setBirthday(Date birthday) {
     this.birthday = birthday;
+  }
+
+  public void setGender(Gender gender) {
+    this.gender = gender;
   }
 }

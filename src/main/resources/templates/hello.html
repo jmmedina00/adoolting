@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <h1 th:text="#{greeting}">Hello</h1>
 <form th:action="@{/login}" method="post">
   <span th:text="#{user}">User:</span>
@@ -76,6 +77,21 @@
     <p
       th:if="${#fields.hasErrors('birthday')}"
       th:text="${#fields.errors('birthday')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Gender</label>
+    <select th:field="*{gender}">
+      <option th:value="''">Select gender</option>
+      <option th:value="'HE'">Male</option>
+      <option th:value="'SHE'">Female</option>
+      <option th:value="'THEY'">Other</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('gender')}"
+      th:text="${#fields.errors('gender')[0]}"
     >
       Validation error
     </p>
