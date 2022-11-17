@@ -52,9 +52,5 @@
       Validation error
     </p>
   </div>
-  <div th:if="${#fields.hasErrors('global')}">
-    <h3>Global errors:</h3>
-    <p th:each="err : ${#fields.errors('global')}" th:text="${err}">Error</p>
-  </div>
   <button type="submit">Submit</button>
 </form>

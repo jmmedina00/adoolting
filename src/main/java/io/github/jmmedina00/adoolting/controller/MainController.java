@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,7 +54,14 @@ public class MainController {
     RedirectAttributes attributes
   ) {
     if (result.hasErrors()) {
-      // TODO: reassign global validation errors to their fields
+      for (ObjectError err : result.getGlobalErrors()) {
+        if (err.getCode() != null && err.getCode().equals("EmailMatches")) {
+          result.rejectValue("confirmEmail", "match_email");
+        }
+        if (err.getCode() != null && err.getCode().equals("PasswordMatches")) {
+          result.rejectValue("confirmPassword", "match_password");
+        }
+      }
 
       // Preserve errors and originally input values when redirecting
       attributes.addFlashAttribute(
