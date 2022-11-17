@@ -60,6 +60,8 @@ public class MainController {
     BindingResult result,
     RedirectAttributes attributes
   ) {
+    // TODO: refactor this SEVERELY
+
     try {
       if (result.hasErrors()) {
         for (ObjectError err : result.getGlobalErrors()) {
@@ -76,14 +78,19 @@ public class MainController {
         throw new InvalidDTOException();
       }
 
-      Person person = personService.createPersonFromUser(userDto);
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.person",
-        result
-      );
-      attributes.addFlashAttribute("person", person);
+      try {
+        Person person = personService.createPersonFromUser(userDto);
+        attributes.addFlashAttribute(
+          "org.springframework.validation.BindingResult.person",
+          result
+        );
+        attributes.addFlashAttribute("person", person);
 
-      return "valid";
+        return "valid";
+      } catch (EmailIsUsedException e) {
+        result.rejectValue("email", "error.email.used");
+        throw e;
+      }
     } catch (InvalidDTOException e) {
       // Preserve errors and originally input values when redirecting
       attributes.addFlashAttribute(
@@ -92,9 +99,6 @@ public class MainController {
       );
       attributes.addFlashAttribute("user", userDto);
 
-      return "redirect:";
-    } catch (EmailIsUsedException e) {
-      result.rejectValue("email", "error.email.used");
       return "redirect:";
     }
   }
