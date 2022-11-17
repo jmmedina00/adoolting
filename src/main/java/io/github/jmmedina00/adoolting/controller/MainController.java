@@ -1,7 +1,12 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.User;
+import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
+import io.github.jmmedina00.adoolting.service.PersonService;
 import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +22,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/")
 public class MainController {
+  @Autowired
+  private PersonService personService;
 
   private boolean isAuthenticated() {
     Authentication auth = SecurityContextHolder
@@ -53,16 +60,31 @@ public class MainController {
     BindingResult result,
     RedirectAttributes attributes
   ) {
-    if (result.hasErrors()) {
-      for (ObjectError err : result.getGlobalErrors()) {
-        if (err.getCode() != null && err.getCode().equals("EmailMatches")) {
-          result.rejectValue("confirmEmail", "error.email.confirm");
+    try {
+      if (result.hasErrors()) {
+        for (ObjectError err : result.getGlobalErrors()) {
+          if (err.getCode() != null && err.getCode().equals("EmailMatches")) {
+            result.rejectValue("confirmEmail", "error.email.confirm");
+          }
+          if (
+            err.getCode() != null && err.getCode().equals("PasswordMatches")
+          ) {
+            result.rejectValue("confirmPassword", "error.password.confirm");
+          }
         }
-        if (err.getCode() != null && err.getCode().equals("PasswordMatches")) {
-          result.rejectValue("confirmPassword", "error.password.confirm");
-        }
+
+        throw new InvalidDTOException();
       }
 
+      Person person = personService.createPersonFromUser(userDto);
+      attributes.addFlashAttribute(
+        "org.springframework.validation.BindingResult.person",
+        result
+      );
+      attributes.addFlashAttribute("person", person);
+
+      return "valid";
+    } catch (InvalidDTOException e) {
       // Preserve errors and originally input values when redirecting
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.user",
@@ -71,8 +93,9 @@ public class MainController {
       attributes.addFlashAttribute("user", userDto);
 
       return "redirect:";
+    } catch (EmailIsUsedException e) {
+      result.rejectValue("email", "error.email.used");
+      return "redirect:";
     }
-
-    return "valid";
   }
 }
