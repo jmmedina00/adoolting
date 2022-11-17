@@ -79,13 +79,7 @@ public class MainController {
       }
 
       try {
-        Person person = personService.createPersonFromUser(userDto);
-        attributes.addFlashAttribute(
-          "org.springframework.validation.BindingResult.person",
-          result
-        );
-        attributes.addFlashAttribute("person", person);
-
+        personService.createPersonFromUser(userDto);
         return "valid";
       } catch (EmailIsUsedException e) {
         result.rejectValue("email", "error.email.used");
