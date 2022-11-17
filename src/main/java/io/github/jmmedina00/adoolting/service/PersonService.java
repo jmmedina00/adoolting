@@ -2,14 +2,18 @@ package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.dto.User;
 import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PersonService {
+public class PersonService implements UserDetailsService {
   @Autowired
   private PersonRepository personRepository;
 
@@ -34,5 +38,13 @@ public class PersonService {
 
   private boolean isEmailAlreadyUsed(String email) {
     return personRepository.findByEmail(email) != null;
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String email)
+    throws UsernameNotFoundException {
+    Person person = personRepository.findByEmail(email);
+    PersonDetails details = new PersonDetails(person);
+    return details;
   }
 }

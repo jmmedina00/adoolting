@@ -1,6 +1,8 @@
 <h1>
   <span th:text="#{test_title}"></span>
-  <span sec:authentication="name">user</span>
+  <span th:text="${#authentication.getPrincipal().getPerson().getFirstName()}">
+    user
+  </span>
 </h1>
 
 <table>
@@ -35,7 +37,7 @@
 <form method="post" th:action="@{/test/upload}" enctype="multipart/form-data">
   <p>
     <span>File</span>
-    <input type="file" name="image" accept="image/png, image/jpg" />
+    <input type="file" name="image" accept="image/png, image/jpeg" />
     <input type="submit" value="Send" />
   </p>
 </form>

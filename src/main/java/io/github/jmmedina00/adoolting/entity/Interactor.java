@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -15,7 +16,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Interactor {
+public class Interactor implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
