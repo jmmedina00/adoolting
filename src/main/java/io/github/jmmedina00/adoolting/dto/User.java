@@ -11,25 +11,25 @@ import org.hibernate.validator.constraints.Length;
 @EmailMatches
 @PasswordMatches
 public class User implements Serializable {
-  @NotNull
-  @NotEmpty
+  @NotNull(message = "{error.not_empty}")
+  @NotEmpty(message = "{error.not_empty}")
   private String firstName;
 
-  @NotNull
-  @NotEmpty
+  @NotNull(message = "{error.not_empty}")
+  @NotEmpty(message = "{error.not_empty}")
   private String lastName;
 
   // Additional check to ensure it's a somewhat valid domain
-  @Email(message = "Invalid email", regexp = "^.+@.+\\.[^\\.]{2,}$")
-  @NotNull
-  @NotEmpty
+  @Email(message = "{error.email}", regexp = "^.+@.+\\.[^\\.]{2,}$")
+  @NotNull(message = "{error.email}")
+  @NotEmpty(message = "{error.email}")
   private String email;
 
   private String confirmEmail;
 
-  @Length(min = 6)
-  @NotNull
-  @NotEmpty
+  @Length(min = 6, message = "{error.password}")
+  @NotNull(message = "{error.password}")
+  @NotEmpty(message = "{error.password}")
   private String password;
 
   private String confirmPassword;

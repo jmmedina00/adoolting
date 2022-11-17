@@ -56,10 +56,10 @@ public class MainController {
     if (result.hasErrors()) {
       for (ObjectError err : result.getGlobalErrors()) {
         if (err.getCode() != null && err.getCode().equals("EmailMatches")) {
-          result.rejectValue("confirmEmail", "match_email");
+          result.rejectValue("confirmEmail", "error.email.confirm");
         }
         if (err.getCode() != null && err.getCode().equals("PasswordMatches")) {
-          result.rejectValue("confirmPassword", "match_password");
+          result.rejectValue("confirmPassword", "error.password.confirm");
         }
       }
 
