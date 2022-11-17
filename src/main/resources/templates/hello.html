@@ -70,5 +70,15 @@
       Validation error
     </p>
   </div>
+  <div>
+    <label>Birthday</label>
+    <input th:field="*{birthday}" type="date" />
+    <p
+      th:if="${#fields.hasErrors('birthday')}"
+      th:text="${#fields.errors('birthday')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
   <button type="submit">Submit</button>
 </form>

@@ -1,12 +1,16 @@
 package io.github.jmmedina00.adoolting.dto;
 
 import io.github.jmmedina00.adoolting.dto.annotation.EmailMatches;
+import io.github.jmmedina00.adoolting.dto.annotation.HasMinimumAge;
 import io.github.jmmedina00.adoolting.dto.annotation.PasswordMatches;
 import java.io.Serializable;
+import java.util.Date;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 @EmailMatches
 @PasswordMatches
@@ -34,6 +38,10 @@ public class User implements Serializable {
 
   private String confirmPassword;
 
+  @DateTimeFormat(iso = ISO.DATE)
+  @HasMinimumAge
+  private Date birthday;
+
   public String getFirstName() {
     return firstName;
   }
@@ -58,6 +66,10 @@ public class User implements Serializable {
     return confirmPassword;
   }
 
+  public Date getBirthday() {
+    return birthday;
+  }
+
   public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
@@ -80,5 +92,9 @@ public class User implements Serializable {
 
   public void setConfirmPassword(String confirmPassword) {
     this.confirmPassword = confirmPassword;
+  }
+
+  public void setBirthday(Date birthday) {
+    this.birthday = birthday;
   }
 }
