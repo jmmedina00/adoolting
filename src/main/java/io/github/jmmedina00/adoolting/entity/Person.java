@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.entity;
 
 import io.github.jmmedina00.adoolting.entity.enums.Gender;
+import io.github.jmmedina00.adoolting.entity.util.ConfirmationToken;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -47,6 +49,9 @@ public class Person extends Interactor {
 
   @OneToMany(mappedBy = "toPerson")
   private List<PrivateMessage> receivedMessages;
+
+  @OneToOne(mappedBy = "person")
+  private ConfirmationToken confirmationToken;
 
   public String getFirstName() {
     return firstName;
