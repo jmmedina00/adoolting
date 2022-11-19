@@ -20,6 +20,9 @@ public class PersonService implements UserDetailsService {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  @Autowired
+  private ConfirmationService confirmationService;
+
   public Person createPersonFromUser(User userDto) throws EmailIsUsedException {
     if (isEmailAlreadyUsed(userDto.getEmail())) {
       throw new EmailIsUsedException();
@@ -33,7 +36,9 @@ public class PersonService implements UserDetailsService {
     person.setGender(userDto.getGender());
     person.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-    return personRepository.save(person);
+    Person saved = personRepository.save(person);
+    confirmationService.createTokenforPerson(saved);
+    return saved;
   }
 
   private boolean isEmailAlreadyUsed(String email) {

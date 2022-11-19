@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.entity.util;
 
 import io.github.jmmedina00.adoolting.entity.Person;
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +15,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-public class ConfirmationToken {
+public class ConfirmationToken implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -37,6 +38,10 @@ public class ConfirmationToken {
   @Temporal(TemporalType.TIMESTAMP)
   @Column
   private Date confirmedAt;
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
 
   public String getToken() {
     return token;

@@ -39,6 +39,10 @@ public class Interactor implements Serializable {
 
   public Interactor() {}
 
+  public Long getId() {
+    return id;
+  }
+
   public String getAbout() {
     return about;
   }

@@ -100,4 +100,8 @@ public class Person extends Interactor {
   public void setGender(Gender gender) {
     this.gender = gender;
   }
+
+  public ConfirmationToken getConfirmationToken() {
+    return confirmationToken;
+  }
 }
