@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<p th:if="${param.expired}">Token has expired</p>
+<p th:if="${param.success}">Thanks, your account is now active</p>
 <h1 th:text="#{greeting}">Hello</h1>
 <form th:action="@{/login}" method="post">
   <span th:text="#{user}">User:</span>

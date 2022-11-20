@@ -2,4 +2,9 @@
   <span th:text="#{greeting}">Greetings</span>,
   <span th:text="${name}">(input name here)</span>
 </h1>
-<p>Your token is <span th:text="${token}"></span></p>
+<p>
+  <span>Confirm account</span>
+  <a th:href="${@environment.getProperty('SITE_URL') + '/confirm/' + token}">
+    here
+  </a>
+</p>

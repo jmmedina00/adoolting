@@ -1,9 +1,10 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.User;
-import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
+import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
+import io.github.jmmedina00.adoolting.service.ConfirmationService;
 import io.github.jmmedina00.adoolting.service.PersonService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -24,6 +26,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MainController {
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private ConfirmationService confirmationService;
 
   private boolean isAuthenticated() {
     Authentication auth = SecurityContextHolder
@@ -52,6 +57,19 @@ public class MainController {
     }
 
     return "hello";
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/confirm/{token}")
+  public String confirmToken(@PathVariable("token") String token) {
+    String query = "?success";
+
+    try {
+      confirmationService.confirmToken(token);
+    } catch (TokenExpiredException e) {
+      query = "?expired";
+    }
+
+    return "redirect:/" + query;
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/register")

@@ -8,11 +8,13 @@ import javax.mail.internet.MimeMessage;
 import org.jobrunr.jobs.annotations.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.expression.ThymeleafEvaluationContext;
 
 @Service
 public class EmailService {
@@ -28,6 +30,9 @@ public class EmailService {
   @Autowired
   private PersonRepository personRepository;
 
+  @Autowired
+  private ApplicationContext applicationContext;
+
   @Value("${EMAIL_ADDRESS}")
   private String sender;
 
@@ -37,6 +42,10 @@ public class EmailService {
     Person person = personRepository.findById(personId).get();
 
     Context context = new Context(locale);
+    context.setVariable(
+      ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+      new ThymeleafEvaluationContext(applicationContext, null)
+    );
     context.setVariable("name", person.getFirstName());
     context.setVariable("token", person.getConfirmationToken().getToken());
 

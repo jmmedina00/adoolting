@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.util.ConfirmationToken;
+import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.repository.ConfirmationTokenRepository;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,5 +47,19 @@ public class ConfirmationService {
         )
     );
     return saved;
+  }
+
+  public ConfirmationToken confirmToken(String tokenStr)
+    throws TokenExpiredException {
+    ConfirmationToken token = tokenRepository.findByToken(tokenStr);
+    Date expiredAt = token.getExpiresAt();
+    Date now = new Date();
+
+    if (expiredAt.before(now)) {
+      throw new TokenExpiredException();
+    }
+
+    token.setConfirmedAt(now);
+    return tokenRepository.save(token);
   }
 }
