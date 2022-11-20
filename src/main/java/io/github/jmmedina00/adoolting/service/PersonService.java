@@ -49,6 +49,10 @@ public class PersonService implements UserDetailsService {
   public UserDetails loadUserByUsername(String email)
     throws UsernameNotFoundException {
     Person person = personRepository.findByEmail(email);
+    if (person == null) {
+      throw new UsernameNotFoundException(email);
+    }
+
     PersonDetails details = new PersonDetails(person);
     return details;
   }

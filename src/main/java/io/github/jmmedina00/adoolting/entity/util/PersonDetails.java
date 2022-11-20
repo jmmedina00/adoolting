@@ -1,14 +1,13 @@
 package io.github.jmmedina00.adoolting.entity.util;
 
 import io.github.jmmedina00.adoolting.entity.Person;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class PersonDetails implements UserDetails, Serializable {
+public class PersonDetails implements UserDetails {
   private Person person;
 
   public PersonDetails(Person person) {
@@ -49,8 +48,13 @@ public class PersonDetails implements UserDetails, Serializable {
 
   @Override
   public boolean isEnabled() {
-    // TODO check if account has been confirmed here
-    return true;
+    ConfirmationToken token = person.getConfirmationToken();
+
+    if (token == null) {
+      return false;
+    }
+
+    return token.getConfirmedAt() != null;
   }
 
   public Person getPerson() {

@@ -59,6 +59,10 @@ public class ConfirmationToken implements Serializable {
     this.expiresAt = expiresAt;
   }
 
+  public Date getConfirmedAt() {
+    return confirmedAt;
+  }
+
   public void setConfirmedAt(Date confirmedAt) {
     this.confirmedAt = confirmedAt;
   }
