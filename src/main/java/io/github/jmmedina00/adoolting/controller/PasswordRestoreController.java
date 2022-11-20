@@ -1,31 +1,77 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.dto.ForgotPassword;
+import io.github.jmmedina00.adoolting.dto.RestorePassword;
+import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/restore-password")
 public class PasswordRestoreController {
 
   @RequestMapping(method = RequestMethod.GET)
-  public String getSendLinkForm() {
+  public String getSendLinkForm(Model model) {
+    if (!model.containsAttribute("forgotPassword")) {
+      ForgotPassword forgotPassword = new ForgotPassword();
+      model.addAttribute("forgotPassword", forgotPassword);
+    }
+
     return "forgot-password";
   }
 
   @RequestMapping(method = RequestMethod.POST)
-  public String sendRestoreLink() {
+  public String sendRestoreLink(
+    @ModelAttribute("forgotPassword") @Valid ForgotPassword forgotPassword,
+    BindingResult result,
+    RedirectAttributes attributes
+  ) {
+    if (result.hasErrors()) {
+      attributes.addFlashAttribute(
+        "org.springframework.validation.BindingResult.forgotPassword",
+        result
+      );
+      attributes.addFlashAttribute("forgotPassword", forgotPassword);
+      return "redirect:restore-password";
+    }
+
     return "email-sent";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{token}")
-  public String getRestoreForm(@PathVariable("token") String token) {
+  public String getRestoreForm(
+    @PathVariable("token") String token,
+    Model model
+  ) {
+    if (!model.containsAttribute("newPassword")) {
+      RestorePassword restorePassword = new RestorePassword();
+      model.addAttribute("newPassword", restorePassword);
+    }
+
     return "restore-password";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{token}")
-  public String restorePassword(@PathVariable("token") String token) {
-    return "redirect:/";
+  public String restorePassword(
+    @PathVariable("token") String token,
+    @ModelAttribute("newPassword") @Valid RestorePassword restorePassword,
+    BindingResult result,
+    RedirectAttributes attributes
+  ) {
+    if (result.hasErrors()) {
+      attributes.addFlashAttribute(
+        "org.springframework.validation.BindingResult.newPassword",
+        result
+      );
+      attributes.addFlashAttribute("newPassword", restorePassword);
+      return "redirect:/restore-password/" + token;
+    }
+    return "redirect:/?restored";
   }
 }
