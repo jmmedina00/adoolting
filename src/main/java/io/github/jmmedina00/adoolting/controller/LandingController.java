@@ -23,7 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/")
-public class MainController {
+public class LandingController {
   @Autowired
   private PersonService personService;
 
