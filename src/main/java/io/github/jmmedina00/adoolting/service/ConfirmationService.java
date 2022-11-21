@@ -3,7 +3,8 @@ package io.github.jmmedina00.adoolting.service;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.util.ConfirmationToken;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
-import io.github.jmmedina00.adoolting.repository.ConfirmationTokenRepository;
+import io.github.jmmedina00.adoolting.repository.fromutil.ConfirmationTokenRepository;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;

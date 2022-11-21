@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.entity;
 
 import io.github.jmmedina00.adoolting.entity.enums.Gender;
 import io.github.jmmedina00.adoolting.entity.util.ConfirmationToken;
+import io.github.jmmedina00.adoolting.entity.util.PasswordRestoreToken;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -52,6 +53,9 @@ public class Person extends Interactor {
 
   @OneToOne(mappedBy = "person")
   private ConfirmationToken confirmationToken;
+
+  @OneToMany(mappedBy = "person")
+  private List<PasswordRestoreToken> restoreTokens;
 
   public String getFirstName() {
     return firstName;
