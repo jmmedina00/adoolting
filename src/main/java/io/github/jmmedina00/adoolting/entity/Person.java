@@ -108,4 +108,28 @@ public class Person extends Interactor {
   public ConfirmationToken getConfirmationToken() {
     return confirmationToken;
   }
+
+  public List<Page> getCreatedPages() {
+    return createdPages;
+  }
+
+  public List<PageManager> getManagedPages() {
+    return managedPages;
+  }
+
+  public List<PersonStatus> getStatuses() {
+    return statuses;
+  }
+
+  public List<PrivateMessage> getSentMessages() {
+    return sentMessages;
+  }
+
+  public List<PrivateMessage> getReceivedMessages() {
+    return receivedMessages;
+  }
+
+  public List<PasswordRestoreToken> getRestoreTokens() {
+    return restoreTokens;
+  }
 }

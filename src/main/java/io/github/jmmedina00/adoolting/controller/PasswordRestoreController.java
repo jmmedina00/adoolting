@@ -2,7 +2,10 @@ package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.ForgotPassword;
 import io.github.jmmedina00.adoolting.dto.RestorePassword;
+import io.github.jmmedina00.adoolting.service.PasswordRestoreService;
 import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/restore-password")
 public class PasswordRestoreController {
+  @Autowired
+  PasswordRestoreService restoreService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getSendLinkForm(Model model) {
@@ -39,6 +44,12 @@ public class PasswordRestoreController {
       );
       attributes.addFlashAttribute("forgotPassword", forgotPassword);
       return "redirect:restore-password";
+    }
+
+    try {
+      restoreService.createTokenFromEmail(forgotPassword.getEmail());
+    } catch (UsernameNotFoundException e) {
+      System.out.println(e.getMessage());
     }
 
     return "email-sent";

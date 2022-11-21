@@ -77,4 +77,8 @@ public class PasswordRestoreToken {
   public void setUsedAt(Date usedAt) {
     this.usedAt = usedAt;
   }
+
+  public Long getId() {
+    return id;
+  }
 }

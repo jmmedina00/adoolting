@@ -1,7 +1,9 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.util.PasswordRestoreToken;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
+import io.github.jmmedina00.adoolting.repository.fromutil.PasswordRestoreTokenRepository;
 import java.util.Locale;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -31,10 +33,34 @@ public class EmailService {
   private PersonRepository personRepository;
 
   @Autowired
+  private PasswordRestoreTokenRepository restoreTokenRepository; // TODO implement something better than this
+
+  @Autowired
   private ApplicationContext applicationContext;
 
   @Value("${EMAIL_ADDRESS}")
   private String sender;
+
+  @Job(name = "Password restore email")
+  public void sendPasswordRestoreEmail(Long tokenId, Locale locale)
+    throws Exception {
+    PasswordRestoreToken tokenObj = restoreTokenRepository
+      .findById(tokenId)
+      .get();
+
+    String token = tokenObj.getToken();
+    String email = tokenObj.getPerson().getEmail();
+
+    Context context = new Context(locale);
+    context.setVariable(
+      ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+      new ThymeleafEvaluationContext(applicationContext, null)
+    );
+    context.setVariable("token", token);
+
+    String contents = templateEngine.process("mail/restore", context);
+    sendEmail(email, "Restore password", contents);
+  }
 
   @Job(name = "Confirmation email")
   public void sendConfirmationEmail(Long personId, Locale locale)
