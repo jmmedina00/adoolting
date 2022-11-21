@@ -22,15 +22,16 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(
         requests ->
           requests
-            .antMatchers("/test/**")
-            .authenticated()
-            .antMatchers("/**")
+            .antMatchers("/", "/restore-password/**")
             .permitAll()
+            .anyRequest()
+            .authenticated()
       )
       .formLogin()
       .loginPage("/")
       .loginProcessingUrl("/login")
-      .failureHandler(authenticationFailureHandler());
+      .failureHandler(authenticationFailureHandler())
+      .defaultSuccessUrl("/home", true);
     return http.build();
   }
 
