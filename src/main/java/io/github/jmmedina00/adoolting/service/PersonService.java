@@ -23,6 +23,17 @@ public class PersonService implements UserDetailsService {
   @Autowired
   private ConfirmationService confirmationService;
 
+  public Person changePersonPassword(Long personId, String newPassword) {
+    Person person = personRepository.findById(personId).get();
+
+    if (person == null) {
+      return null;
+    }
+
+    person.setPassword(passwordEncoder.encode(newPassword));
+    return personRepository.save(person);
+  }
+
   public Person createPersonFromUser(User userDto) throws EmailIsUsedException {
     if (isEmailAlreadyUsed(userDto.getEmail())) {
       throw new EmailIsUsedException();

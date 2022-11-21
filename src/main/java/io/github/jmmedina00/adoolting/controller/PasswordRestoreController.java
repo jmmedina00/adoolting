@@ -60,10 +60,16 @@ public class PasswordRestoreController {
     @PathVariable("token") String token,
     Model model
   ) {
+    if (!restoreService.isTokenStillUseful(token)) {
+      return "redirect:/";
+    }
+
     if (!model.containsAttribute("newPassword")) {
       RestorePassword restorePassword = new RestorePassword();
       model.addAttribute("newPassword", restorePassword);
     }
+
+    model.addAttribute("token", token);
 
     return "restore-password";
   }
@@ -75,6 +81,10 @@ public class PasswordRestoreController {
     BindingResult result,
     RedirectAttributes attributes
   ) {
+    if (!restoreService.isTokenStillUseful(token)) {
+      return "redirect:/";
+    }
+
     if (result.hasErrors()) {
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.newPassword",
@@ -83,6 +93,11 @@ public class PasswordRestoreController {
       attributes.addFlashAttribute("newPassword", restorePassword);
       return "redirect:/restore-password/" + token;
     }
+
+    restoreService.changePasswordWithToken(
+      token,
+      restorePassword.getPassword()
+    );
     return "redirect:/?restored";
   }
 }

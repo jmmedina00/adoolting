@@ -32,6 +32,34 @@ public class PasswordRestoreService {
   @Value("${restoretoken.expires.hours}")
   private int expireInHours;
 
+  public boolean isTokenStillUseful(String token) {
+    PasswordRestoreToken tokenObj = restoreTokenRepository.findByToken(token);
+
+    if (tokenObj == null) {
+      return false;
+    }
+
+    return (
+      tokenObj.getExpiresAt().after(new Date()) && tokenObj.getUsedAt() == null
+    );
+  }
+
+  public void changePasswordWithToken(String token, String newPassword) {
+    PasswordRestoreToken tokenObj = restoreTokenRepository.findByToken(token);
+
+    if (tokenObj == null) {
+      return;
+    }
+
+    personService.changePersonPassword(
+      tokenObj.getPerson().getId(),
+      newPassword
+    );
+
+    tokenObj.setUsedAt(new Date());
+    restoreTokenRepository.save(tokenObj);
+  }
+
   public PasswordRestoreToken createTokenFromEmail(String email)
     throws UsernameNotFoundException {
     PersonDetails personDetails = (PersonDetails) personService.loadUserByUsername(
