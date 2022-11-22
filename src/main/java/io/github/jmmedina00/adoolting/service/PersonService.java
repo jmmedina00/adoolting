@@ -23,8 +23,12 @@ public class PersonService implements UserDetailsService {
   @Autowired
   private ConfirmationService confirmationService;
 
+  public Person getPerson(Long personId) {
+    return personRepository.findById(personId).orElse(null);
+  }
+
   public Person changePersonPassword(Long personId, String newPassword) {
-    Person person = personRepository.findById(personId).get();
+    Person person = personRepository.findById(personId).orElse(null);
 
     if (person == null) {
       return null;
