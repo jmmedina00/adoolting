@@ -1,14 +1,21 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.Post;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.PersonService;
+import io.github.jmmedina00.adoolting.service.PostService;
+import java.util.Objects;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +25,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProfileController {
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private PostService postService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
@@ -60,6 +70,52 @@ public class ProfileController {
     }
 
     model.addAttribute("person", person);
+    model.addAttribute("newPost", new NewPost());
     return "profile";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
+  public String commentOnPersonProfile(
+    @PathVariable("personId") String personIdStr,
+    @ModelAttribute("newPost") @Valid NewPost newPost,
+    BindingResult result
+  ) {
+    Long personId;
+
+    try {
+      personId = Long.parseLong(personIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    if (result.hasErrors()) {
+      return "redirect:/profile/" + personId + "?error";
+    }
+
+    Person personFromProfile = personService.getPerson(personId);
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    Post savedPost;
+
+    if (
+      Objects.equals(personFromProfile.getId(), authenticatedPerson.getId())
+    ) {
+      savedPost = postService.createPost(authenticatedPerson, newPost);
+    } else {
+      savedPost =
+        postService.postOnProfile(
+          authenticatedPerson,
+          personFromProfile,
+          newPost
+        );
+    }
+
+    return "redirect:/profile/" + personId + "?post=" + savedPost.getId();
   }
 }

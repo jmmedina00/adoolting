@@ -3,3 +3,14 @@
   <span th:text="${person.firstName}"></span>
   <span th:text="${person.lastName}"></span>
 </p>
+<form
+  method="post"
+  th:object="${newPost}"
+  th:action="@{/profile/{personId}(personId=${person.id})}"
+>
+  <div>
+    <label>New post</label>
+    <textarea th:field="*{contents}"></textarea>
+  </div>
+  <button type="submit">Send</button>
+</form>
