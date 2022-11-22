@@ -14,3 +14,22 @@
   </div>
   <button type="submit">Send</button>
 </form>
+<div th:each="post : ${posts}">
+  <h3>
+    <span th:object="${post.interactor}">
+      <span th:text="*{firstName}"></span>
+      <span th:text="*{lastName}"></span>
+    </span>
+
+    <span
+      th:if="${post.receiverInteractor}"
+      th:object="${post.receiverInteractor}"
+    >
+      ->
+      <span th:text="*{firstName}"></span>
+      <span th:text="*{lastName}"></span>
+    </span>
+  </h3>
+  <p th:text="${post.content}"></p>
+  <p><span th:text="${post.comments.size()}"></span> comments</p>
+</div>

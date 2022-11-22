@@ -71,6 +71,7 @@ public class ProfileController {
 
     model.addAttribute("person", person);
     model.addAttribute("newPost", new NewPost());
+    model.addAttribute("posts", postService.getPersonPosts(person));
     return "profile";
   }
 
