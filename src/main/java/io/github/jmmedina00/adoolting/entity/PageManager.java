@@ -33,4 +33,28 @@ public class PageManager {
   @Temporal(TemporalType.TIMESTAMP)
   @Column
   private Date deletedAt;
+
+  public Long getId() {
+    return id;
+  }
+
+  public Page getPage() {
+    return page;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public Date getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(Date deletedAt) {
+    this.deletedAt = deletedAt;
+  }
 }

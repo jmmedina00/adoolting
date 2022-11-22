@@ -44,4 +44,44 @@ public class Interaction {
 
   @OneToMany(mappedBy = "interaction")
   private List<Medium> media;
+
+  public Long getId() {
+    return id;
+  }
+
+  public Interactor getInteractor() {
+    return interactor;
+  }
+
+  public void setInteractor(Interactor interactor) {
+    this.interactor = interactor;
+  }
+
+  public Interactor getReceiverInteractor() {
+    return receiverInteractor;
+  }
+
+  public void setReceiverInteractor(Interactor receiverInteractor) {
+    this.receiverInteractor = receiverInteractor;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public Date getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(Date deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public List<Comment> getComments() {
+    return comments;
+  }
+
+  public List<Medium> getMedia() {
+    return media;
+  }
 }

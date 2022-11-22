@@ -26,4 +26,36 @@ public class Page extends Interactor {
 
   @OneToMany(mappedBy = "page")
   private List<PageManager> managers;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  public Date getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(Date deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public Person getCreatedByPerson() {
+    return createdByPerson;
+  }
+
+  public List<PageManager> getManagers() {
+    return managers;
+  }
 }

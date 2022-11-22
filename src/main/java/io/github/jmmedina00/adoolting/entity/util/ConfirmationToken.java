@@ -39,6 +39,14 @@ public class ConfirmationToken implements Serializable {
   @Column
   private Date confirmedAt;
 
+  public Long getId() {
+    return id;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
   public void setPerson(Person person) {
     this.person = person;
   }
@@ -49,6 +57,10 @@ public class ConfirmationToken implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
   }
 
   public Date getExpiresAt() {

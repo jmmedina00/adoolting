@@ -38,6 +38,10 @@ public class PasswordRestoreToken {
   @Column
   private Date usedAt;
 
+  public Long getId() {
+    return id;
+  }
+
   public String getToken() {
     return token;
   }
@@ -58,10 +62,6 @@ public class PasswordRestoreToken {
     return createdAt;
   }
 
-  public void setCreatedAt(Date createdAt) {
-    this.createdAt = createdAt;
-  }
-
   public Date getExpiresAt() {
     return expiresAt;
   }
@@ -76,9 +76,5 @@ public class PasswordRestoreToken {
 
   public void setUsedAt(Date usedAt) {
     this.usedAt = usedAt;
-  }
-
-  public Long getId() {
-    return id;
   }
 }

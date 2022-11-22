@@ -50,4 +50,20 @@ public class Interactor implements Serializable {
   public void setAbout(String about) {
     this.about = about;
   }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public List<Interaction> getInteractions() {
+    return interactions;
+  }
+
+  public List<Interaction> getReceivedInteractions() {
+    return receivedInteractions;
+  }
 }

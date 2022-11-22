@@ -13,4 +13,20 @@ public class Comment extends Interaction {
 
   @Column(columnDefinition = "TEXT")
   private String content;
+
+  public Interaction getReceiverInteraction() {
+    return receiverInteraction;
+  }
+
+  public void setReceiverInteraction(Interaction receiverInteraction) {
+    this.receiverInteraction = receiverInteraction;
+  }
+
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    this.content = content;
+  }
 }

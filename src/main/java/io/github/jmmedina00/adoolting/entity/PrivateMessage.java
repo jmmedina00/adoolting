@@ -24,4 +24,32 @@ public class PrivateMessage {
   @ManyToOne
   @JoinColumn(name = "to_person_id")
   private Person toPerson;
+
+  public Long getId() {
+    return id;
+  }
+
+  public String getContents() {
+    return contents;
+  }
+
+  public void setContents(String contents) {
+    this.contents = contents;
+  }
+
+  public Person getFromPerson() {
+    return fromPerson;
+  }
+
+  public void setFromPerson(Person fromPerson) {
+    this.fromPerson = fromPerson;
+  }
+
+  public Person getToPerson() {
+    return toPerson;
+  }
+
+  public void setToPerson(Person toPerson) {
+    this.toPerson = toPerson;
+  }
 }

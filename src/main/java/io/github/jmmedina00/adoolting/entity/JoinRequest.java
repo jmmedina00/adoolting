@@ -9,4 +9,12 @@ public class JoinRequest extends ConfirmableInteraction {
   @ManyToOne
   @JoinColumn(name = "group_id")
   private PeopleGroup group;
+
+  public PeopleGroup getGroup() {
+    return group;
+  }
+
+  public void setGroup(PeopleGroup group) {
+    this.group = group;
+  }
 }

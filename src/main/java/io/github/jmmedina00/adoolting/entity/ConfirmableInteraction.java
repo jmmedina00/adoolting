@@ -20,4 +20,20 @@ public class ConfirmableInteraction extends Interaction {
   @Temporal(TemporalType.TIMESTAMP)
   @Column
   private Date ignoredAt;
+
+  public Date getConfirmedAt() {
+    return confirmedAt;
+  }
+
+  public void setConfirmedAt(Date confirmedAt) {
+    this.confirmedAt = confirmedAt;
+  }
+
+  public Date getIgnoredAt() {
+    return ignoredAt;
+  }
+
+  public void setIgnoredAt(Date ignoredAt) {
+    this.ignoredAt = ignoredAt;
+  }
 }

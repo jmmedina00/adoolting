@@ -7,4 +7,12 @@ import javax.persistence.Entity;
 public class Post extends Interaction {
   @Column(columnDefinition = "TEXT")
   private String content;
+
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    this.content = content;
+  }
 }

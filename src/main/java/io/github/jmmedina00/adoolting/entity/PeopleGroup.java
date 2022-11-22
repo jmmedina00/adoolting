@@ -23,4 +23,28 @@ public class PeopleGroup extends Interaction {
 
   @OneToMany(mappedBy = "group")
   private List<JoinRequest> joinRequests;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public List<JoinRequest> getJoinRequests() {
+    return joinRequests;
+  }
 }

@@ -26,4 +26,28 @@ public class PersonStatus {
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
   private Date createdAt;
+
+  public Long getId() {
+    return id;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    this.content = content;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 }

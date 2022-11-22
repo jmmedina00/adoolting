@@ -14,4 +14,20 @@ public class Event extends PeopleGroup {
   @Temporal(TemporalType.TIMESTAMP)
   @Column
   private Date happeningAt;
+
+  public String getLocation() {
+    return location;
+  }
+
+  public void setLocation(String location) {
+    this.location = location;
+  }
+
+  public Date getHappeningAt() {
+    return happeningAt;
+  }
+
+  public void setHappeningAt(Date happeningAt) {
+    this.happeningAt = happeningAt;
+  }
 }

@@ -35,4 +35,36 @@ public class Medium {
   @ManyToOne
   @JoinColumn(name = "interaction_id")
   private Interaction interaction;
+
+  public Long getId() {
+    return id;
+  }
+
+  public String getReference() {
+    return reference;
+  }
+
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public Date getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(Date deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public Interaction getInteraction() {
+    return interaction;
+  }
+
+  public void setInteraction(Interaction interaction) {
+    this.interaction = interaction;
+  }
 }
