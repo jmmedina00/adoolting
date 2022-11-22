@@ -36,7 +36,18 @@ public class ProfileController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
-  public String getPersonProfile(@PathVariable Long personId, Model model) {
+  public String getPersonProfile(
+    @PathVariable("personId") String personIdStr,
+    Model model
+  ) {
+    Long personId;
+
+    try {
+      personId = Long.parseLong(personIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
     Person person = personService.getPerson(personId);
 
     if (person == null) {
