@@ -1,12 +1,11 @@
 package io.github.jmmedina00.adoolting.service;
 
-import io.github.jmmedina00.adoolting.entity.Person;
-import io.github.jmmedina00.adoolting.entity.util.PasswordRestoreToken;
-import io.github.jmmedina00.adoolting.repository.PersonRepository;
-import io.github.jmmedina00.adoolting.repository.fromutil.PasswordRestoreTokenRepository;
+import io.github.jmmedina00.adoolting.entity.util.EmailData;
 import java.util.Locale;
+import java.util.Map;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
+import org.apache.commons.lang3.LocaleUtils;
 import org.jobrunr.jobs.annotations.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,55 +29,38 @@ public class EmailService {
   private MessageSource messageSource;
 
   @Autowired
-  private PersonRepository personRepository;
-
-  @Autowired
-  private PasswordRestoreTokenRepository restoreTokenRepository; // TODO implement something better than this
-
-  @Autowired
   private ApplicationContext applicationContext;
 
   @Value("${EMAIL_ADDRESS}")
   private String sender;
 
-  @Job(name = "Password restore email")
-  public void sendPasswordRestoreEmail(Long tokenId, Locale locale)
-    throws Exception {
-    PasswordRestoreToken tokenObj = restoreTokenRepository
-      .findById(tokenId)
-      .get();
+  @Job(name = "Send email")
+  public void prepareEmail(EmailData data, String template) throws Exception {
+    Locale locale = LocaleUtils.toLocale(data.getLocale());
+    Context context = generateContext(locale);
 
-    String token = tokenObj.getToken();
-    String email = tokenObj.getPerson().getEmail();
+    for (Map.Entry<String, String> entry : data.getParameters().entrySet()) {
+      context.setVariable(entry.getKey(), entry.getValue());
+    }
 
-    Context context = new Context(locale);
-    context.setVariable(
-      ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
-      new ThymeleafEvaluationContext(applicationContext, null)
+    String contents = templateEngine.process("mail/" + template, context);
+    String subject = messageSource.getMessage(
+      "email." + template,
+      null,
+      "Email",
+      locale
     );
-    context.setVariable("token", token);
-
-    String contents = templateEngine.process("mail/restore", context);
-    sendEmail(email, "Restore password", contents);
+    sendEmail(data.getDestination(), subject, contents);
   }
 
-  @Job(name = "Confirmation email")
-  public void sendConfirmationEmail(Long personId, Locale locale)
-    throws Exception {
-    Person person = personRepository.findById(personId).get();
-
+  private Context generateContext(Locale locale) {
     Context context = new Context(locale);
     context.setVariable(
       ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
       new ThymeleafEvaluationContext(applicationContext, null)
     );
-    context.setVariable("name", person.getFirstName());
-    context.setVariable("token", person.getConfirmationToken().getToken());
 
-    String contents = templateEngine.process("mail/confirm", context);
-    String subject = messageSource.getMessage("greeting", null, locale);
-
-    sendEmail(person.getEmail(), subject, contents);
+    return context;
   }
 
   private void sendEmail(String to, String subject, String contents)

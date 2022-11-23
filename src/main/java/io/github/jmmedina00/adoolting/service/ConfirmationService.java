@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,11 +39,7 @@ public class ConfirmationService {
 
     ConfirmationToken saved = tokenRepository.save(token);
     jobScheduler.enqueue(
-      () ->
-        emailService.sendConfirmationEmail(
-          person.getId(),
-          LocaleContextHolder.getLocale()
-        )
+      () -> emailService.prepareEmail(saved.getEmailData(), "confirm")
     );
     return saved;
   }

@@ -2,6 +2,8 @@ package io.github.jmmedina00.adoolting.entity.util;
 
 import io.github.jmmedina00.adoolting.entity.Person;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,9 +14,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @Entity
-public class PasswordRestoreToken {
+public class PasswordRestoreToken implements Emailable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -76,5 +79,18 @@ public class PasswordRestoreToken {
 
   public void setUsedAt(Date usedAt) {
     this.usedAt = usedAt;
+  }
+
+  @Override
+  public EmailData getEmailData() {
+    EmailData data = new EmailData(
+      person.getEmail(),
+      LocaleContextHolder.getLocale().toString()
+    );
+    HashMap<String, String> parameters = new HashMap<>();
+    parameters.put("token", token);
+
+    data.setParameters(parameters);
+    return data;
   }
 }
