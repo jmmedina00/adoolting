@@ -1,12 +1,15 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.util.EmailData;
+import io.github.jmmedina00.adoolting.repository.fromutil.EmailDataRepository;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang3.LocaleUtils;
 import org.jobrunr.jobs.annotations.Job;
+import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -20,6 +23,9 @@ import org.thymeleaf.spring5.expression.ThymeleafEvaluationContext;
 @Service
 public class EmailService {
   @Autowired
+  private EmailDataRepository dataRepository;
+
+  @Autowired
   private JavaMailSender emailSender;
 
   @Autowired
@@ -31,11 +37,26 @@ public class EmailService {
   @Autowired
   private ApplicationContext applicationContext;
 
+  @Autowired
+  private JobScheduler jobScheduler;
+
   @Value("${EMAIL_ADDRESS}")
   private String sender;
 
+  public void setUpEmailJob(EmailData data, String template) {
+    String id = UUID.randomUUID().toString();
+    data.setId(id);
+    dataRepository.save(data);
+    jobScheduler.enqueue(() -> prepareEmail(id, template));
+  }
+
   @Job(name = "Send email")
-  public void prepareEmail(EmailData data, String template) throws Exception {
+  public void prepareEmail(String dataId, String template) throws Exception {
+    EmailData data = dataRepository.findById(dataId).orElse(null);
+    if (data == null) {
+      return; // Already sent
+    }
+
     Locale locale = LocaleUtils.toLocale(data.getLocale());
     Context context = generateContext(locale);
 
@@ -51,6 +72,7 @@ public class EmailService {
       locale
     );
     sendEmail(data.getDestination(), subject, contents);
+    dataRepository.deleteById(dataId);
   }
 
   private Context generateContext(Locale locale) {

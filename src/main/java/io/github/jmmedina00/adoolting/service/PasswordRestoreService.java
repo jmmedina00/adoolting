@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,16 +16,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class PasswordRestoreService {
   @Autowired
-  PasswordRestoreTokenRepository restoreTokenRepository;
+  private PasswordRestoreTokenRepository restoreTokenRepository;
 
   @Autowired
-  PersonService personService;
+  private PersonService personService;
 
   @Autowired
   private EmailService emailService;
-
-  @Autowired
-  private JobScheduler jobScheduler;
 
   @Value("${restoretoken.expires.hours}")
   private int expireInHours;
@@ -91,9 +87,7 @@ public class PasswordRestoreService {
     token.setExpiresAt(expiresAt);
 
     PasswordRestoreToken saved = restoreTokenRepository.save(token);
-    jobScheduler.enqueue(
-      () -> emailService.prepareEmail(saved.getEmailData(), "restore")
-    );
+    emailService.setUpEmailJob(saved.getEmailData(), "restore");
     return saved;
   }
 }

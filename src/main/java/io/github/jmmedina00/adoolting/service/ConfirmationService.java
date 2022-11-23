@@ -7,7 +7,6 @@ import io.github.jmmedina00.adoolting.repository.fromutil.ConfirmationTokenRepos
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
-import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,6 @@ public class ConfirmationService {
 
   @Autowired
   private EmailService emailService;
-
-  @Autowired
-  private JobScheduler jobScheduler;
 
   @Value("${confirmtoken.expires.hours}")
   private int expireInHours;
@@ -38,9 +34,7 @@ public class ConfirmationService {
     token.setExpiresAt(expiresAt);
 
     ConfirmationToken saved = tokenRepository.save(token);
-    jobScheduler.enqueue(
-      () -> emailService.prepareEmail(saved.getEmailData(), "confirm")
-    );
+    emailService.setUpEmailJob(saved.getEmailData(), "confirm");
     return saved;
   }
 

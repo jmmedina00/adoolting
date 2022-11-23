@@ -2,8 +2,11 @@ package io.github.jmmedina00.adoolting.entity.util;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import org.springframework.data.redis.core.RedisHash;
 
+@RedisHash("emaildata")
 public class EmailData implements Serializable {
+  private String id;
   private String destination;
   private String locale;
   private HashMap<String, String> parameters;
@@ -13,6 +16,14 @@ public class EmailData implements Serializable {
   public EmailData(String destination, String locale) {
     this.destination = destination;
     this.locale = locale;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getDestination() {
