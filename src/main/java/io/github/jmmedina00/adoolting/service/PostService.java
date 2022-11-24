@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.Post;
 import io.github.jmmedina00.adoolting.repository.PostRepository;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +11,6 @@ import org.springframework.stereotype.Service;
 public class PostService {
   @Autowired
   private PostRepository postRepository;
-
-  public List<Post> getPersonPosts(Interactor interactor) {
-    return postRepository.findDistinctByInteractorOrReceiverInteractor(
-      interactor,
-      interactor
-    );
-  }
 
   public Post createPost(Interactor interactor, NewPost newPost) {
     Post post = new Post();

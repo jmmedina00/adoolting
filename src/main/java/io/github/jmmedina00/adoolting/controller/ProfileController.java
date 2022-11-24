@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.Post;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.PersonService;
 import io.github.jmmedina00.adoolting.service.PostService;
 import java.util.Objects;
@@ -28,6 +29,9 @@ public class ProfileController {
 
   @Autowired
   private PostService postService;
+
+  @Autowired
+  private InteractionService interactionService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
@@ -71,7 +75,10 @@ public class ProfileController {
 
     model.addAttribute("person", person);
     model.addAttribute("newPost", new NewPost());
-    model.addAttribute("posts", postService.getPersonPosts(person));
+    model.addAttribute(
+      "posts",
+      interactionService.getInteractions(person.getId())
+    );
     return "profile";
   }
 
