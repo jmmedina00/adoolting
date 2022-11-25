@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.Post;
@@ -90,6 +91,7 @@ public class ProfileController {
       cInteractionService.getPersonFriendship(authenticatedPerson, person)
     );
     model.addAttribute("newPost", new NewPost());
+    model.addAttribute("cInteraction", new NewConfirmableInteraction());
     model.addAttribute(
       "posts",
       interactionService.getInteractions(person.getId())

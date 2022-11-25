@@ -1,8 +1,12 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.InteractionConfirmation;
+import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +15,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/network")
@@ -23,9 +30,68 @@ public class ConfirmableInteractionController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{interactionId}")
   public String decideInteractionResult(
-    @Valid @RequestBody InteractionConfirmation confirmation
+    @Valid @RequestBody InteractionConfirmation confirmation,
+    @PathVariable("interactionId") String interactionIdStr,
+    @RequestParam(required = false) String goToProfile
   ) {
-    return "";
+    Long interactionId;
+
+    try {
+      interactionId = Long.parseLong(interactionIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    ConfirmableInteraction interaction;
+
+    try {
+      interaction =
+        cInteractionService.decideInteractionResult(
+          interactionId,
+          authenticatedPerson,
+          confirmation.isAccepted()
+        );
+    } catch (NotAuthorizedException e) {
+      return "redirect:/home?notfound";
+    }
+
+    return (goToProfile == null)
+      ? "redirect:/network"
+      : "redirect:/profile/" + interaction.getInteractor().getId() + "?success";
+  }
+
+  @RequestMapping(method = RequestMethod.POST)
+  public String addFriend(
+    @ModelAttribute(
+      "cInteraction"
+    ) @Valid NewConfirmableInteraction nConfirmableInteraction
+  ) {
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    try {
+      cInteractionService.addPersonAsFriend(
+        authenticatedPerson,
+        nConfirmableInteraction.getPersonId()
+      );
+    } catch (InvalidDTOException e) {
+      return "redirect:/home?notfound";
+    }
+
+    return "redirect:/profile/" + nConfirmableInteraction.getPersonId();
   }
 
   @RequestMapping(method = RequestMethod.GET)
