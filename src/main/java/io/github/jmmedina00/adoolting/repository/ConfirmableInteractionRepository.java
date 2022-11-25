@@ -14,4 +14,12 @@ public interface ConfirmableInteractionRepository
   List<ConfirmableInteraction> findConfirmableInteractionsByInteractorId(
     @Param("interactorId") Long interactorId
   );
+
+  @Query(
+    "SELECT c FROM ConfirmableInteraction c WHERE ((c.interactor.id=:firstId AND c.receiverInteractor.id=:secondId) OR (c.interactor.id=:secondId AND c.receiverInteractor.id=:firstId)) AND c.deletedAt IS NULL ORDER BY c.createdAt DESC"
+  )
+  List<ConfirmableInteraction> findConfirmableInteractionsBetweenInteractors(
+    @Param("firstId") Long interactorId,
+    @Param("secondId") Long otherInteractorId
+  );
 }

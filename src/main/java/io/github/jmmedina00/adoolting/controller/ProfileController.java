@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.Post;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.PersonService;
 import io.github.jmmedina00.adoolting.service.PostService;
@@ -32,6 +33,9 @@ public class ProfileController {
 
   @Autowired
   private InteractionService interactionService;
+
+  @Autowired
+  private ConfirmableInteractionService cInteractionService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
@@ -62,6 +66,13 @@ public class ProfileController {
       return "redirect:/home?notfound";
     }
 
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
     Person person = personService.getPerson(personId);
 
     if (person == null) {
@@ -74,6 +85,10 @@ public class ProfileController {
     }
 
     model.addAttribute("person", person);
+    model.addAttribute(
+      "friendship",
+      cInteractionService.getPersonFriendship(authenticatedPerson, person)
+    );
     model.addAttribute("newPost", new NewPost());
     model.addAttribute(
       "posts",

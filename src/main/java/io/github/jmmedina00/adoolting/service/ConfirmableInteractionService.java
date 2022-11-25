@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
+import io.github.jmmedina00.adoolting.entity.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
 import java.util.List;
@@ -24,8 +25,20 @@ public class ConfirmableInteractionService {
     return null;
   }
 
-  public boolean isPersonFriendWithPerson(Person person, Person otherPerson) {
-    return false;
+  public ConfirmableInteraction getPersonFriendship(
+    Person person,
+    Person otherPerson
+  ) {
+    List<ConfirmableInteraction> interactions = cInteractionRepository.findConfirmableInteractionsBetweenInteractors(
+      person.getId(),
+      otherPerson.getId()
+    );
+
+    return interactions
+      .stream()
+      .filter(interaction -> !(interaction instanceof JoinRequest))
+      .findFirst()
+      .orElse(null);
   }
 
   public ConfirmableInteraction decideInteractionResult(

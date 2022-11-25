@@ -2,6 +2,26 @@
   Watching profile of:
   <span th:text="${person.firstName}"></span>
   <span th:text="${person.lastName}"></span>
+  -
+  <span th:unless="${friendship == null}">
+    <span
+      th:if="${friendship.confirmedAt == null && friendship.ignoredAt == null}"
+    >
+      <span th:if="${friendship.receiverInteractor.id == person.id}">
+        Pending
+      </span>
+      <span th:unless="${friendship.receiverInteractor.id == person.id}">
+        Click to accept
+      </span>
+    </span>
+    <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
+    <span th:unless="${friendship.ignoredAt == null}">Ignored</span>
+  </span>
+  <span th:if="${friendship == null}">
+    <span th:unless="${person.id == #authentication.principal.person.id}">
+      Add as friend
+    </span>
+  </span>
 </p>
 <form
   method="post"
@@ -30,9 +50,11 @@
       <span th:text="*{lastName}"></span>
     </span>
   </h3>
+  <!-- instanceOf does not work reliably between restarts -->
   <p
-    th:if="${post instanceof T(io.github.jmmedina00.adoolting.entity.Post)}"
+    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
     th:text="${post.content}"
   ></p>
+  <p th:text="${post.class.name}"></p>
   <p><span th:text="${post.comments.size()}"></span> comments</p>
 </div>
