@@ -15,7 +15,9 @@ public class ConfirmableInteractionService {
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Person person
   ) {
-    return null;
+    return cInteractionRepository.findConfirmableInteractionsByInteractorId(
+      person.getId()
+    );
   }
 
   public List<ConfirmableInteraction> getPersonFriends(Person person) {

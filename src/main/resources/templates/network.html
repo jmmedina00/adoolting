@@ -1,0 +1,9 @@
+<div th:each="interaction : ${interactions}">
+  <span th:text="${interaction.id}"></span>
+  -
+  <span th:text="${interaction.receiverInteractor.id}"></span>
+  <span
+    th:if="${interaction instanceof T(io.github.jmmedina00.adoolting.entity.JoinRequest)}"
+    >- Extended <span th:text="${interaction.group.id}"></span>
+  </span>
+</div>

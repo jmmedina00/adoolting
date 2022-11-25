@@ -30,6 +30,9 @@
       <span th:text="*{lastName}"></span>
     </span>
   </h3>
-  <p th:text="${post.content}"></p>
+  <p
+    th:if="${post instanceof T(io.github.jmmedina00.adoolting.entity.Post)}"
+    th:text="${post.content}"
+  ></p>
   <p><span th:text="${post.comments.size()}"></span> comments</p>
 </div>
