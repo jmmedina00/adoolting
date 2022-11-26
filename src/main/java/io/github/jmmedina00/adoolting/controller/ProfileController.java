@@ -88,21 +88,22 @@ public class ProfileController {
     NewConfirmableInteraction cInteraction = new NewConfirmableInteraction();
 
     if (!Objects.equals(authenticatedPerson.getId(), person.getId())) {
-cInteraction.setPersonId(personId);
+      cInteraction.setPersonId(personId);
     }
-    
 
     model.addAttribute("person", person);
     model.addAttribute(
       "friendship",
       cInteractionService.getPersonFriendship(authenticatedPerson, person)
     );
-    model.addAttribute("newPost", new NewPost());
-    model.addAttribute("cInteraction",  cInteraction);
+    model.addAttribute("friends", cInteractionService.getPersonFriends(person));
     model.addAttribute(
       "posts",
       interactionService.getInteractions(person.getId())
     );
+    model.addAttribute("newPost", new NewPost());
+    model.addAttribute("cInteraction", cInteraction);
+
     return "profile";
   }
 

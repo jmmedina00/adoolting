@@ -29,7 +29,13 @@ public class ConfirmableInteractionService {
   }
 
   public List<ConfirmableInteraction> getPersonFriends(Person person) {
-    return null;
+    List<ConfirmableInteraction> interactions = cInteractionRepository.findConfirmedInteractionsByInteractorId(
+      person.getId()
+    );
+    return interactions
+      .stream()
+      .filter(interaction -> !(interaction instanceof JoinRequest))
+      .toList();
   }
 
   public ConfirmableInteraction getPersonFriendship(

@@ -3,6 +3,20 @@
   <span th:text="${person.firstName}"></span>
   <span th:text="${person.lastName}"></span>
 </p>
+<ul>
+  <li th:each="friend : ${friends}">
+    <span
+      th:unless="${friend.interactor.id == person.id}"
+      th:text="${friend.interactor.firstName + ' ' + friend.interactor.lastName}"
+    >
+    </span>
+    <span
+      th:unless="${friend.receiverInteractor.id == person.id}"
+      th:text="${friend.receiverInteractor.firstName + ' ' + friend.receiverInteractor.lastName}"
+    >
+    </span>
+  </li>
+</ul>
 <span th:unless="${friendship == null}">
   <span
     th:if="${friendship.confirmedAt == null && friendship.ignoredAt == null}"

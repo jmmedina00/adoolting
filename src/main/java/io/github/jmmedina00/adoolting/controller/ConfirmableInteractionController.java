@@ -9,7 +9,6 @@ import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,7 +26,11 @@ public class ConfirmableInteractionController {
   @Autowired
   private ConfirmableInteractionService cInteractionService;
 
-  @RequestMapping(method = RequestMethod.POST, value = "/{interactionId}", consumes = "application/x-www-form-urlencoded")
+  @RequestMapping(
+    method = RequestMethod.POST,
+    value = "/{interactionId}",
+    consumes = "application/x-www-form-urlencoded"
+  )
   public String decideInteractionResult(
     @Valid InteractionConfirmation confirmation,
     @PathVariable("interactionId") String interactionIdStr
