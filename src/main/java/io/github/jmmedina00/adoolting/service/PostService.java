@@ -12,11 +12,16 @@ public class PostService {
   @Autowired
   private PostRepository postRepository;
 
+  @Autowired
+  private MediumService mediumService;
+
   public Post createPost(Interactor interactor, NewPost newPost) {
     Post post = new Post();
     post.setInteractor(interactor);
     post.setContent(newPost.getContents().trim());
-    return postRepository.save(post);
+    Post saved = postRepository.save(post);
+    handleNewPostFiles(newPost, saved);
+    return saved;
   }
 
   public Post postOnProfile(
@@ -28,6 +33,16 @@ public class PostService {
     post.setInteractor(interactor);
     post.setReceiverInteractor(receiverInteractor);
     post.setContent(newPost.getContents().trim());
-    return postRepository.save(post);
+    Post saved = postRepository.save(post);
+    handleNewPostFiles(newPost, saved);
+    return saved;
+  }
+
+  private void handleNewPostFiles(NewPost post, Post savedPost) {
+    try {
+      mediumService.saveAllFiles(post.getMedia(), savedPost);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
