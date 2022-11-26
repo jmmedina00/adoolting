@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/profile")
@@ -122,6 +123,12 @@ public class ProfileController {
     }
 
     if (result.hasErrors()) {
+      System.out.println("Error");
+      for (MultipartFile file : newPost.getMedia()) {
+        System.out.println(file.getOriginalFilename());
+        System.out.println(file.getContentType());
+      }
+
       return "redirect:/profile/" + personId + "?error";
     }
 

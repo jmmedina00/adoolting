@@ -81,10 +81,17 @@
   method="post"
   th:object="${newPost}"
   th:action="@{/profile/{personId}(personId=${person.id})}"
+  enctype="multipart/form-data"
 >
   <div>
     <label>New post</label>
     <textarea th:field="*{contents}"></textarea>
+    <input
+      type="file"
+      th:field="*{media}"
+      accept="image/png, image/jpeg"
+      multiple
+    />
   </div>
   <button type="submit">Send</button>
 </form>
