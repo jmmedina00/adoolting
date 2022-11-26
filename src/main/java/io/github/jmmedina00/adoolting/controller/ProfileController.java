@@ -85,13 +85,20 @@ public class ProfileController {
       return "redirect:/home?notfound";
     }
 
+    NewConfirmableInteraction cInteraction = new NewConfirmableInteraction();
+
+    if (!Objects.equals(authenticatedPerson.getId(), person.getId())) {
+cInteraction.setPersonId(personId);
+    }
+    
+
     model.addAttribute("person", person);
     model.addAttribute(
       "friendship",
       cInteractionService.getPersonFriendship(authenticatedPerson, person)
     );
     model.addAttribute("newPost", new NewPost());
-    model.addAttribute("cInteraction", new NewConfirmableInteraction());
+    model.addAttribute("cInteraction",  cInteraction);
     model.addAttribute(
       "posts",
       interactionService.getInteractions(person.getId())

@@ -2,27 +2,55 @@
   Watching profile of:
   <span th:text="${person.firstName}"></span>
   <span th:text="${person.lastName}"></span>
-  -
-  <span th:unless="${friendship == null}">
-    <span
-      th:if="${friendship.confirmedAt == null && friendship.ignoredAt == null}"
-    >
-      <span th:if="${friendship.receiverInteractor.id == person.id}">
-        Pending
-      </span>
-      <span th:unless="${friendship.receiverInteractor.id == person.id}">
-        Click to accept
-      </span>
-    </span>
-    <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
-    <span th:unless="${friendship.ignoredAt == null}">Ignored</span>
-  </span>
-  <span th:if="${friendship == null}">
-    <span th:unless="${person.id == #authentication.principal.person.id}">
-      Add as friend
-    </span>
-  </span>
 </p>
+<span th:unless="${friendship == null}">
+  <span
+    th:if="${friendship.confirmedAt == null && friendship.ignoredAt == null}"
+  >
+    <span th:if="${friendship.receiverInteractor.id == person.id}">
+      Pending
+    </span>
+    <span th:unless="${friendship.receiverInteractor.id == person.id}">
+      <form
+        th:action="@{/network/{friendship}(friendship=${friendship.id})}"
+        method="post"
+      >
+        <input
+          type="text"
+          name="isAccepted"
+          value="true"
+          style="display: none"
+        />
+        <button type="submit">Accept</button>
+      </form>
+      <form
+        th:action="@{/network/{friendship}(friendship=${friendship.id})}"
+        method="post"
+      >
+        <input
+          type="text"
+          name="isAccepted"
+          value="false"
+          style="display: none"
+        />
+        <button type="submit">Ignore</button>
+      </form>
+    </span>
+  </span>
+  <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
+  <span th:unless="${friendship.ignoredAt == null}">Ignored</span>
+</span>
+
+<form
+  th:if="${friendship == null && cInteraction.personId != 0}"
+  th:object="${cInteraction}"
+  th:action="@{/network}"
+  method="post"
+>
+  <input type="text" th:field="*{personId}" style="display: none" />
+  <button type="submit">Add as friend</button>
+</form>
+
 <form
   method="post"
   th:object="${newPost}"
