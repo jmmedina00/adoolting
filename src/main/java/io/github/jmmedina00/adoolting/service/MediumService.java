@@ -19,6 +19,19 @@ public class MediumService {
   @Value("${user.dir}")
   private String workDirectory;
 
+  public List<String> getMediaForInteraction(Long interactionId) {
+    return mediumRepository
+      .findByInteractionId(interactionId)
+      .stream()
+      .map(
+        medium ->
+          "/cdn/media/full/" +
+          medium.getId() +
+          medium.getReference().replace("cdn:", "")
+      )
+      .toList();
+  }
+
   public void saveAllFiles(List<MultipartFile> files, Interaction interaction)
     throws Exception {
     for (MultipartFile file : files) {
