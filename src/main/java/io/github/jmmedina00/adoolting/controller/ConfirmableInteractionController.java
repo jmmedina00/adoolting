@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/network")
@@ -31,8 +30,7 @@ public class ConfirmableInteractionController {
   @RequestMapping(method = RequestMethod.POST, value = "/{interactionId}", consumes = "application/x-www-form-urlencoded")
   public String decideInteractionResult(
     @Valid InteractionConfirmation confirmation,
-    @PathVariable("interactionId") String interactionIdStr,
-    @RequestParam(required = false) String goToProfile
+    @PathVariable("interactionId") String interactionIdStr
   ) {
     Long interactionId;
 
@@ -63,7 +61,7 @@ public class ConfirmableInteractionController {
       return "redirect:/home?notfound";
     }
 
-    return (goToProfile == null)
+    return (!confirmation.getGoToProfile())
       ? "redirect:/network"
       : "redirect:/profile/" + interaction.getInteractor().getId() + "?success";
   }

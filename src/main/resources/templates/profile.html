@@ -21,6 +21,12 @@
           value="true"
           style="display: none"
         />
+        <input
+          type="text"
+          name="goToProfile"
+          value="true"
+          style="display: none"
+        />
         <button type="submit">Accept</button>
       </form>
       <form
@@ -33,16 +39,22 @@
           value="false"
           style="display: none"
         />
+        <input
+          type="text"
+          name="goToProfile"
+          value="true"
+          style="display: none"
+        />
         <button type="submit">Ignore</button>
       </form>
     </span>
   </span>
   <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
-  <span th:unless="${friendship.ignoredAt == null}">Ignored</span>
+  <!-- <span th:unless="${friendship.ignoredAt == null}">Ignored</span> -->
 </span>
 
 <form
-  th:if="${friendship == null && cInteraction.personId != 0}"
+  th:if="${(friendship == null && cInteraction.personId != 0) || friendship?.ignoredAt != null}"
   th:object="${cInteraction}"
   th:action="@{/network}"
   method="post"
