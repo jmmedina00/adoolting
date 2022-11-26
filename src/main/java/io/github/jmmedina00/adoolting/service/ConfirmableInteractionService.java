@@ -23,7 +23,7 @@ public class ConfirmableInteractionService {
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Person person
   ) {
-    return cInteractionRepository.findConfirmableInteractionsByInteractorId(
+    return cInteractionRepository.findPendingConfirmableInteractionsByInteractorId(
       person.getId()
     );
   }

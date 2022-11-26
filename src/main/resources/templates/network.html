@@ -1,9 +1,31 @@
 <div th:each="interaction : ${interactions}">
   <span th:text="${interaction.id}"></span>
   -
-  <span th:text="${interaction.receiverInteractor.id}"></span>
+  <span th:text="${interaction.class.name}"></span>
+  -
   <span
-    th:if="${interaction instanceof T(io.github.jmmedina00.adoolting.entity.JoinRequest)}"
+    th:text="${interaction.interactor.firstName + ' ' + interaction.interactor.lastName}"
+  >
+  </span>
+  <span
+    th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.JoinRequest')}"
     >- Extended <span th:text="${interaction.group.id}"></span>
   </span>
+
+  <form
+    th:action="@{/network/{interaction}(interaction=${interaction.id})}"
+    method="post"
+  >
+    <input type="text" name="isAccepted" value="true" style="display: none" />
+    <input type="text" name="goToProfile" value="false" style="display: none" />
+    <button type="submit">Accept</button>
+  </form>
+  <form
+    th:action="@{/network/{interaction}(interaction=${interaction.id})}"
+    method="post"
+  >
+    <input type="text" name="isAccepted" value="false" style="display: none" />
+    <input type="text" name="goToProfile" value="false" style="display: none" />
+    <button type="submit">Ignore</button>
+  </form>
 </div>

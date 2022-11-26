@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 public interface ConfirmableInteractionRepository
   extends JpaRepository<ConfirmableInteraction, Long> {
   @Query(
-    "SELECT c FROM ConfirmableInteraction c WHERE (c.interactor.id=:interactorId OR c.receiverInteractor.id=:interactorId) AND c.deletedAt IS NULL"
+    "SELECT c FROM ConfirmableInteraction c WHERE c.receiverInteractor.id=:interactorId AND c.confirmedAt IS NULL AND c.ignoredAt IS NULL AND c.deletedAt IS NULL ORDER BY c.createdAt DESC"
   )
-  List<ConfirmableInteraction> findConfirmableInteractionsByInteractorId(
+  List<ConfirmableInteraction> findPendingConfirmableInteractionsByInteractorId(
     @Param("interactorId") Long interactorId
   );
 
