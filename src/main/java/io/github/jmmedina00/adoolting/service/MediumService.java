@@ -11,7 +11,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Stream;
-
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
@@ -36,15 +35,24 @@ public class MediumService {
   @Value("${user.dir}")
   private String workDirectory;
 
-  private String fullRelativePath = "/data/cdn/media/full/";
-  private String squareRelativePath = "/data/cdn/media/square/";
+  private String toCdn = "/data/cdn/";
+  private String mediaDir = "media/";
+  private String full = "full/";
+  private String square = "square/";
+
+  private int[] expectedSizes = { 512, 256, 128, 64 };
 
   @PostConstruct
   public void initializeDirectoriesIfNeeded() {
-    File full = new File(workDirectory + fullRelativePath);
-    File square = new File(workDirectory + squareRelativePath);
-    full.mkdirs();
-    square.mkdirs();
+    File fullDir = new File(workDirectory + toCdn + mediaDir + full);
+    File squareDir = new File(workDirectory + toCdn + mediaDir + square);
+    fullDir.mkdirs();
+    squareDir.mkdirs();
+
+    for (int size : expectedSizes) {
+      File dir = new File(workDirectory + toCdn + mediaDir + size + "/");
+      dir.mkdirs();
+    }
   }
 
   public List<String> getMediaForInteraction(Long interactionId) {
@@ -71,7 +79,13 @@ public class MediumService {
 
       Medium saved = mediumRepository.save(medium);
       String path =
-        workDirectory + fullRelativePath + saved.getId() + "." + extension;
+        workDirectory +
+        toCdn +
+        mediaDir +
+        full +
+        saved.getId() +
+        "." +
+        extension;
 
       File writingFile = new File(path);
       file.transferTo(writingFile);
@@ -80,6 +94,7 @@ public class MediumService {
     }
   }
 
+  // TODO: refactor to make it more likeable by JobRunr
   @Job(name = "Get image square")
   public void getImageSquare(Long mediumId) throws Exception {
     Medium medium = mediumRepository.findById(mediumId).orElse(null);
@@ -90,10 +105,10 @@ public class MediumService {
 
     String extension = medium.getReference().replace("cdn:", "");
     File fullFile = new File(
-      workDirectory + fullRelativePath + mediumId + extension
+      workDirectory + toCdn + mediaDir + full + mediumId + extension
     );
     File squareFile = new File(
-      workDirectory + squareRelativePath + mediumId + extension
+      workDirectory + toCdn + mediaDir + square + mediumId + extension
     );
 
     if (!fullFile.exists() || squareFile.exists()) {
@@ -151,6 +166,55 @@ public class MediumService {
     graphics.dispose();
     writer.setOutput(outputStream);
     writer.write(square);
+    outputStream.close();
+
+    for (int size : expectedSizes) {
+      if (minDimension >= size) {
+        jobScheduler.enqueue(() -> scaleSquareImageToSize(mediumId, size));
+      }
+    }
+  }
+
+  @Job(name = "Scale squared image")
+  public void scaleSquareImageToSize(Long mediumId, int size) throws Exception {
+    Medium medium = mediumRepository.findById(mediumId).orElse(null);
+
+    if (medium == null) {
+      return;
+    }
+
+    String extension = medium.getReference().replace("cdn:", "");
+    File squareFile = new File(
+      workDirectory + toCdn + mediaDir + square + mediumId + extension
+    );
+    File scaledFile = new File(
+      workDirectory + toCdn + mediaDir + size + "/" + mediumId + extension
+    );
+
+    if (!squareFile.exists() || scaledFile.exists()) {
+      return;
+    }
+
+    ImageWriter writer = getProperImageWriter(squareFile);
+    BufferedImage sourceImage = ImageIO.read(squareFile);
+    ImageOutputStream outputStream = new FileImageOutputStream(scaledFile);
+
+    int imageType = sourceImage.getColorModel().hasAlpha()
+      ? BufferedImage.TYPE_4BYTE_ABGR
+      : sourceImage.getType();
+
+    BufferedImage target = new BufferedImage(size, size, imageType);
+    Graphics2D graphics = target.createGraphics();
+    graphics.setRenderingHint(
+      RenderingHints.KEY_INTERPOLATION,
+      RenderingHints.VALUE_INTERPOLATION_BICUBIC
+    );
+    graphics.setBackground(new Color(0, 0, 0, 0));
+    graphics.drawImage(sourceImage, 0, 0, size, size, null);
+    graphics.dispose();
+
+    writer.setOutput(outputStream);
+    writer.write(target);
     outputStream.close();
   }
 
