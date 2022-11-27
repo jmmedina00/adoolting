@@ -22,7 +22,12 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(
         requests ->
           requests
-            .antMatchers("/", "/restore-password/**", "/register")
+            .antMatchers(
+              "/",
+              "/restore-password/**",
+              "/register",
+              "/confirm/**"
+            )
             .permitAll()
             .anyRequest()
             .authenticated()
