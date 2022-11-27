@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.ConfirmationService;
 import io.github.jmmedina00.adoolting.service.PersonService;
+import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -47,7 +48,7 @@ public class LandingController {
   @RequestMapping(method = RequestMethod.GET)
   public String hello(Model model) {
     if (isAuthenticated()) {
-      return "redirect:test";
+      return "redirect:/home";
     }
 
     // Might have been redirected from invalid register
@@ -74,44 +75,58 @@ public class LandingController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/register")
   public String registerNewPerson(
-    @ModelAttribute("user") @Valid User userDto,
+    @ModelAttribute("user") @Valid User user,
     BindingResult result,
     RedirectAttributes attributes
   ) {
-    // TODO: refactor this SEVERELY
-
     try {
-      if (result.hasErrors()) {
-        for (ObjectError err : result.getGlobalErrors()) {
-          if (err.getCode() != null && err.getCode().equals("EmailMatches")) {
-            result.rejectValue("confirmEmail", "error.email.confirm");
-          }
-          if (
-            err.getCode() != null && err.getCode().equals("PasswordMatches")
-          ) {
-            result.rejectValue("confirmPassword", "error.password.confirm");
-          }
-        }
-
-        throw new InvalidDTOException();
-      }
-
-      try {
-        personService.createPersonFromUser(userDto);
-        return "valid";
-      } catch (EmailIsUsedException e) {
-        result.rejectValue("email", "error.email.used");
-        throw e;
-      }
+      return tryToRegisterPerson(user, result, attributes);
     } catch (InvalidDTOException e) {
-      // Preserve errors and originally input values when redirecting
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.user",
-        result
-      );
-      attributes.addFlashAttribute("user", userDto);
-
-      return "redirect:";
+      return failToRegisterPerson(user, result, attributes, e);
     }
+  }
+
+  private String failToRegisterPerson(
+    User user,
+    BindingResult result,
+    RedirectAttributes attributes,
+    InvalidDTOException e
+  ) {
+    // Preserve errors and originally input values when redirecting
+    attributes.addFlashAttribute(
+      "org.springframework.validation.BindingResult.user",
+      result
+    );
+    attributes.addFlashAttribute("user", user);
+
+    if (e instanceof EmailIsUsedException) {
+      result.rejectValue("email", "error.email.used");
+    }
+
+    return "redirect:";
+  }
+
+  private String tryToRegisterPerson(
+    User user,
+    BindingResult result,
+    RedirectAttributes attributes
+  )
+    throws InvalidDTOException {
+    if (!result.hasErrors()) {
+      personService.createPersonFromUser(user);
+      return "valid";
+    }
+
+    for (ObjectError err : result.getGlobalErrors()) {
+      switch (Optional.of(err.getCode()).orElse("")) {
+        case "EmailMatches":
+          result.rejectValue("confirmEmail", "error.email.confirm");
+          break;
+        case "PasswordMatches":
+          result.rejectValue("confirmPassword", "error.password.confirm");
+          break;
+      }
+    }
+    throw new InvalidDTOException();
   }
 }
