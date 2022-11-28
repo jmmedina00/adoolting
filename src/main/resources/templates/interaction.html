@@ -27,3 +27,21 @@
   th:text="${interaction.content}"
 ></p>
 <img th:each="medium : ${interaction.media}" th:src="@{${medium.reference}}" />
+<form
+  th:action="@{/interaction/{id}/comment(id=${interaction.id})}"
+  th:object="${newComment}"
+  method="post"
+  enctype="multipart/form-data"
+>
+  <span>New comment:</span><textarea th:field="*{content}"></textarea>
+  <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
+  <button type="submit">Send</button>
+</form>
+<h3>Comments</h3>
+<div th:each="comment : ${interaction.comments}">
+  <h4 th:object="${comment.interactor}">
+    <span th:text="*{firstName}"></span>
+    <span th:text="*{lastName}"></span>
+  </h4>
+  <p th:text="${comment.content}"></p>
+</div>
