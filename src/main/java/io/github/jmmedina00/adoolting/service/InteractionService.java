@@ -27,6 +27,10 @@ public class InteractionService {
     return interaction;
   }
 
+  public Interaction getInteractionReference(Long interactionId) {
+    return interactionRepository.getReferenceById(interactionId);
+  }
+
   public List<Interaction> getInteractions(Long interactorId) {
     return interactionRepository
       .findInteractionsByInteractorId(interactorId)

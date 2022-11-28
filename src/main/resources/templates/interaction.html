@@ -38,10 +38,11 @@
   <button type="submit">Send</button>
 </form>
 <h3>Comments</h3>
-<div th:each="comment : ${interaction.comments}">
+<div th:each="comment : ${comments}">
   <h4 th:object="${comment.interactor}">
     <span th:text="*{firstName}"></span>
     <span th:text="*{lastName}"></span>
   </h4>
   <p th:text="${comment.content}"></p>
+  <img th:each="medium : ${comment.media}" th:src="@{${medium.reference}}" />
 </div>

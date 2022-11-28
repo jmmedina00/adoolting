@@ -1,10 +1,12 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.NewComment;
+import io.github.jmmedina00.adoolting.entity.Comment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
+import io.github.jmmedina00.adoolting.service.CommentService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class InteractionController {
   @Autowired
   private InteractionService interactionService;
 
+  @Autowired
+  private CommentService commentService;
+
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getInteraction(
     @PathVariable("id") String interactionIdStr,
@@ -38,6 +43,10 @@ public class InteractionController {
     }
 
     model.addAttribute("interaction", interaction);
+    model.addAttribute(
+      "comments",
+      commentService.getCommentsFromInteraction(interactionId)
+    );
     model.addAttribute("newComment", new NewComment());
 
     return "interaction";
@@ -60,7 +69,22 @@ public class InteractionController {
       return "redirect:/interaction/" + interactionId + "?error";
     }
 
-    return "redirect:/interaction/" + interactionId + "?success";
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    Comment comment = commentService.createComment(
+      newComment,
+      authenticatedPerson,
+      interactionId
+    );
+    return (
+      "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()
+    );
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
