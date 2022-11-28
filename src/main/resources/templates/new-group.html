@@ -1,5 +1,9 @@
 <h1>New group</h1>
-<form th:object="${newGroup}" th:action="@{/group}" th:method="post">
+<form
+  th:object="${newGroup}"
+  th:action="${param.event} ? @{/group/event} : @{/group}"
+  th:method="post"
+>
   <div>
     <label>Name:</label>
     <input type="text" th:field="*{name}" />
@@ -37,10 +41,22 @@
     th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
   >
     <label>Date:</label>
-    <input type="datetime-local" th:field="*{happeningAt}" />
+    <input type="date" th:field="*{date}" />
     <p
-      th:if="${#fields.hasErrors('happeningAt')}"
-      th:text="${#fields.errors('happeningAt')[0]}"
+      th:if="${#fields.hasErrors('date')}"
+      th:text="${#fields.errors('date')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+  >
+    <label>Time:</label>
+    <input type="time" th:field="*{time}" />
+    <p
+      th:if="${#fields.hasErrors('time')}"
+      th:text="${#fields.errors('time')[0]}"
     >
       Validation error
     </p>

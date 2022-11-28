@@ -11,8 +11,13 @@ public class NewEvent extends NewGroup {
   @NotEmpty(message = "{error.not_empty}")
   private String location; // temporary
 
-  @DateTimeFormat(iso = ISO.DATE_TIME)
-  private Date happeningAt;
+  @NotNull
+  @DateTimeFormat(iso = ISO.DATE)
+  private Date date;
+
+  @NotNull
+  @DateTimeFormat(pattern = "HH:mm")
+  private Date time;
 
   public String getLocation() {
     return location;
@@ -22,11 +27,19 @@ public class NewEvent extends NewGroup {
     this.location = location;
   }
 
-  public Date getHappeningAt() {
-    return happeningAt;
+  public Date getDate() {
+    return date;
   }
 
-  public void setHappeningAt(Date happeningAt) {
-    this.happeningAt = happeningAt;
+  public void setDate(Date date) {
+    this.date = date;
+  }
+
+  public Date getTime() {
+    return time;
+  }
+
+  public void setTime(Date time) {
+    this.time = time;
   }
 }
