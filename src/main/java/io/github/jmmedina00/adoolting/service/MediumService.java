@@ -75,8 +75,12 @@ public class MediumService {
   public void saveAllFiles(List<MultipartFile> files, Interaction interaction)
     throws Exception {
     for (MultipartFile file : files) {
-      Medium medium = new Medium();
       String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+      if (extension.isEmpty()) {
+        continue;
+      }
+
+      Medium medium = new Medium();
 
       medium.setInteraction(interaction);
       medium.setReference("cdn:" + "." + extension);

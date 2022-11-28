@@ -32,7 +32,8 @@ public class CommentService {
           );
           return comment;
         }
-      ).toList();
+      )
+      .toList();
   }
 
   public Comment createComment(
