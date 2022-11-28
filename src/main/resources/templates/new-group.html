@@ -1,0 +1,49 @@
+<h1>New group</h1>
+<form th:object="${newGroup}" th:action="@{/group}" th:method="post">
+  <div>
+    <label>Name:</label>
+    <input type="text" th:field="*{name}" />
+    <p
+      th:if="${#fields.hasErrors('name')}"
+      th:text="${#fields.errors('name')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Description:</label>
+    <input type="text" th:field="*{description}" />
+    <p
+      th:if="${#fields.hasErrors('description')}"
+      th:text="${#fields.errors('description')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+  >
+    <!-- To be updated with proper map -->
+    <label>Location:</label>
+    <input type="text" th:field="*{location}" />
+    <p
+      th:if="${#fields.hasErrors('location')}"
+      th:text="${#fields.errors('location')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+  >
+    <label>Date:</label>
+    <input type="datetime-local" th:field="*{happeningAt}" />
+    <p
+      th:if="${#fields.hasErrors('happeningAt')}"
+      th:text="${#fields.errors('happeningAt')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <button type="submit">Create</button>
+</form>
