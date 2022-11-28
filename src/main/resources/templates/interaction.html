@@ -1,0 +1,29 @@
+<h3>
+  <span th:object="${interaction.interactor}">
+    <span th:text="*{firstName}"></span>
+    <span th:text="*{lastName}"></span>
+  </span>
+  <span
+    th:if="${interaction.receiverInteractor}"
+    th:object="${interaction.receiverInteractor}"
+  >
+    ->
+    <span th:text="*{firstName}"></span>
+    <span th:text="*{lastName}"></span
+  ></span>
+</h3>
+<div
+  th:if="${interaction.interactor.id == #authentication.principal.person.id}"
+>
+  <form
+    th:action="@{/interaction/{id}/delete(id=${interaction.id})}"
+    method="post"
+  >
+    <button type="submit">Delete</button>
+  </form>
+</div>
+<p
+  th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
+  th:text="${interaction.content}"
+></p>
+<img th:each="medium : ${interaction.media}" th:src="@{${medium.reference}}" />

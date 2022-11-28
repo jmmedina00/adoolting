@@ -19,6 +19,14 @@ public class InteractionService {
   @Autowired
   private MediumService mediumService;
 
+  public Interaction getInteraction(Long interactionId) {
+    Interaction interaction = interactionRepository
+      .findById(interactionId)
+      .orElseThrow();
+    interaction.setMedia(mediumService.getMediaForInteraction(interactionId));
+    return interaction;
+  }
+
   public List<Interaction> getInteractions(Long interactorId) {
     return interactionRepository
       .findInteractionsByInteractorId(interactorId)
