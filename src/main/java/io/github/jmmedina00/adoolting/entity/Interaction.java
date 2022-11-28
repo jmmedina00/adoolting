@@ -84,4 +84,8 @@ public class Interaction {
   public List<Medium> getMedia() {
     return media;
   }
+
+  public void setMedia(List<Medium> media) {
+    this.media = media;
+  }
 }

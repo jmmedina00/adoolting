@@ -4,14 +4,11 @@ import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.NewPost;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.Post;
-import io.github.jmmedina00.adoolting.entity.util.InteractionWithReferences;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
-import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.PersonService;
 import io.github.jmmedina00.adoolting.service.PostService;
-import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +37,6 @@ public class ProfileController {
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
-
-  @Autowired
-  private MediumService mediumService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
@@ -97,29 +91,16 @@ public class ProfileController {
       cInteraction.setPersonId(personId);
     }
 
-    List<InteractionWithReferences> posts = interactionService
-      .getInteractions(person.getId())
-      .stream()
-      .map(
-        interaction -> {
-          InteractionWithReferences withReferences = new InteractionWithReferences();
-          withReferences.setInteraction(interaction);
-          withReferences.setReferences(
-            mediumService.getMediaForInteraction(interaction.getId())
-          );
-
-          return withReferences;
-        }
-      )
-      .toList();
-
     model.addAttribute("person", person);
     model.addAttribute(
       "friendship",
       cInteractionService.getPersonFriendship(authenticatedPerson, person)
     );
     model.addAttribute("friends", cInteractionService.getPersonFriends(person));
-    model.addAttribute("posts", posts);
+    model.addAttribute(
+      "posts",
+      interactionService.getInteractions(person.getId())
+    );
     model.addAttribute("newPost", new NewPost());
     model.addAttribute("cInteraction", cInteraction);
 

@@ -97,14 +97,14 @@
 </form>
 <div th:each="post : ${posts}">
   <h3>
-    <span th:object="${post.interaction.interactor}">
+    <span th:object="${post.interactor}">
       <span th:text="*{firstName}"></span>
       <span th:text="*{lastName}"></span>
     </span>
 
     <span
-      th:if="${post.interaction.receiverInteractor}"
-      th:object="${post.interaction.receiverInteractor}"
+      th:if="${post.receiverInteractor}"
+      th:object="${post.receiverInteractor}"
     >
       ->
       <span th:text="*{firstName}"></span>
@@ -113,10 +113,10 @@
   </h3>
   <!-- instanceOf does not work reliably between restarts -->
   <p
-    th:if="${post.interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
-    th:text="${post.interaction.content}"
+    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
+    th:text="${post.content}"
   ></p>
-  <img th:each="medium : ${post.references}" th:src="@{${medium}}" />
-  <p th:text="${post.interaction.class.name}"></p>
-  <p><span th:text="${post.interaction.comments.size()}"></span> comments</p>
+  <img th:each="medium : ${post.media}" th:src="@{${medium.reference}}" />
+  <p th:text="${post.class.name}"></p>
+  <p><span th:text="${post.comments.size()}"></span> comments</p>
 </div>

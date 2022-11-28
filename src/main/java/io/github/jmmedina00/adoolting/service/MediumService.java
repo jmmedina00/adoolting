@@ -55,15 +55,19 @@ public class MediumService {
     }
   }
 
-  public List<String> getMediaForInteraction(Long interactionId) {
+  public List<Medium> getMediaForInteraction(Long interactionId) {
     return mediumRepository
       .findByInteractionId(interactionId)
       .stream()
       .map(
-        medium ->
-          "/cdn/media/full/" +
-          medium.getId() +
-          medium.getReference().replace("cdn:", "")
+        medium -> {
+          String properUrl =
+            "/cdn/media/full/" +
+            medium.getId() +
+            medium.getReference().replace("cdn:", "");
+          medium.setReference(properUrl);
+          return medium;
+        }
       )
       .toList();
   }
