@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.controller;
 import io.github.jmmedina00.adoolting.dto.NewComment;
 import io.github.jmmedina00.adoolting.entity.Comment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
@@ -40,6 +41,19 @@ public class InteractionController {
       interaction = interactionService.getInteraction(interactionId);
     } catch (Exception e) {
       return "redirect:/home?notfound";
+    }
+
+    if (interaction instanceof Comment) {
+      Comment comment = (Comment) interaction;
+
+      if (!(comment.getReceiverInteraction() instanceof PeopleGroup)) {
+        return (
+          "redirect:/interaction/" +
+          comment.getReceiverInteraction().getId() +
+          "?comment=" +
+          comment.getId()
+        );
+      }
     }
 
     model.addAttribute("interaction", interaction);
