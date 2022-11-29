@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.NewEvent;
 import io.github.jmmedina00.adoolting.dto.NewGroup;
+import java.util.Calendar;
 import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/group")
 public class GroupController {
+  private static int MINIMUM_HOURS = 2;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getNewGroupForm(
@@ -55,9 +57,6 @@ public class GroupController {
     BindingResult result,
     RedirectAttributes attributes
   ) {
-    System.out.println(newEvent.getDate());
-    System.out.println(newEvent.getTime());
-
     if (result.hasErrors()) {
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.newGroup",
@@ -67,6 +66,14 @@ public class GroupController {
       return "redirect:/group?event";
     }
 
-    return "redirect:/group?success=1&event=1";
+    Calendar calendarThreshold = Calendar.getInstance();
+    calendarThreshold.add(Calendar.HOUR_OF_DAY, MINIMUM_HOURS);
+
+    if (calendarThreshold.getTime().after(newEvent.getFinalizedDate())) {
+      attributes.addFlashAttribute("newGroup", newEvent);
+      return "redirect:/group?event&badtime";
+    }
+
+    return "redirect:/group?success&event";
   }
 }
