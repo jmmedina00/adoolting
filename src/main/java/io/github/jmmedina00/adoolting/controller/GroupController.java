@@ -2,8 +2,16 @@ package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.NewEvent;
 import io.github.jmmedina00.adoolting.dto.NewGroup;
+import io.github.jmmedina00.adoolting.entity.Event;
+import io.github.jmmedina00.adoolting.entity.PeopleGroup;
+import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.service.EventService;
+import io.github.jmmedina00.adoolting.service.PeopleGroupService;
 import java.util.Calendar;
 import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,6 +24,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/group")
 public class GroupController {
+  @Autowired
+  private PeopleGroupService groupService;
+
+  @Autowired
+  private EventService eventService;
+
   private static int MINIMUM_HOURS = 2;
 
   @RequestMapping(method = RequestMethod.GET)
@@ -48,7 +62,16 @@ public class GroupController {
       return "redirect:/group";
     }
 
-    return "redirect:/group?success";
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    PeopleGroup group = groupService.createGroup(newGroup, authenticatedPerson);
+    return "redirect:/interaction/" + group.getId();
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/event")
@@ -74,6 +97,15 @@ public class GroupController {
       return "redirect:/group?event&badtime";
     }
 
-    return "redirect:/group?success&event";
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    Event event = eventService.createEvent(newEvent, authenticatedPerson);
+    return "redirect:/interaction/" + event.getId();
   }
 }
