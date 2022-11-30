@@ -94,7 +94,7 @@ public class InteractionController {
     Comment comment = commentService.createComment(
       newComment,
       authenticatedPerson,
-      interactionId
+      interactionService.getInteractionReference(interactionId)
     );
     return (
       "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()

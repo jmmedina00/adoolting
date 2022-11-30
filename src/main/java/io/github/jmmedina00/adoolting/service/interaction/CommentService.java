@@ -1,10 +1,10 @@
 package io.github.jmmedina00.adoolting.service.interaction;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
+import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
-import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 public class CommentService {
   @Autowired
   private CommentRepository commentRepository;
-
-  @Autowired
-  private InteractionService interactionService;
 
   @Autowired
   private MediumService mediumService;
@@ -45,14 +42,12 @@ public class CommentService {
   public Comment createComment(
     NewComment newComment,
     Interactor interactor,
-    Long interactionId
+    Interaction interaction
   ) {
     Comment comment = new Comment();
     comment.setContent(newComment.getContent());
     comment.setInteractor(interactor);
-    comment.setReceiverInteraction(
-      interactionService.getInteractionReference(interactionId)
-    );
+    comment.setReceiverInteraction(interaction);
 
     Comment saved = commentRepository.save(comment);
     try {
