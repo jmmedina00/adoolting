@@ -51,6 +51,10 @@ public class Interaction {
     return id;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   public Interactor getInteractor() {
     return interactor;
   }
