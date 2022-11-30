@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.entity;
 
+import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;

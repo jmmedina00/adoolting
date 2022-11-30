@@ -1,14 +1,14 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
-import io.github.jmmedina00.adoolting.dto.NewPost;
-import io.github.jmmedina00.adoolting.entity.Person;
-import io.github.jmmedina00.adoolting.entity.Post;
+import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
+import io.github.jmmedina00.adoolting.entity.interaction.Post;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
-import io.github.jmmedina00.adoolting.service.PersonService;
-import io.github.jmmedina00.adoolting.service.PostService;
+import io.github.jmmedina00.adoolting.service.interaction.PostService;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

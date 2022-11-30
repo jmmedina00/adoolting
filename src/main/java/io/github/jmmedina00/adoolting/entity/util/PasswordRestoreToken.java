@@ -1,9 +1,8 @@
 package io.github.jmmedina00.adoolting.entity.util;
 
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -1,11 +1,12 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
-import io.github.jmmedina00.adoolting.entity.JoinRequest;
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;

@@ -1,14 +1,14 @@
 package io.github.jmmedina00.adoolting.controller;
 
-import io.github.jmmedina00.adoolting.dto.NewComment;
-import io.github.jmmedina00.adoolting.entity.Comment;
+import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.PeopleGroup;
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
+import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
-import io.github.jmmedina00.adoolting.service.CommentService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.interaction.CommentService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;

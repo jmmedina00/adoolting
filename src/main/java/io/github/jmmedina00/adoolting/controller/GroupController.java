@@ -1,13 +1,13 @@
 package io.github.jmmedina00.adoolting.controller;
 
-import io.github.jmmedina00.adoolting.dto.NewEvent;
-import io.github.jmmedina00.adoolting.dto.NewGroup;
-import io.github.jmmedina00.adoolting.entity.Event;
-import io.github.jmmedina00.adoolting.entity.PeopleGroup;
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.dto.group.NewEvent;
+import io.github.jmmedina00.adoolting.dto.group.NewGroup;
+import io.github.jmmedina00.adoolting.entity.group.Event;
+import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
-import io.github.jmmedina00.adoolting.service.EventService;
-import io.github.jmmedina00.adoolting.service.PeopleGroupService;
+import io.github.jmmedina00.adoolting.service.group.EventService;
+import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import java.util.Calendar;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

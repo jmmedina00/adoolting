@@ -1,8 +1,8 @@
 package io.github.jmmedina00.adoolting.controller;
 
-import io.github.jmmedina00.adoolting.dto.ForgotPassword;
-import io.github.jmmedina00.adoolting.dto.RestorePassword;
-import io.github.jmmedina00.adoolting.service.PasswordRestoreService;
+import io.github.jmmedina00.adoolting.dto.util.ForgotPassword;
+import io.github.jmmedina00.adoolting.dto.util.RestorePassword;
+import io.github.jmmedina00.adoolting.service.util.PasswordRestoreService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

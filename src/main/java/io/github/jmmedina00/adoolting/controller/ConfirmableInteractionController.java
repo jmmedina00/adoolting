@@ -3,7 +3,7 @@ package io.github.jmmedina00.adoolting.controller;
 import io.github.jmmedina00.adoolting.dto.InteractionConfirmation;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;

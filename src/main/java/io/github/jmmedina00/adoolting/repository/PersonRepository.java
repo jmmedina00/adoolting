@@ -1,6 +1,6 @@
 package io.github.jmmedina00.adoolting.repository;
 
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {

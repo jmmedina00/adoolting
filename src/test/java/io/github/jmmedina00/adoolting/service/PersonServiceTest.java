@@ -1,7 +1,9 @@
 package io.github.jmmedina00.adoolting.service;
 
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

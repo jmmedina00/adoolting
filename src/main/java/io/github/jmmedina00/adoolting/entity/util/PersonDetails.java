@@ -1,6 +1,6 @@
 package io.github.jmmedina00.adoolting.entity.util;
 
-import io.github.jmmedina00.adoolting.entity.Person;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
