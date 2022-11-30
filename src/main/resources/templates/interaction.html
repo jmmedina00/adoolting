@@ -27,6 +27,7 @@
   th:text="${interaction.content}"
 ></p>
 <img th:each="medium : ${interaction.media}" th:src="@{${medium.reference}}" />
+<p th:text="${@relativeTimeService.getRelativeTime(interaction.createdAt)}"></p>
 <form
   th:action="@{/interaction/{id}/comment(id=${interaction.id})}"
   th:object="${newComment}"
