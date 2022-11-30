@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -40,10 +41,10 @@ public class Interaction {
   @Column
   private Date deletedAt;
 
-  @OneToMany(mappedBy = "receiverInteraction")
+  @OneToMany(mappedBy = "receiverInteraction", fetch = FetchType.LAZY)
   private List<Comment> comments;
 
-  @OneToMany(mappedBy = "interaction")
+  @OneToMany(mappedBy = "interaction", fetch = FetchType.LAZY)
   private List<Medium> media;
 
   public Long getId() {

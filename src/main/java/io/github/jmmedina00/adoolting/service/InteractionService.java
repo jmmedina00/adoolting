@@ -37,6 +37,10 @@ public class InteractionService {
       .stream()
       .map(
         interaction -> {
+          if (interaction.getMedia().size() == 0) {
+            return interaction;
+          }
+
           List<Medium> properMedia = mediumService.getMediaForInteraction(
             interaction.getId()
           );

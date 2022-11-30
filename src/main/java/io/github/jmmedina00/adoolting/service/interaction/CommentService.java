@@ -29,6 +29,10 @@ public class CommentService {
       .stream()
       .map(
         comment -> {
+          if (comment.getMedia().size() == 0) {
+            return comment;
+          }
+
           comment.setMedia(
             mediumService.getMediaForInteraction(comment.getId())
           );

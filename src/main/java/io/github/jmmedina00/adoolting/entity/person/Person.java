@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -39,25 +40,25 @@ public class Person extends Interactor {
   @Column
   private Gender gender;
 
-  @OneToMany(mappedBy = "createdByPerson")
+  @OneToMany(mappedBy = "createdByPerson", fetch = FetchType.LAZY)
   private List<Page> createdPages;
 
-  @OneToMany(mappedBy = "person")
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private List<PageManager> managedPages;
 
-  @OneToMany(mappedBy = "person")
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private List<PersonStatus> statuses;
 
-  @OneToMany(mappedBy = "fromPerson")
+  @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
   private List<PrivateMessage> sentMessages;
 
-  @OneToMany(mappedBy = "toPerson")
+  @OneToMany(mappedBy = "toPerson", fetch = FetchType.LAZY)
   private List<PrivateMessage> receivedMessages;
 
-  @OneToOne(mappedBy = "person")
+  @OneToOne(mappedBy = "person", fetch = FetchType.LAZY)
   private ConfirmationToken confirmationToken;
 
-  @OneToMany(mappedBy = "person")
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private List<PasswordRestoreToken> restoreTokens;
 
   public String getFirstName() {
