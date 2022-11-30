@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.service;
+package io.github.jmmedina00.adoolting.service.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -14,7 +14,6 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
-import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.Date;
 import java.util.Optional;
