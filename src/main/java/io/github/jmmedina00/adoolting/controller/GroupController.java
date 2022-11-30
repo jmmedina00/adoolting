@@ -44,7 +44,7 @@ public class GroupController {
       );
     }
 
-    return "new-group";
+    return "form/group";
   }
 
   @RequestMapping(method = RequestMethod.POST)

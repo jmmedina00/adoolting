@@ -113,7 +113,7 @@
   </h3>
   <!-- instanceOf does not work reliably between restarts -->
   <p
-    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
+    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
     th:text="${post.content}"
   ></p>
   <img th:each="medium : ${post.media}" th:src="@{${medium.reference}}" />

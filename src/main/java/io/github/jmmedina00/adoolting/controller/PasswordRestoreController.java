@@ -28,7 +28,7 @@ public class PasswordRestoreController {
       model.addAttribute("forgotPassword", forgotPassword);
     }
 
-    return "forgot-password";
+    return "password/forgot-password";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -52,7 +52,7 @@ public class PasswordRestoreController {
       System.out.println(e.getMessage());
     }
 
-    return "email-sent";
+    return "password/email-sent";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{token}")
@@ -71,7 +71,7 @@ public class PasswordRestoreController {
 
     model.addAttribute("token", token);
 
-    return "restore-password";
+    return "password/restore-password";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{token}")

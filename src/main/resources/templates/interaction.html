@@ -23,7 +23,7 @@
   </form>
 </div>
 <p
-  th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.Post')}"
+  th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
   th:text="${interaction.content}"
 ></p>
 <img th:each="medium : ${interaction.media}" th:src="@{${medium.reference}}" />

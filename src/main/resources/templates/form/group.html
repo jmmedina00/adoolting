@@ -38,7 +38,7 @@
     </p>
   </div>
   <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
   >
     <label>Date:</label>
     <input type="date" th:field="*{date}" />
@@ -50,7 +50,7 @@
     </p>
   </div>
   <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
   >
     <label>Time:</label>
     <input type="time" th:field="*{time}" />
@@ -62,7 +62,7 @@
     </p>
   </div>
   <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.NewEvent'}"
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
     style="display: none"
   >
     <input type="hidden" th:field="*{offsetFromUTC}" id="offset" />
