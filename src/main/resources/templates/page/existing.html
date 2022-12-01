@@ -1,0 +1,3 @@
+<h1 th:text="${page.name}"></h1>
+<p th:text="${page.about}"></p>
+<p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>

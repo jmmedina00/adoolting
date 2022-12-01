@@ -57,6 +57,10 @@ public class Page extends Interactor {
     return createdByPerson;
   }
 
+  public void setCreatedByPerson(Person createdByPerson) {
+    this.createdByPerson = createdByPerson;
+  }
+
   public List<PageManager> getManagers() {
     return managers;
   }
