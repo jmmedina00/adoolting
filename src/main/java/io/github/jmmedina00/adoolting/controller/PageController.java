@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
@@ -141,6 +142,8 @@ public class PageController {
     try {
       managerService.addManagerForPage(personId, page);
       return "redirect:/page/" + pageId + "/manage";
+    } catch (AlreadyInPlaceException e) {
+      return "redirect:/page/" + pageId + "/manage?error";
     } catch (Exception e) {
       return "redirect:/home?notfound";
     }

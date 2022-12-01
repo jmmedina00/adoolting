@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.service.page;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.repository.page.PageManagerRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.List;
@@ -17,7 +18,7 @@ public class PageManagerService {
   @Autowired
   private PersonService personService;
 
-  List<Page> getPagesManagedByPerson(Long personId) {
+  public List<Page> getPagesManagedByPerson(Long personId) {
     return pageManagerRepository
       .findPersonManagements(personId)
       .stream()
@@ -25,7 +26,7 @@ public class PageManagerService {
       .toList();
   }
 
-  List<Person> getPeopleManagingPage(Long pageId) {
+  public List<Person> getPeopleManagingPage(Long pageId) {
     return pageManagerRepository
       .findPageManagers(pageId)
       .stream()
@@ -35,11 +36,21 @@ public class PageManagerService {
 
   public PageManager addManagerForPage(Long personId, Page page)
     throws Exception {
-    PageManager manager = new PageManager();
     Person person = personService.getPerson(personId);
     if (person == null) {
       throw new Exception();
     }
+
+    List<Page> samePages = getPagesManagedByPerson(personId)
+      .stream()
+      .filter(managedPage -> managedPage.getId() == page.getId())
+      .toList();
+    if (samePages.size() > 0) {
+      throw new AlreadyInPlaceException();
+    }
+
+    PageManager manager = new PageManager();
+
     manager.setPage(page);
     manager.setPerson(person);
 
