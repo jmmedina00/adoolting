@@ -1,9 +1,3 @@
 <h1 th:text="${page.name}"></h1>
 <p th:text="${page.about}"></p>
 <p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>
-<ul>
-  <li th:each="person : ${managers}">
-    <span th:text="${person.firstName}"></span>
-    <span th:text="${person.lastName}"></span>
-  </li>
-</ul>

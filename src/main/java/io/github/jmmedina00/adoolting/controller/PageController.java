@@ -4,7 +4,10 @@ import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
+import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
+import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +25,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class PageController {
   @Autowired
   private PageService pageService;
+
+  @Autowired
+  private PageManagerService managerService;
+
+  @Autowired
+  private ConfirmableInteractionService cInteractionService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getNewPageForm(Model model) {
@@ -50,8 +59,91 @@ public class PageController {
     }
 
     model.addAttribute("page", page);
-    model.addAttribute("managers", pageService.getPageManagers(pageId));
     return "page/existing";
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/{id}/manage")
+  public String getPageManagementPage(
+    @PathVariable("id") String pageIdStr,
+    Model model
+  ) {
+    Long pageId;
+    try {
+      pageId = Long.parseLong(pageIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    Page page = pageService.getPage(pageId);
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    if (
+      page == null ||
+      !Objects.equals(
+        page.getCreatedByPerson().getId(),
+        authenticatedPerson.getId()
+      )
+    ) {
+      return "redirect:/home?notfound";
+    }
+
+    model.addAttribute("page", page);
+    model.addAttribute("managers", pageService.getPageManagers(pageId));
+    model.addAttribute(
+      "friends",
+      cInteractionService.getPersonFriends(authenticatedPerson)
+    );
+    return "page/manage";
+  }
+
+  @RequestMapping(
+    method = RequestMethod.POST,
+    value = "/{pageId}/manage/{personId}"
+  )
+  public String addPersonAsManager(
+    @PathVariable("pageId") String pageIdStr,
+    @PathVariable("personId") String personIdStr
+  ) {
+    Long pageId;
+    Long personId;
+    try {
+      pageId = Long.parseLong(pageIdStr);
+      personId = Long.parseLong(personIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    Page page = pageService.getPage(pageId);
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    if (
+      page == null ||
+      !Objects.equals(
+        page.getCreatedByPerson().getId(),
+        authenticatedPerson.getId()
+      )
+    ) {
+      return "redirect:/home?notfound";
+    }
+
+    try {
+      managerService.addManagerForPage(personId, page);
+      return "redirect:/page/" + pageId + "/manage";
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
   }
 
   @RequestMapping(method = RequestMethod.POST)
