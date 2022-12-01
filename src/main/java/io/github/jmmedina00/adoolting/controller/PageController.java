@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
+import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
@@ -8,6 +9,8 @@ import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,25 @@ public class PageController {
       return "redirect:/home?notfound";
     }
 
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    List<Interactor> controlledInteractors;
+    if (pageService.isPageManagedByPerson(page, authenticatedPerson)) {
+      controlledInteractors = List.of(authenticatedPerson, page);
+    } else {
+      controlledInteractors =
+        new ArrayList<>(pageService.getAllPersonPages(authenticatedPerson));
+      controlledInteractors.add(0, authenticatedPerson);
+    }
+
     model.addAttribute("page", page);
+    model.addAttribute("interactors", controlledInteractors);
     return "page/existing";
   }
 

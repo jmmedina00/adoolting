@@ -1,3 +1,19 @@
 <h1 th:text="${page.name}"></h1>
 <p th:text="${page.about}"></p>
 <p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>
+<ul>
+  <li th:each="interactor : ${interactors}">
+    <span
+      th:if="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.person.Person')}"
+      th:text="${interactor.firstName} + ' ' + ${interactor.lastName}"
+    >
+      Person name
+    </span>
+    <span
+      th:if="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.page.Page')}"
+      th:text="${interactor.name}"
+    >
+      Page name
+    </span>
+  </li>
+</ul>
