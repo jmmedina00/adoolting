@@ -50,6 +50,7 @@ public class PageController {
     }
 
     model.addAttribute("page", page);
+    model.addAttribute("managers", pageService.getPageManagers(pageId));
     return "page/existing";
   }
 

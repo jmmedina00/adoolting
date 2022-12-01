@@ -43,8 +43,16 @@ public class PageManager {
     return page;
   }
 
+  public void setPage(Page page) {
+    this.page = page;
+  }
+
   public Person getPerson() {
     return person;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
   }
 
   public Date getCreatedAt() {
