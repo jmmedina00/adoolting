@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.controller;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
@@ -108,11 +109,21 @@ public class PageController {
       return "redirect:/home?notfound";
     }
 
+    Page page = pageService.getPage(pageId);
+    if (page == null) {
+      return "redirect:/home?notfound";
+    }
+
     if (result.hasErrors()) {
       return "redirect:/page/" + pageId + "?error";
     }
 
-    return "redirect:/page/" + pageId + "?success";
+    try {
+      Post post = postService.postOnPage(newPost, page);
+      return "redirect:/page/" + pageId + "?post=" + post.getId();
+    } catch (Exception e) {
+      return "redirect:/page/" + pageId + "?error";
+    }
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}/manage")
