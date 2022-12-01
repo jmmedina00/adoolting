@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.page.Page;
@@ -7,6 +8,8 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
+import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.ArrayList;
@@ -35,6 +38,12 @@ public class PageController {
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
+
+  @Autowired
+  private InteractionService interactionService;
+
+  @Autowired
+  private PostService postService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getNewPageForm(Model model) {
@@ -81,7 +90,29 @@ public class PageController {
 
     model.addAttribute("page", page);
     model.addAttribute("interactors", controlledInteractors);
+    model.addAttribute("posts", interactionService.getInteractions(pageId));
+    model.addAttribute("newPost", new NewPostOnPage());
     return "page/existing";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{id}")
+  public String createPostOnPage(
+    @PathVariable("id") String pageIdStr,
+    @ModelAttribute("newPost") @Valid NewPostOnPage newPost,
+    BindingResult result
+  ) {
+    Long pageId;
+    try {
+      pageId = Long.parseLong(pageIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    if (result.hasErrors()) {
+      return "redirect:/page/" + pageId + "?error";
+    }
+
+    return "redirect:/page/" + pageId + "?success";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}/manage")

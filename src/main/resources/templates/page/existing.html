@@ -1,19 +1,56 @@
 <h1 th:text="${page.name}"></h1>
 <p th:text="${page.about}"></p>
 <p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>
-<ul>
-  <li th:each="interactor : ${interactors}">
-    <span
-      th:if="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.person.Person')}"
-      th:text="${interactor.firstName} + ' ' + ${interactor.lastName}"
-    >
-      Person name
+<form
+  method="post"
+  th:object="${newPost}"
+  th:action="@{/page/{pageId}(pageId=${page.id})}"
+  enctype="multipart/form-data"
+>
+  <div>
+    <label>New post</label>
+    <textarea th:field="*{contents}"></textarea>
+    <input
+      type="file"
+      th:field="*{media}"
+      accept="image/png, image/jpeg"
+      multiple
+    />
+  </div>
+  <div>
+    <select th:field="*{postAs}">
+      <option
+        th:each="interactor : ${interactors}"
+        th:value="${interactor.id}"
+        th:text="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.person.Person') ? interactor.firstName : interactor.name}"
+      >
+        Visible name
+      </option>
+    </select>
+  </div>
+  <button type="submit">Send</button>
+</form>
+<div th:each="post : ${posts}">
+  <h3>
+    <span th:object="${post.interactor}">
+      <span th:text="*{firstName}"></span>
+      <span th:text="*{lastName}"></span>
     </span>
     <span
-      th:if="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.page.Page')}"
-      th:text="${interactor.name}"
+      th:if="${post.receiverInteractor}"
+      th:object="${post.receiverInteractor}"
     >
-      Page name
+      ->
+      <span th:text="*{firstName}"></span>
+      <span th:text="*{lastName}"></span>
     </span>
-  </li>
-</ul>
+  </h3>
+  <!-- instanceOf does not work reliably between restarts -->
+  <p
+    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
+    th:text="${post.content}"
+  ></p>
+  <img th:each="medium : ${post.media}" th:src="@{${medium.reference}}" />
+  <p th:text="${post.class.name}"></p>
+  <p><span th:text="${post.comments.size()}"></span> comments</p>
+</div>
