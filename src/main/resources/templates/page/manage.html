@@ -1,3 +1,15 @@
+<form
+  method="post"
+  th:action="@{/pfp/interactor/{id}(id=${page.id})}"
+  th:object="${pfp}"
+  enctype="multipart/form-data"
+>
+  <p>
+    <span>New profile picture</span>
+    <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
+    <input type="submit" value="Send" />
+  </p>
+</form>
 <ul>
   <li th:each="person : ${managers}">
     <span th:text="${person.firstName}"></span>

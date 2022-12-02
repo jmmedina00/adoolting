@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
+import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
@@ -158,6 +159,7 @@ public class PageController {
     }
 
     model.addAttribute("page", page);
+    model.addAttribute("pfp", new ProfilePictureFile());
     model.addAttribute("managers", pageService.getPageManagers(pageId));
     model.addAttribute(
       "friends",

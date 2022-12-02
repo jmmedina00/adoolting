@@ -55,6 +55,10 @@ public class MediumService {
     }
   }
 
+  public String getProperFullPath() {
+    return workDirectory + toCdn + mediaDir + full;
+  }
+
   public List<Medium> getMediaForInteraction(Long interactionId) {
     return mediumRepository
       .findByInteractionId(interactionId)

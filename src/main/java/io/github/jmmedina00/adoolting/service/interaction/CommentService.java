@@ -50,6 +50,10 @@ public class CommentService {
     comment.setReceiverInteraction(interaction);
 
     Comment saved = commentRepository.save(comment);
+    if (newComment.getFile() == null) {
+      return saved;
+    }
+
     try {
       mediumService.saveAllFiles(List.of(newComment.getFile()), comment);
     } catch (Exception e) {
