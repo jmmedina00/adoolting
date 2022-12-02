@@ -64,4 +64,9 @@ public class Page extends Interactor {
   public List<PageManager> getManagers() {
     return managers;
   }
+
+  @Override
+  public String getFullName() {
+    return name;
+  }
 }

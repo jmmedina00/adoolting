@@ -12,6 +12,7 @@ import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.Medium;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.List;
@@ -50,7 +51,7 @@ public class CommentServiceTest {
     newComment.setContent("Test");
     newComment.setFile(file);
 
-    Interactor interactor = new Interactor();
+    Interactor interactor = new Page();
     interactor.setAbout("This is a page");
     Interaction interaction = new Interaction();
 
@@ -79,7 +80,7 @@ public class CommentServiceTest {
     newComment.setContent("Test");
     newComment.setFile(file);
 
-    Interactor interactor = new Interactor();
+    Interactor interactor = new Page();
     interactor.setAbout("This is a page");
     Interaction interaction = new Interaction();
 
@@ -104,15 +105,24 @@ public class CommentServiceTest {
 
     Medium treated = new Medium();
     treated.setReference("treated");
-    
-    Mockito.when(commentRepository.findByReceiverInteractionId((long) 1)).thenReturn(List.of(withNoMedia, withMedia, anotherWithMedia));
-    Mockito.when(mediumService.getMediaForInteraction(any())).thenReturn(List.of(treated));
 
-    List<Comment> comments = commentService.getCommentsFromInteraction((long) 1);
-    List<Medium> media = comments.stream().flatMap(comment -> comment.getMedia().stream()).toList();
+    Mockito
+      .when(commentRepository.findByReceiverInteractionId((long) 1))
+      .thenReturn(List.of(withNoMedia, withMedia, anotherWithMedia));
+    Mockito
+      .when(mediumService.getMediaForInteraction(any()))
+      .thenReturn(List.of(treated));
+
+    List<Comment> comments = commentService.getCommentsFromInteraction(
+      (long) 1
+    );
+    List<Medium> media = comments
+      .stream()
+      .flatMap(comment -> comment.getMedia().stream())
+      .toList();
 
     for (Medium medium : media) {
-        assertEquals(medium.getReference(), "treated");
+      assertEquals(medium.getReference(), "treated");
     }
 
     verify(mediumService, never()).getMediaForInteraction((long) 1);

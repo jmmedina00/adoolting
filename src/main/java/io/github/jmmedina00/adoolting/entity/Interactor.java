@@ -17,7 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Interactor implements Serializable {
+public abstract class Interactor implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -67,4 +67,6 @@ public class Interactor implements Serializable {
   public List<Interaction> getReceivedInteractions() {
     return receivedInteractions;
   }
+
+  public abstract String getFullName();
 }

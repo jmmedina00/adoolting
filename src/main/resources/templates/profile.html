@@ -1,7 +1,6 @@
 <p>
   Watching profile of:
-  <span th:text="${person.firstName}"></span>
-  <span th:text="${person.lastName}"></span>
+  <span th:text="${person.getFullName()}"></span>
 </p>
 <p>
   <span th:if="${status}" th:text="${status.content}"></span>
@@ -11,12 +10,12 @@
   <li th:each="friend : ${friends}">
     <span
       th:unless="${friend.interactor.id == person.id}"
-      th:text="${friend.interactor.firstName + ' ' + friend.interactor.lastName}"
+      th:text="${friend.interactor.getFullName()}"
     >
     </span>
     <span
       th:unless="${friend.receiverInteractor.id == person.id}"
-      th:text="${friend.receiverInteractor.firstName + ' ' + friend.receiverInteractor.lastName}"
+      th:text="${friend.interactor.getFullName()}"
     >
     </span>
   </li>
@@ -101,18 +100,11 @@
 </form>
 <div th:each="post : ${posts}">
   <h3>
-    <span th:object="${post.interactor}">
-      <span th:text="*{firstName}"></span>
-      <span th:text="*{lastName}"></span>
-    </span>
+    <span th:text="${post.interactor.getFullName()}"> </span>
 
-    <span
-      th:if="${post.receiverInteractor}"
-      th:object="${post.receiverInteractor}"
-    >
+    <span th:if="${post.receiverInteractor}">
       ->
-      <span th:text="*{firstName}"></span>
-      <span th:text="*{lastName}"></span>
+      <span th:text="${post.receiverInteractor.getFullName()}"></span>
     </span>
   </h3>
   <!-- instanceOf does not work reliably between restarts -->

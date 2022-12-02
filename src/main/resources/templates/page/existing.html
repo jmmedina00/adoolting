@@ -22,7 +22,7 @@
       <option
         th:each="interactor : ${interactors}"
         th:value="${interactor.id}"
-        th:text="${interactor.class.name.equals('io.github.jmmedina00.adoolting.entity.person.Person') ? interactor.firstName : interactor.name}"
+        th:text="${interactor.getFullName()}"
       >
         Visible name
       </option>
@@ -32,17 +32,10 @@
 </form>
 <div th:each="post : ${posts}">
   <h3>
-    <span th:object="${post.interactor}">
-      <span th:text="*{firstName}"></span>
-      <span th:text="*{lastName}"></span>
-    </span>
-    <span
-      th:if="${post.receiverInteractor}"
-      th:object="${post.receiverInteractor}"
-    >
+    <span th:text="${post.interactor.getFullName()}"> </span>
+    <span th:if="${post.receiverInteractor}">
       ->
-      <span th:text="*{firstName}"></span>
-      <span th:text="*{lastName}"></span>
+      <span th:text="${post.receiverInteractor.getFullName()}"></span>
     </span>
   </h3>
   <!-- instanceOf does not work reliably between restarts -->

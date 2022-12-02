@@ -136,4 +136,8 @@ public class Person extends Interactor {
   public List<PasswordRestoreToken> getRestoreTokens() {
     return restoreTokens;
   }
+
+  public String getFullName() {
+    return firstName + " " + lastName;
+  }
 }
