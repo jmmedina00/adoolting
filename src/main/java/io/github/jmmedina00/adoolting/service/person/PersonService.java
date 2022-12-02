@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.service.person;
 
+import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.dto.User;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
@@ -24,19 +25,43 @@ public class PersonService implements UserDetailsService {
   @Autowired
   private ConfirmationService confirmationService;
 
+  @Autowired
+  private PersonStatusService statusService;
+
   public Person getPerson(Long personId) {
     return personRepository.findById(personId).orElse(null);
   }
 
-  public Person updatePersonAbout(Long personId, String about) {
+  public PersonInfo getPersonInfo(Long personId) {
+    Person person = getPerson(personId);
+
+    if (person == null) {
+      return null;
+    }
+
+    PersonInfo info = new PersonInfo();
+    info.setFirstName(person.getFirstName());
+    info.setLastName(person.getLastName());
+    info.setGender(person.getGender());
+    info.setAbout(person.getAbout());
+    return info;
+  }
+
+  public Person updatePerson(Long personId, PersonInfo info) {
     Person person = personRepository.findById(personId).orElse(null);
 
     if (person == null) {
       return null;
     }
 
-    person.setAbout(about);
-    return personRepository.save(person);
+    person.setFirstName(info.getFirstName());
+    person.setLastName(info.getLastName());
+    person.setGender(info.getGender());
+    person.setAbout(info.getAbout());
+
+    Person saved = personRepository.save(person);
+    statusService.updatePersonStatus(person, info.getStatus());
+    return saved;
   }
 
   public Person changePersonPassword(Long personId, String newPassword) {

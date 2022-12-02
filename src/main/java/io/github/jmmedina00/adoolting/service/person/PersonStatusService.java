@@ -11,12 +11,8 @@ public class PersonStatusService {
   @Autowired
   private PersonStatusRepository statusRepository;
 
-  @Autowired
-  private PersonService personService;
-
-  public PersonStatus updatePersonStatus(Long personId, String content) {
-    Person person = personService.getPerson(personId);
-    if (person == null) {
+  public PersonStatus updatePersonStatus(Person person, String content) {
+    if (content.isEmpty()) {
       return null;
     }
 

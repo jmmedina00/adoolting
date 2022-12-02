@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
-import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,9 +20,6 @@ public class ProfileEditController {
   @Autowired
   private PersonService personService;
 
-  @Autowired
-  private PersonStatusService statusService;
-
   @RequestMapping(method = RequestMethod.GET)
   public String getEditInfoForm(Model model) {
     Person authenticatedPerson =
@@ -34,14 +30,10 @@ public class ProfileEditController {
           .getPrincipal()
       ).getPerson();
 
-    Person upToDatePerson = personService.getPerson(
-      authenticatedPerson.getId()
+    model.addAttribute(
+      "info",
+      personService.getPersonInfo(authenticatedPerson.getId())
     );
-
-    PersonInfo info = new PersonInfo();
-    info.setAbout(upToDatePerson.getAbout());
-
-    model.addAttribute("info", info);
     return "profile-edit";
   }
 
@@ -63,12 +55,7 @@ public class ProfileEditController {
       ).getPerson()
         .getId();
 
-    personService.updatePersonAbout(personId, info.getAbout());
-
-    if (!info.getStatus().isEmpty()) {
-      statusService.updatePersonStatus(personId, info.getStatus());
-    }
-
+    personService.updatePerson(personId, info);
     return "redirect:/profile";
   }
 }
