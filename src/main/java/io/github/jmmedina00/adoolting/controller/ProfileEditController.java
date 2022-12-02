@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.controller;
 
 import io.github.jmmedina00.adoolting.dto.PersonInfo;
+import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
@@ -30,6 +31,7 @@ public class ProfileEditController {
           .getPrincipal()
       ).getPerson();
 
+    model.addAttribute("pfp", new ProfilePictureFile());
     model.addAttribute(
       "info",
       personService.getPersonInfo(authenticatedPerson.getId())

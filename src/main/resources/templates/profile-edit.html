@@ -2,6 +2,18 @@
   <span sec:authentication="principal.person.firstName"></span>
   <span sec:authentication="principal.person.lastName"></span>
 </h1>
+<form
+  method="post"
+  th:action="@{/pfp/interactor/{id}(id=${#authentication.principal.person.id})}"
+  th:object="${pfp}"
+  enctype="multipart/form-data"
+>
+  <p>
+    <span>New profile picture</span>
+    <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
+    <input type="submit" value="Send" />
+  </p>
+</form>
 <form th:action="@{/profile/edit}" method="post" th:object="${info}">
   <div>
     <label>First</label>
