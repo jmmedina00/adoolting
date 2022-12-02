@@ -3,6 +3,10 @@
   <span th:text="${person.firstName}"></span>
   <span th:text="${person.lastName}"></span>
 </p>
+<p>
+  <span th:if="${status}" th:text="${status.content}"></span>
+  <span th:unless="${status}">Not set</span>
+</p>
 <ul>
   <li th:each="friend : ${friends}">
     <span

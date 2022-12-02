@@ -9,6 +9,7 @@ import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProfileController {
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private PersonStatusService statusService;
 
   @Autowired
   private PostService postService;
@@ -92,6 +96,7 @@ public class ProfileController {
     }
 
     model.addAttribute("person", person);
+    model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "friendship",
       cInteractionService.getPersonFriendship(authenticatedPerson, person)

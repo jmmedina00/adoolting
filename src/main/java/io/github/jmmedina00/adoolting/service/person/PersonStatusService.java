@@ -11,6 +11,14 @@ public class PersonStatusService {
   @Autowired
   private PersonStatusRepository statusRepository;
 
+  public PersonStatus getPersonStatus(Long personId) {
+    return statusRepository
+      .findFirst1ByPersonIdOrderByCreatedAtDesc(personId)
+      .stream()
+      .findFirst()
+      .orElse(null);
+  }
+
   public PersonStatus updatePersonStatus(Person person, String content) {
     if (content.isEmpty()) {
       return null;
