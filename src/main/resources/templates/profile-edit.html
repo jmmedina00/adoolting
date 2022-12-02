@@ -1,0 +1,27 @@
+<h1>
+  <span sec:authentication="principal.person.firstName"></span>
+  <span sec:authentication="principal.person.lastName"></span>
+</h1>
+<form th:action="@{/profile/edit}" method="post" th:object="${info}">
+  <div>
+    <label>About</label>
+    <textarea th:field="*{about}"></textarea>
+    <p
+      th:if="${#fields.hasErrors('about')}"
+      th:text="${#fields.errors('about')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Current status</label>
+    <textarea th:field="*{status}"></textarea>
+    <p
+      th:if="${#fields.hasErrors('status')}"
+      th:text="${#fields.errors('status')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <button type="submit">Update</button>
+</form>
