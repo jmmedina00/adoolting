@@ -28,6 +28,17 @@ public class PersonService implements UserDetailsService {
     return personRepository.findById(personId).orElse(null);
   }
 
+  public Person updatePersonAbout(Long personId, String about) {
+    Person person = personRepository.findById(personId).orElse(null);
+
+    if (person == null) {
+      return null;
+    }
+
+    person.setAbout(about);
+    return personRepository.save(person);
+  }
+
   public Person changePersonPassword(Long personId, String newPassword) {
     Person person = personRepository.findById(personId).orElse(null);
 

@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProfileEditController {
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private PersonStatusService statusService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getEditInfoForm(Model model) {
@@ -50,6 +54,21 @@ public class ProfileEditController {
       return "redirect:/profile/edit?error";
     }
 
-    return "redirect:/profile/edit?success";
+    Long personId =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson()
+        .getId();
+
+    personService.updatePersonAbout(personId, info.getAbout());
+
+    if (!info.getStatus().isEmpty()) {
+      statusService.updatePersonStatus(personId, info.getStatus());
+    }
+
+    return "redirect:/profile";
   }
 }
