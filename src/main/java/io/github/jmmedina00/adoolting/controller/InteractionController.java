@@ -62,6 +62,9 @@ public class InteractionController {
       commentService.getCommentsFromInteraction(interactionId)
     );
     model.addAttribute("newComment", new NewComment());
+    if (interaction instanceof PeopleGroup) {
+      model.addAttribute("groupPfp", "/pfp/group/" + interactionId);
+    }
 
     return "interaction";
   }

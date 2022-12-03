@@ -36,6 +36,30 @@ public class ProfilePictureService {
   @Autowired
   private CommentService commentService;
 
+  public String getProfilePictureOfInteractor(Long interactorId) {
+    List<ProfilePicture> pfps = pfpRepository.findInteractorsProfilePictures(
+      interactorId
+    );
+    ProfilePicture latest = pfps.stream().findFirst().get();
+    return (
+      mediumService.getProperPublicPath() +
+      latest.getId() +
+      latest.getReference().replace("cdn:", "")
+    );
+  }
+
+  public String getProfilePictureOfGroup(Long groupId) {
+    List<ProfilePicture> pfps = pfpRepository.findGroupsProfilePictures(
+      groupId
+    );
+    ProfilePicture latest = pfps.stream().findFirst().get();
+    return (
+      mediumService.getProperPublicPath() +
+      latest.getId() +
+      latest.getReference().replace("cdn:", "")
+    );
+  }
+
   public ProfilePicture setProfilePictureOfInteractor(
     Interactor interactor,
     ProfilePictureFile pfpFile

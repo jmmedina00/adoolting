@@ -2,3 +2,6 @@
   <span sec:authentication="principal.person.firstName"></span>
   <span sec:authentication="principal.person.lastName"></span>
 </h1>
+<img
+  th:src="@{/pfp/interactor/{id}(id=${#authentication.principal.person.id})}"
+/>

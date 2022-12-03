@@ -34,6 +34,33 @@ public class ProfilePictureController {
   @Autowired
   private InteractorService interactorService;
 
+  @RequestMapping(method = RequestMethod.GET, value = "/interactor/{id}")
+  public String getProfilePictureOfInteractor(
+    @PathVariable("id") String idStr
+  ) {
+    try {
+      Long interactorId = Long.parseLong(idStr);
+      return (
+        "redirect:" +
+        profilePictureService.getProfilePictureOfInteractor(interactorId)
+      );
+    } catch (Exception e) {
+      return "redirect:/cdn/default";
+    }
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/group/{id}")
+  public String getProfilePictureOfGroup(@PathVariable("id") String idStr) {
+    try {
+      Long groupId = Long.parseLong(idStr);
+      return (
+        "redirect:" + profilePictureService.getProfilePictureOfGroup(groupId)
+      );
+    } catch (Exception e) {
+      return "redirect:/cdn/default";
+    }
+  }
+
   @RequestMapping(method = RequestMethod.POST, value = "/interactor/{id}")
   public String setProfilePictureOfInteractor(
     @PathVariable("id") String idStr,

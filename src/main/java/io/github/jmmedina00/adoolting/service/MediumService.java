@@ -55,6 +55,10 @@ public class MediumService {
     }
   }
 
+  public String getProperPublicPath() {
+    return "/cdn/" + mediaDir + full;
+  }
+
   public String getProperFullPath() {
     return workDirectory + toCdn + mediaDir + full;
   }

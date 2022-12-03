@@ -5,6 +5,7 @@
     <span th:text="${interaction.receiverInteractor.getFullName()}"></span>
   </span>
 </h3>
+<img th:if="${groupPfp}" th:src="${groupPfp}" />
 <div
   th:if="${interaction.interactor.id == #authentication.principal.person.id}"
 >
