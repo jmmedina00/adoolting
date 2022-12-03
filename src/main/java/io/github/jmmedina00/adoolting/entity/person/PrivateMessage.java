@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.entity.person;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class PrivateMessage {
@@ -24,6 +26,10 @@ public class PrivateMessage {
   @ManyToOne
   @JoinColumn(name = "to_person_id")
   private Person toPerson;
+
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Date createdAt;
 
   public Long getId() {
     return id;
@@ -51,5 +57,13 @@ public class PrivateMessage {
 
   public void setToPerson(Person toPerson) {
     this.toPerson = toPerson;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
   }
 }

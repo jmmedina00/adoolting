@@ -3,6 +3,15 @@
   <span th:text="${person.getFullName()}"></span>
 </h1>
 
+<div
+  th:each="message : ${messages}"
+  class="message"
+  th:classappend="${person.id == message.fromPerson.id ? 'received' : 'sent'}"
+>
+  <p th:text="${message.contents}"></p>
+  <p th:text="${@relativeTimeService.getRelativeTime(message.createdAt)}"></p>
+</div>
+
 <form
   method="post"
   th:object="${newMessage}"

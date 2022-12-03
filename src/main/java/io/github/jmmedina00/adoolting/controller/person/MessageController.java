@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.person.NewMessage;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.person.PrivateMessageService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/message")
 public class MessageController {
+  @Autowired
+  private PrivateMessageService messageService;
+
   @Autowired
   private PersonService personService;
 
@@ -54,6 +58,13 @@ public class MessageController {
     }
 
     model.addAttribute("person", person);
+    model.addAttribute(
+      "messages",
+      messageService.getMessagesBetweenPersons(
+        authenticatedPerson.getId(),
+        person.getId()
+      )
+    );
     model.addAttribute("newMessage", new NewMessage());
     return "message/conversation";
   }
@@ -76,6 +87,20 @@ public class MessageController {
       return "redirect:/message/" + personId + "?error";
     }
 
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    Person person = personService.getPerson(personId);
+    if (Objects.equals(person.getId(), authenticatedPerson.getId())) {
+      return "redirect:/message";
+    }
+
+    messageService.sendMessageToPerson(authenticatedPerson, person, newMessage);
     return "redirect:/message/" + personId + "?success";
   }
 }
