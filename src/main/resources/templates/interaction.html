@@ -20,7 +20,10 @@
   th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
   th:text="${interaction.content}"
 ></p>
-<img th:each="medium : ${interaction.media}" th:src="@{${medium.reference}}" />
+<img
+  th:each="medium : ${interaction.media}"
+  th:src="@{/media/thumbnail/512/{id}(id=${medium.id})}"
+/>
 <p th:text="${@relativeTimeService.getRelativeTime(interaction.createdAt)}"></p>
 <form
   th:action="@{/interaction/{id}/comment(id=${interaction.id})}"
@@ -36,5 +39,8 @@
 <div th:each="comment : ${comments}">
   <h4 th:text="${comment.interactor.getFullName()}"></h4>
   <p th:text="${comment.content}"></p>
-  <img th:each="medium : ${comment.media}" th:src="@{${medium.reference}}" />
+  <img
+    th:each="medium : ${comment.media}"
+    th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
+  />
 </div>

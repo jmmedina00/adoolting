@@ -2,7 +2,6 @@ package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
-import io.github.jmmedina00.adoolting.entity.Medium;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import java.util.Date;
@@ -16,16 +15,10 @@ public class InteractionService {
   @Autowired
   private InteractionRepository interactionRepository;
 
-  @Autowired
-  private MediumService mediumService;
-
   public Interaction getInteraction(Long interactionId) {
     Interaction interaction = interactionRepository
       .findById(interactionId)
       .orElseThrow();
-    interaction.setMedia(
-      mediumService.getMediaForInteraction(interactionId, 512)
-    );
     return interaction;
   }
 
@@ -34,24 +27,7 @@ public class InteractionService {
   }
 
   public List<Interaction> getInteractions(Long interactorId) {
-    return interactionRepository
-      .findInteractionsByInteractorId(interactorId)
-      .stream()
-      .map(
-        interaction -> {
-          if (interaction.getMedia().size() == 0) {
-            return interaction;
-          }
-
-          List<Medium> properMedia = mediumService.getMediaForInteraction(
-            interaction.getId(),
-            256
-          );
-          interaction.setMedia(properMedia);
-          return interaction;
-        }
-      )
-      .toList();
+    return interactionRepository.findInteractionsByInteractorId(interactorId);
   }
 
   public void deleteInteraction(

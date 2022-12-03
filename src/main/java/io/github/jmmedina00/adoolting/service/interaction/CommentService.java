@@ -19,24 +19,7 @@ public class CommentService {
   private MediumService mediumService;
 
   public List<Comment> getCommentsFromInteraction(Long interactionId) {
-    List<Comment> comments = commentRepository.findByReceiverInteractionId(
-      interactionId
-    );
-    return comments
-      .stream()
-      .map(
-        comment -> {
-          if (comment.getMedia().size() == 0) {
-            return comment;
-          }
-
-          comment.setMedia(
-            mediumService.getMediaForInteraction(comment.getId(), 256)
-          );
-          return comment;
-        }
-      )
-      .toList();
+    return commentRepository.findByReceiverInteractionId(interactionId);
   }
 
   public Comment createComment(

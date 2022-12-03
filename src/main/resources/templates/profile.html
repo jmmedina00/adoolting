@@ -112,7 +112,10 @@
     th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
     th:text="${post.content}"
   ></p>
-  <img th:each="medium : ${post.media}" th:src="@{${medium.reference}}" />
+  <img
+    th:each="medium : ${post.media}"
+    th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
+  />
   <p th:text="${post.class.name}"></p>
   <p><span th:text="${post.comments.size()}"></span> comments</p>
 </div>

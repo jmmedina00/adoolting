@@ -66,66 +66,44 @@ public class MediumService {
     return workDirectory + toCdn + mediaDir + full;
   }
 
-  public List<Medium> getMediaForInteraction(Long interactionId) {
-    return getMediaForInteraction(interactionId, 512);
-  }
+  public String getThumbnailLinkForMedium(Long mediumId, int desiredSize) {
+    Medium medium = mediumRepository.findById(mediumId).get();
 
-  public List<Medium> getMediaForInteraction(
-    Long interactionId,
-    int desiredSize
-  ) {
     List<Integer> cycleSizes = new ArrayList<>(
       Arrays.stream(expectedSizes).boxed().toList()
     );
     Collections.reverse(cycleSizes);
 
-    return mediumRepository
-      .findByInteractionId(interactionId)
-      .stream()
-      .map(
-        medium -> {
-          String extension = medium.getReference().replace("cdn:", "");
-          String properUrl = "";
+    String extension = medium.getReference().replace("cdn:", "");
 
-          for (Integer size : cycleSizes) {
-            if (size.intValue() < desiredSize) {
-              continue;
-            }
+    for (Integer size : cycleSizes) {
+      if (size.intValue() < desiredSize) {
+        continue;
+      }
 
-            String testUrl =
-              workDirectory +
-              toCdn +
-              mediaDir +
-              size.intValue() +
-              "/" +
-              medium.getId() +
-              extension;
+      String testUrl =
+        workDirectory +
+        toCdn +
+        mediaDir +
+        size.intValue() +
+        "/" +
+        medium.getId() +
+        extension;
 
-            File fileCheck = new File(testUrl);
+      File fileCheck = new File(testUrl);
 
-            if (fileCheck.exists()) {
-              properUrl = testUrl.replace(workDirectory + "/data", "");
-              break; // Found good one
-            }
-          }
+      if (fileCheck.exists()) {
+        return testUrl.replace(workDirectory + "/data", "");
+      }
+    }
 
-          if (properUrl.isEmpty()) {
-            properUrl =
-              "/cdn/" + mediaDir + square + medium.getId() + extension;
+    String defaultSquare =
+      "/cdn/" + mediaDir + square + medium.getId() + extension;
+    File file = new File(workDirectory + "/data" + defaultSquare);
 
-            File file = new File(workDirectory + "/data" + properUrl);
-
-            if (!file.exists()) {
-              properUrl =
-                "/cdn/" + mediaDir + full + medium.getId() + extension;
-            }
-          }
-
-          medium.setReference(properUrl);
-          return medium;
-        }
-      )
-      .toList();
+    return file.exists()
+      ? defaultSquare
+      : ("/cdn/" + mediaDir + full + medium.getId() + extension);
   }
 
   public void saveAllFiles(List<MultipartFile> files, Interaction interaction)
