@@ -23,7 +23,9 @@ public class InteractionService {
     Interaction interaction = interactionRepository
       .findById(interactionId)
       .orElseThrow();
-    interaction.setMedia(mediumService.getMediaForInteraction(interactionId));
+    interaction.setMedia(
+      mediumService.getMediaForInteraction(interactionId, 512)
+    );
     return interaction;
   }
 
@@ -42,7 +44,8 @@ public class InteractionService {
           }
 
           List<Medium> properMedia = mediumService.getMediaForInteraction(
-            interaction.getId()
+            interaction.getId(),
+            256
           );
           interaction.setMedia(properMedia);
           return interaction;

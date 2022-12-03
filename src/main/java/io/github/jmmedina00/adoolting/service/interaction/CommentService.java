@@ -31,7 +31,7 @@ public class CommentService {
           }
 
           comment.setMedia(
-            mediumService.getMediaForInteraction(comment.getId())
+            mediumService.getMediaForInteraction(comment.getId(), 256)
           );
           return comment;
         }

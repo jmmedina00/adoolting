@@ -9,6 +9,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
@@ -64,15 +67,60 @@ public class MediumService {
   }
 
   public List<Medium> getMediaForInteraction(Long interactionId) {
+    return getMediaForInteraction(interactionId, 512);
+  }
+
+  public List<Medium> getMediaForInteraction(
+    Long interactionId,
+    int desiredSize
+  ) {
+    List<Integer> cycleSizes = new ArrayList<>(
+      Arrays.stream(expectedSizes).boxed().toList()
+    );
+    Collections.reverse(cycleSizes);
+
     return mediumRepository
       .findByInteractionId(interactionId)
       .stream()
       .map(
         medium -> {
-          String properUrl =
-            "/cdn/media/full/" +
-            medium.getId() +
-            medium.getReference().replace("cdn:", "");
+          String extension = medium.getReference().replace("cdn:", "");
+          String properUrl = "";
+
+          for (Integer size : cycleSizes) {
+            if (size.intValue() < desiredSize) {
+              continue;
+            }
+
+            String testUrl =
+              workDirectory +
+              toCdn +
+              mediaDir +
+              size.intValue() +
+              "/" +
+              medium.getId() +
+              extension;
+
+            File fileCheck = new File(testUrl);
+
+            if (fileCheck.exists()) {
+              properUrl = testUrl.replace(workDirectory + "/data", "");
+              break; // Found good one
+            }
+          }
+
+          if (properUrl.isEmpty()) {
+            properUrl =
+              "/cdn/" + mediaDir + square + medium.getId() + extension;
+
+            File file = new File(workDirectory + "/data" + properUrl);
+
+            if (!file.exists()) {
+              properUrl =
+                "/cdn/" + mediaDir + full + medium.getId() + extension;
+            }
+          }
+
           medium.setReference(properUrl);
           return medium;
         }
