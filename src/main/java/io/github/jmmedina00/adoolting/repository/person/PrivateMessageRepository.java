@@ -9,6 +9,13 @@ import org.springframework.data.repository.query.Param;
 public interface PrivateMessageRepository
   extends JpaRepository<PrivateMessage, Long> {
   @Query(
+    "SELECT m FROM PrivateMessage m WHERE m.fromPerson.id=:personId OR m.toPerson.id=:personId ORDER BY m.createdAt DESC"
+  )
+  List<PrivateMessage> findMessagesExchangedWithPerson(
+    @Param("personId") Long personId
+  );
+
+  @Query(
     "SELECT m FROM PrivateMessage m WHERE (m.fromPerson.id=:firstPerson AND m.toPerson.id=:secondPerson) OR (m.fromPerson.id=:secondPerson AND m.toPerson.id=:firstPerson) ORDER BY m.createdAt DESC"
   )
   List<PrivateMessage> findMessagesByPersonIds(

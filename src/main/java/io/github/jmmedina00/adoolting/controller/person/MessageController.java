@@ -27,7 +27,19 @@ public class MessageController {
   private PersonService personService;
 
   @RequestMapping(method = RequestMethod.GET)
-  public String getRecentMessagesList() {
+  public String getRecentMessagesList(Model model) {
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    model.addAttribute(
+      "messages",
+      messageService.getLatestMessagesForPerson(authenticatedPerson.getId())
+    );
     return "message/list";
   }
 
