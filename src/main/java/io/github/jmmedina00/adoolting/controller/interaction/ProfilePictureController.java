@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.interaction;
 
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.Interaction;

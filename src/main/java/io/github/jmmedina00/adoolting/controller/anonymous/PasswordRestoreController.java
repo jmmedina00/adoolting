@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.anonymous;
 
 import io.github.jmmedina00.adoolting.dto.util.ForgotPassword;
 import io.github.jmmedina00.adoolting.dto.util.RestorePassword;

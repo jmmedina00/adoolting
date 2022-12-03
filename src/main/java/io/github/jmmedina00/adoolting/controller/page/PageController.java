@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.page;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;

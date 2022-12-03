@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.person;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

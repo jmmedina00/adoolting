@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.group;
 
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;

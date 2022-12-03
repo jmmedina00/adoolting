@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.controller;
+package io.github.jmmedina00.adoolting.controller.person;
 
 import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
