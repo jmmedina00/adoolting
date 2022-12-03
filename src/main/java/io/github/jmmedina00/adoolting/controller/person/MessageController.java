@@ -1,0 +1,81 @@
+package io.github.jmmedina00.adoolting.controller.person;
+
+import io.github.jmmedina00.adoolting.dto.person.NewMessage;
+import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
+import java.util.Objects;
+import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@Controller
+@RequestMapping("/message")
+public class MessageController {
+  @Autowired
+  private PersonService personService;
+
+  @RequestMapping(method = RequestMethod.GET)
+  public String getRecentMessagesList() {
+    return "message/list";
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
+  public String getMessagesWithPerson(
+    @PathVariable("personId") String personIdStr,
+    Model model
+  ) {
+    Long personId;
+
+    try {
+      personId = Long.parseLong(personIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    Person person = personService.getPerson(personId);
+    if (Objects.equals(person.getId(), authenticatedPerson.getId())) {
+      return "redirect:/message";
+    }
+
+    model.addAttribute("person", person);
+    model.addAttribute("newMessage", new NewMessage());
+    return "message/conversation";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
+  public String sendMessageToPerson(
+    @PathVariable("personId") String personIdStr,
+    @ModelAttribute("newMessage") @Valid NewMessage newMessage,
+    BindingResult result
+  ) {
+    Long personId;
+
+    try {
+      personId = Long.parseLong(personIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    if (result.hasErrors()) {
+      return "redirect:/message/" + personId + "?error";
+    }
+
+    return "redirect:/message/" + personId + "?success";
+  }
+}

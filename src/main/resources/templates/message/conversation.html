@@ -1,0 +1,16 @@
+<h1>
+  Messaging with
+  <span th:text="${person.getFullName()}"></span>
+</h1>
+
+<form
+  method="post"
+  th:object="${newMessage}"
+  th:action="@{/message/{personId}(personId=${person.id})}"
+>
+  <div>
+    <label>Send new message</label>
+    <textarea th:field="*{contents}"></textarea>
+  </div>
+  <button type="submit">Send</button>
+</form>
