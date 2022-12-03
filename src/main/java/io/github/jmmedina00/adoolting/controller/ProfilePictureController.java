@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
+import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
@@ -13,6 +14,7 @@ import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Controller
@@ -34,27 +37,45 @@ public class ProfilePictureController {
   @Autowired
   private InteractorService interactorService;
 
+  @Value("${DEFAULT_IMAGE}")
+  private String defaultImageFile;
+
   @RequestMapping(method = RequestMethod.GET, value = "/interactor/{id}")
   public String getProfilePictureOfInteractor(
-    @PathVariable("id") String idStr
+    @PathVariable("id") String idStr,
+    @RequestParam(required = false, name = "size") String size
   ) {
     try {
       Long interactorId = Long.parseLong(idStr);
+      ProfilePicture pfp = profilePictureService.getProfilePictureOfInteractor(
+        interactorId
+      );
       return (
-        "redirect:" +
-        profilePictureService.getProfilePictureOfInteractor(interactorId)
+        "redirect:/media/thumbnail/" +
+        (size == null ? 64 : size) +
+        "/" +
+        pfp.getId()
       );
     } catch (Exception e) {
-      return "redirect:/cdn/default";
+      return "redirect:/cdn/" + defaultImageFile;
     }
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/group/{id}")
-  public String getProfilePictureOfGroup(@PathVariable("id") String idStr) {
+  public String getProfilePictureOfGroup(
+    @PathVariable("id") String idStr,
+    @RequestParam(required = false, name = "size") String size
+  ) {
     try {
       Long groupId = Long.parseLong(idStr);
+      ProfilePicture pfp = profilePictureService.getProfilePictureOfGroup(
+        groupId
+      );
       return (
-        "redirect:" + profilePictureService.getProfilePictureOfGroup(groupId)
+        "redirect:/media/thumbnail/" +
+        (size == null ? 64 : size) +
+        "/" +
+        pfp.getId()
       );
     } catch (Exception e) {
       return "redirect:/cdn/default";
