@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.entity.util;
+package io.github.jmmedina00.adoolting.entity.cache;
 
 import java.io.Serializable;
 import java.util.HashMap;

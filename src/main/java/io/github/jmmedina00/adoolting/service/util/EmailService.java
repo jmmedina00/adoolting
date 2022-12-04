@@ -1,7 +1,7 @@
 package io.github.jmmedina00.adoolting.service.util;
 
-import io.github.jmmedina00.adoolting.entity.util.EmailData;
-import io.github.jmmedina00.adoolting.repository.util.EmailDataRepository;
+import io.github.jmmedina00.adoolting.entity.cache.EmailData;
+import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
