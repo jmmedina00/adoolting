@@ -7,6 +7,7 @@ import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +31,10 @@ public class PersonService implements UserDetailsService {
 
   public Person getPerson(Long personId) {
     return personRepository.findById(personId).orElse(null);
+  }
+
+  public List<Person> getAllActivePersons() {
+    return personRepository.findConfirmedPersons();
   }
 
   public PersonInfo getPersonInfo(Long personId) {
