@@ -72,7 +72,10 @@ public class PrivateMessageService {
     message.setFromPerson(sender);
     message.setToPerson(receiver);
     message.setContents(newMessage.getContents());
-    return messageRepository.save(message);
+    PrivateMessage saved = messageRepository.save(message);
+
+    saveMessageToCache(message);
+    return saved;
   }
 
   public List<PrivateMessage> getLatestMessagesForPerson(Long personId) {
@@ -99,6 +102,42 @@ public class PrivateMessageService {
       .stream()
       .sorted((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()) * -1)
       .toList();
+  }
+
+  private PersonLatestMessages initNewCache(Long personId) {
+    PersonLatestMessages cache = new PersonLatestMessages();
+    cache.setId(personId);
+    cache.setMessages(new HashMap<>());
+    return cache;
+  }
+
+  private void saveMessageToCache(PrivateMessage message) {
+    Long senderId = message.getFromPerson().getId();
+    Long receiverId = message.getToPerson().getId();
+
+    SimpleMessage simpleMessage = new SimpleMessage(message);
+    PersonLatestMessages senderCache = latestMessagesRepository
+      .findById(senderId)
+      .orElse(initNewCache(senderId));
+    PersonLatestMessages receiverCache = latestMessagesRepository
+      .findById(receiverId)
+      .orElse(initNewCache(receiverId));
+
+    HashMap<Long, SimpleMessage> senderMessages = new HashMap<>(
+      senderCache.getMessages()
+    );
+    HashMap<Long, SimpleMessage> receiverMessages = new HashMap<>(
+      receiverCache.getMessages()
+    );
+
+    senderMessages.put(receiverId, simpleMessage);
+    receiverMessages.put(senderId, simpleMessage);
+    senderCache.setMessages(senderMessages);
+    receiverCache.setMessages(receiverMessages);
+
+    senderCache.setUpdatedAt(message.getCreatedAt());
+    receiverCache.setUpdatedAt(message.getCreatedAt());
+    latestMessagesRepository.saveAll(List.of(senderCache, receiverCache));
   }
 
   private void initializePersonCache(
