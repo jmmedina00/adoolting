@@ -12,6 +12,7 @@ import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
+import io.github.jmmedina00.adoolting.service.page.PageLikeService;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class PageController {
   @Autowired
   private PageService pageService;
+
+  @Autowired
+  private PageLikeService likeService;
 
   @Autowired
   private PageManagerService managerService;
@@ -91,6 +95,11 @@ public class PageController {
     }
 
     model.addAttribute("page", page);
+    model.addAttribute("likeCount", likeService.getPageLikes(pageId));
+    model.addAttribute(
+      "givenLike",
+      likeService.getLikeToPageFromPerson(authenticatedPerson.getId(), pageId)
+    );
     model.addAttribute("interactors", controlledInteractors);
     model.addAttribute("posts", interactionService.getInteractions(pageId));
     model.addAttribute("newPost", new NewPostOnPage());
@@ -240,5 +249,24 @@ public class PageController {
     Page page = pageService.createPage(newPage, authenticatedPerson);
 
     return "redirect:/page/" + page.getId();
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{id}/like")
+  public String toggleLikeOnPage(@PathVariable("id") String pageIdStr) {
+    try {
+      Long pageId = Long.parseLong(pageIdStr);
+      Person authenticatedPerson =
+        (
+          (PersonDetails) SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getPrincipal()
+        ).getPerson();
+
+      likeService.toggleLikeToPage(authenticatedPerson.getId(), pageId);
+      return "redirect:/page/" + pageId;
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
   }
 }

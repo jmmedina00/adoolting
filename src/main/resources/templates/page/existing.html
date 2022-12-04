@@ -1,6 +1,18 @@
 <h1 th:text="${page.name}"></h1>
 <p th:text="${page.about}"></p>
 <p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>
+<div>
+  <span>
+    <span th:text="${likeCount}"></span>
+    <span>likes</span>
+  </span>
+  <form th:action="@{/page/{pageId}/like(pageId=${page.id})}" method="post">
+    <button
+      type="submit"
+      th:text="${givenLike == null ? 'Like' : 'Remove like'}"
+    ></button>
+  </form>
+</div>
 <form
   method="post"
   th:object="${newPost}"
