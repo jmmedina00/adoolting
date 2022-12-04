@@ -95,6 +95,10 @@ public class PrivateMessageService {
       .findById(personId)
       .orElse(null);
 
+    if (latest == null) {
+      return new HashMap<>();
+    }
+
     Map<Long, SimpleMessage> messages = latest.getMessages();
     List<Person> persons = personService.getPersons(messages.keySet());
     LinkedHashMap<Person, SimpleMessage> transformed = new LinkedHashMap<>();

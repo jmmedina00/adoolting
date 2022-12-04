@@ -1,4 +1,5 @@
 <h1>Message</h1>
+<p th:if="${messages.size() == 0}">No messages yet</p>
 <p
   th:each="entry : ${messages}"
   class="message"
