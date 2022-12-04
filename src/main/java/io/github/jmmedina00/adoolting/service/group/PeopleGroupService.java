@@ -12,6 +12,10 @@ public class PeopleGroupService {
   @Autowired
   private PeopleGroupRepository groupRepository;
 
+  public PeopleGroup getGroup(Long groupId) {
+    return groupRepository.findById(groupId).orElseThrow();
+  }
+
   public PeopleGroup createGroup(NewGroup newGroup, Person person) {
     PeopleGroup group = new PeopleGroup();
     group.setName(newGroup.getName());
