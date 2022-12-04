@@ -56,13 +56,23 @@ public class PrivateMessageService {
   }
 
   public List<PrivateMessage> getMessagesBetweenPersons(
-    Long firstPersonId,
-    Long secondPersonId
+    Long receiverId,
+    Long senderId
   ) {
-    return messageRepository.findMessagesByPersonIds(
-      firstPersonId,
-      secondPersonId
-    );
+    PersonLatestMessages cache = latestMessagesRepository
+      .findById(receiverId)
+      .orElse(null);
+
+    if (cache != null) {
+      SimpleMessage latest = cache.getMessages().get(senderId);
+
+      if (latest != null) {
+        cache.getMessages().get(senderId).setIsRead(true);
+        latestMessagesRepository.save(cache);
+      }
+    }
+
+    return messageRepository.findMessagesByPersonIds(receiverId, senderId);
   }
 
   public PrivateMessage sendMessageToPerson(
@@ -122,6 +132,7 @@ public class PrivateMessageService {
     Long receiverId = message.getToPerson().getId();
 
     SimpleMessage simpleMessage = new SimpleMessage(message);
+    simpleMessage.setIsRead(false);
     PersonLatestMessages senderCache = latestMessagesRepository
       .findById(senderId)
       .orElse(initNewCache(senderId));

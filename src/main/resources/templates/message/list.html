@@ -1,5 +1,9 @@
 <h1>Message</h1>
-<p th:each="entry : ${messages}">
+<p
+  th:each="entry : ${messages}"
+  class="message"
+  th:classappend="${entry.getValue().isRead ? 'read' : 'unread'}"
+>
   <span th:text="${entry.getKey().getFullName()}"></span>
   <br />
   <span th:text="${entry.getValue().contents}"></span>
