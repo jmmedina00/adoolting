@@ -8,7 +8,9 @@ import io.github.jmmedina00.adoolting.entity.person.PrivateMessage;
 import io.github.jmmedina00.adoolting.repository.cache.PersonLatestMessagesRepository;
 import io.github.jmmedina00.adoolting.repository.person.PrivateMessageRepository;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,30 +80,34 @@ public class PrivateMessageService {
     return saved;
   }
 
-  public List<PrivateMessage> getLatestMessagesForPerson(Long personId) {
-    List<PrivateMessage> all = messageRepository.findMessagesExchangedWithPerson(
-      personId
-    );
-    HashMap<Long, PrivateMessage> firsts = new HashMap<>();
+  public Map<Person, SimpleMessage> getLatestMessagesForPerson(Long personId) {
+    PersonLatestMessages latest = latestMessagesRepository
+      .findById(personId)
+      .orElse(null);
 
-    for (PrivateMessage message : all) {
-      Long interestingPersonId = Objects.equals(
-          message.getFromPerson().getId(),
-          personId
-        )
-        ? message.getToPerson().getId()
-        : message.getFromPerson().getId();
+    Map<Long, SimpleMessage> messages = latest.getMessages();
+    List<Person> persons = personService.getPersons(messages.keySet());
+    LinkedHashMap<Person, SimpleMessage> transformed = new LinkedHashMap<>();
 
-      if (!firsts.containsKey(interestingPersonId)) {
-        firsts.put(interestingPersonId, message);
-      }
-    }
-
-    return firsts
-      .values()
+    messages
+      .entrySet()
       .stream()
-      .sorted((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()) * -1)
-      .toList();
+      .sorted(Map.Entry.comparingByValue())
+      .forEach(
+        entry -> {
+          Person person = persons
+            .stream()
+            .filter(
+              singlePerson ->
+                Objects.equals(singlePerson.getId(), entry.getKey())
+            )
+            .findFirst()
+            .get();
+          transformed.put(person, entry.getValue());
+        }
+      );
+
+    return transformed;
   }
 
   private PersonLatestMessages initNewCache(Long personId) {

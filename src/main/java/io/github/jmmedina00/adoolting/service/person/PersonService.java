@@ -33,6 +33,10 @@ public class PersonService implements UserDetailsService {
     return personRepository.findById(personId).orElse(null);
   }
 
+  public List<Person> getPersons(Iterable<Long> personIds) {
+    return personRepository.findAllById(personIds);
+  }
+
   public List<Person> getAllActivePersons() {
     return personRepository.findConfirmedPersons();
   }
