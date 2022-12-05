@@ -8,6 +8,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class InteractionController {
 
   @Autowired
   private CommentService commentService;
+
+  @Autowired
+  private JoinRequestService joinRequestService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getInteraction(
@@ -56,6 +60,14 @@ public class InteractionController {
       }
     }
 
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
     model.addAttribute("interaction", interaction);
     model.addAttribute(
       "comments",
@@ -64,6 +76,13 @@ public class InteractionController {
     model.addAttribute("newComment", new NewComment());
     if (interaction instanceof PeopleGroup) {
       model.addAttribute("groupPfp", "/pfp/group/" + interactionId);
+      model.addAttribute(
+        "joinRequest",
+        joinRequestService.getJoinRequestForPersonAndGroup(
+          authenticatedPerson.getId(),
+          interactionId
+        )
+      );
     }
 
     return "interaction";

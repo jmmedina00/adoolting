@@ -6,6 +6,57 @@
   </span>
 </h3>
 <img th:if="${groupPfp}" th:src="${groupPfp}" />
+<form
+  th:unless="${groupPfp == null}"
+  th:if="${joinRequest == null || joinRequest.ignoredAt != null}"
+  th:action="@{/group/{id}/join(id=${interaction.id})}"
+  method="post"
+>
+  <button type="submit">Join</button>
+</form>
+<div th:if="${joinRequest}" th:object="${joinRequest}">
+  <span
+    th:if="*{interactor.id} == ${#authentication.principal.person.id}"
+    th:unless="*{confirmedAt} != null"
+  >
+    Pending
+  </span>
+  <div
+    th:if="*{receiverInteractor.id} == ${#authentication.principal.person.id}"
+  >
+    <form
+      th:action="@{/network/{interaction}(interaction=*{id})}"
+      method="post"
+    >
+      <input type="text" name="isAccepted" value="true" style="display: none" />
+      <input
+        type="text"
+        name="goToProfile"
+        value="false"
+        style="display: none"
+      />
+      <button type="submit">Accept</button>
+    </form>
+    <form
+      th:action="@{/network/{interaction}(interaction=*{id})}"
+      method="post"
+    >
+      <input
+        type="text"
+        name="isAccepted"
+        value="false"
+        style="display: none"
+      />
+      <input
+        type="text"
+        name="goToProfile"
+        value="false"
+        style="display: none"
+      />
+      <button type="submit">Ignore</button>
+    </form>
+  </div>
+</div>
 <div
   th:if="${interaction.interactor.id == #authentication.principal.person.id}"
 >
