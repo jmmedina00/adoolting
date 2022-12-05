@@ -15,7 +15,7 @@
     </span>
     <span
       th:unless="${friend.receiverInteractor.id == person.id}"
-      th:text="${friend.interactor.getFullName()}"
+      th:text="${friend.receiverInteractor.getFullName()}"
     >
     </span>
   </li>
