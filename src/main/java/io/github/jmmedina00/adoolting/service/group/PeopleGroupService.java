@@ -1,7 +1,9 @@
 package io.github.jmmedina00.adoolting.service.group;
 
+import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
@@ -28,6 +30,23 @@ public class PeopleGroupService {
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
     return groupRepository.save(group);
+  }
+
+  public NewGroup getGroupForm(Long groupId) {
+    PeopleGroup group = getGroup(groupId);
+    NewGroup form = new NewGroup();
+
+    if (group instanceof Event) {
+      NewEvent eventForm = new NewEvent();
+      eventForm.setLocation(((Event) group).getLocation());
+      // Datetime: only when view supports it
+      form = eventForm;
+    }
+
+    form.setDescription(group.getDescription());
+    form.setName(group.getName());
+
+    return form;
   }
 
   public boolean isGroupManagedByPerson(Long groupId, Long personId) {

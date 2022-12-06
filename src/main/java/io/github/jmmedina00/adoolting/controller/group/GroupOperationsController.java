@@ -42,6 +42,7 @@ public class GroupOperationsController {
       "cInteractions",
       joinRequestService.getExistingForGroup(groupId)
     );
+    model.addAttribute("form", groupService.getGroupForm(groupId));
     return "group-manage";
   }
 
