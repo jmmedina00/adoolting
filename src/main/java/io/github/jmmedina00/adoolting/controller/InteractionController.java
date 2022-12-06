@@ -141,7 +141,10 @@ public class InteractionController {
       ).getPerson();
 
     try {
-      interactionService.deleteInteraction(interactionId, authenticatedPerson);
+      interactionService.deleteInteraction(
+        interactionId,
+        authenticatedPerson.getId()
+      );
     } catch (NotAuthorizedException e) {
       return "redirect:/home?notfound";
     }

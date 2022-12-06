@@ -1,12 +1,12 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,19 +30,21 @@ public class InteractionService {
     return interactionRepository.findInteractionsByInteractorId(interactorId);
   }
 
-  public void deleteInteraction(
-    Long interactionId,
-    Interactor creatorInteractor
-  )
+  public void deleteInteraction(Long interactionId, Long interactorId)
     throws NotAuthorizedException {
     Interaction interaction = interactionRepository
       .findById(interactionId)
       .orElseThrow(() -> new NotAuthorizedException());
 
+    Long creatorId = interaction.getInteractor().getId();
+    Long receiverId = Optional
+      .of(interaction.getReceiverInteractor().getId())
+      .orElse(0L);
+
     if (
-      !Objects.equals(
-        creatorInteractor.getId(),
-        interaction.getInteractor().getId()
+      !(
+        Objects.equals(interactorId, creatorId) ||
+        Objects.equals(interactorId, receiverId)
       )
     ) {
       throw new NotAuthorizedException();
