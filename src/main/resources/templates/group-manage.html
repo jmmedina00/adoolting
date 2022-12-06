@@ -82,7 +82,7 @@
 
 <form
   th:object="${form}"
-  th:action="@{/group/{id}(id=${group.id})}"
+  th:action="${form.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'} ? @{/event/{id}(id=${group.id})} : @{/group/{id}(id=${group.id})}"
   th:method="post"
 >
   <div>

@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -55,6 +56,52 @@ public class EventController {
 
     Event event = eventService.createEvent(newEvent, authenticatedPerson);
     return "redirect:/interaction/" + event.getId();
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{id}")
+  public String updateEventInfo(
+    @PathVariable("id") String eventIdStr,
+    @ModelAttribute("form") @Valid NewEvent newEvent,
+    BindingResult result,
+    RedirectAttributes attributes
+  ) {
+    Long eventId;
+
+    try {
+      eventId = Long.parseLong(eventIdStr);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    if (result.hasErrors()) {
+      attributes.addFlashAttribute(
+        "org.springframework.validation.BindingResult.form",
+        result
+      );
+      attributes.addFlashAttribute("form", newEvent);
+      return "redirect:/group/" + eventId;
+    }
+
+    if (isDateBeforeThreshold(newEvent.getFinalizedDate())) {
+      attributes.addFlashAttribute("newGroup", newEvent);
+      return "redirect:/group?event&badtime";
+    }
+
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    try {
+      eventService.updateEvent(eventId, authenticatedPerson.getId(), newEvent);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
+
+    return "redirect:/interaction/" + eventId;
   }
 
   private boolean isDateBeforeThreshold(Date date) {

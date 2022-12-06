@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import java.util.Objects;
@@ -29,6 +30,22 @@ public class PeopleGroupService {
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
+    return groupRepository.save(group);
+  }
+
+  public PeopleGroup updateGroup(
+    Long groupId,
+    Long personId,
+    NewGroup newGroup
+  )
+    throws NotAuthorizedException {
+    if (!isGroupManagedByPerson(groupId, personId)) {
+      throw new NotAuthorizedException();
+    }
+
+    PeopleGroup group = getGroup(groupId);
+    group.setName(newGroup.getName());
+    group.setDescription(newGroup.getDescription());
     return groupRepository.save(group);
   }
 
