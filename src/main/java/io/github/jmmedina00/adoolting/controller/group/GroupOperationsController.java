@@ -42,6 +42,20 @@ public class GroupOperationsController {
       return "redirect:/home?notfound";
     }
 
+    Person authenticatedPerson =
+      (
+        (PersonDetails) SecurityContextHolder
+          .getContext()
+          .getAuthentication()
+          .getPrincipal()
+      ).getPerson();
+
+    if (
+      !groupService.isGroupManagedByPerson(groupId, authenticatedPerson.getId())
+    ) {
+      return "redirect:/home?notfound";
+    }
+
     model.addAttribute("group", group);
     model.addAttribute(
       "cInteractions",
