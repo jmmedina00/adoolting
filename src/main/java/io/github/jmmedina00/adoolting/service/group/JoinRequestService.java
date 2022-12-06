@@ -7,8 +7,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
 import io.github.jmmedina00.adoolting.service.InteractorService;
-import java.util.Date;
-import java.util.Objects;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +30,10 @@ public class JoinRequestService {
       personId,
       groupId
     );
+  }
+
+  public List<JoinRequest> getExistingForGroup(Long groupId) {
+    return joinRequestRepository.findExistingForGroup(groupId);
   }
 
   public JoinRequest joinGroup(Long personId, Long groupId)
@@ -76,30 +79,6 @@ public class JoinRequestService {
 
     PeopleGroup group = groupService.getGroup(groupId);
     return createJoinRequest(host, invited, group);
-  }
-
-  public JoinRequest deleteJoinRequest(Long joinRequestId, Long personId)
-    throws NotAuthorizedException {
-    JoinRequest joinRequest = joinRequestRepository
-      .findById(joinRequestId)
-      .orElseThrow();
-
-    boolean isAllowedToProceed =
-      (
-        Objects.equals(joinRequest.getInteractor().getId(), personId) ||
-        Objects.equals(joinRequest.getReceiverInteractor().getId(), personId) ||
-        groupService.isGroupManagedByPerson(
-          joinRequest.getGroup().getId(),
-          personId
-        )
-      );
-
-    if (!isAllowedToProceed) {
-      throw new NotAuthorizedException();
-    }
-
-    joinRequest.setDeletedAt(new Date());
-    return joinRequestRepository.save(joinRequest);
   }
 
   private JoinRequest createJoinRequest(

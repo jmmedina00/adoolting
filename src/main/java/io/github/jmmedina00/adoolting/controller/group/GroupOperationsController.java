@@ -38,6 +38,10 @@ public class GroupOperationsController {
     }
 
     model.addAttribute("group", group);
+    model.addAttribute(
+      "cInteractions",
+      joinRequestService.getExistingForGroup(groupId)
+    );
     return "group-manage";
   }
 

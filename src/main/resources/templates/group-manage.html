@@ -1,3 +1,81 @@
 <h1 th:text="${group.name}"></h1>
 <p>Created by: <span th:text="${group.interactor.getFullName()}"></span></p>
 <p th:text="${group.class.name}"></p>
+
+<h3>Pending</h3>
+<ul>
+  <li
+    th:each="interaction : ${cInteractions}"
+    th:if="${interaction.confirmedAt == null}"
+    th:object="${interaction}"
+  >
+    <span th:if="*{interactor.id} == ${group.interactor.id}">
+      <span th:text="*{receiverInteractor.getFullName()}"></span>
+      Pending
+    </span>
+    <span th:if="*{receiverInteractor.id} == ${group.interactor.id}">
+      <span th:text="*{interactor.getFullName()}"></span>
+      <form
+        th:action="@{/network/{interaction}(interaction=*{id})}"
+        method="post"
+      >
+        <input
+          type="text"
+          name="isAccepted"
+          value="true"
+          style="display: none"
+        />
+        <input
+          type="text"
+          name="goToProfile"
+          value="false"
+          style="display: none"
+        />
+        <button type="submit">Accept</button>
+      </form>
+      <form
+        th:action="@{/network/{interaction}(interaction=*{id})}"
+        method="post"
+      >
+        <input
+          type="text"
+          name="isAccepted"
+          value="false"
+          style="display: none"
+        />
+        <input
+          type="text"
+          name="goToProfile"
+          value="false"
+          style="display: none"
+        />
+        <button type="submit">Ignore</button>
+      </form>
+    </span>
+    <span th:text="${group.interactor.id}"></span>
+  </li>
+</ul>
+
+<h3>Members</h3>
+<ul>
+  <li
+    th:each="interaction : ${cInteractions}"
+    th:unless="${interaction.confirmedAt == null}"
+    th:object="${interaction}"
+  >
+    <span
+      th:unless="*{interactor.id} == ${group.interactor.id}"
+      th:text="*{interactor.getFullName()}"
+    >
+    </span>
+    <span
+      th:unless="*{receiverInteractor.id} == ${group.interactor.id}"
+      th:text="*{receiverInteractor.getFullName()}"
+    >
+    </span>
+    <span th:text="*{id}"></span>
+    <form th:action="@{/interaction/{id}/delete(id=*{id})}" method="post">
+      <button type="submit">Delete</button>
+    </form>
+  </li>
+</ul>
