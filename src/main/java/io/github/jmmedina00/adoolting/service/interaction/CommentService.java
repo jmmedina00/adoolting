@@ -4,7 +4,10 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +21,25 @@ public class CommentService {
   @Autowired
   private MediumService mediumService;
 
+  @Autowired
+  private InteractorService interactorService;
+
+  @Autowired
+  private InteractionService interactionService;
+
   public List<Comment> getCommentsFromInteraction(Long interactionId) {
     return commentRepository.findByReceiverInteractionId(interactionId);
   }
 
   public Comment createComment(
     NewComment newComment,
-    Interactor interactor,
-    Interaction interaction
-  ) {
+    Long interactorId,
+    Long interactionId
+  )
+    throws NotAuthorizedException {
+    Interactor interactor = interactorService.getInteractor(interactorId);
+    Interaction interaction = interactionService.getInteraction(interactionId);
+
     Comment comment = new Comment();
     comment.setContent(newComment.getContent());
     comment.setInteractor(interactor);

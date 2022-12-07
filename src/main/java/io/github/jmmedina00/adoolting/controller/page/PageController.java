@@ -119,17 +119,12 @@ public class PageController {
       return "redirect:/home?notfound";
     }
 
-    Page page = pageService.getPage(pageId);
-    if (page == null) {
-      return "redirect:/home?notfound";
-    }
-
     if (result.hasErrors()) {
       return "redirect:/page/" + pageId + "?error";
     }
 
     try {
-      Post post = postService.postOnPage(newPost, page);
+      Post post = postService.postOnPage(newPost, pageId);
       return "redirect:/page/" + pageId + "?post=" + post.getId();
     } catch (Exception e) {
       return "redirect:/page/" + pageId + "?error";

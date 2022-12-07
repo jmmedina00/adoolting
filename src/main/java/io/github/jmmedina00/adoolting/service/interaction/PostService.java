@@ -5,6 +5,8 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
+import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.PostRepository;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
@@ -23,16 +25,14 @@ public class PostService {
   @Autowired
   private InteractorService interactorService;
 
-  public Post postOnPage(NewPostOnPage newPost, Page page) throws Exception {
-    Interactor interactor = interactorService.getInteractor(
-      newPost.getPostAs()
-    );
-    return Objects.equals(interactor.getId(), page.getId())
-      ? createPost(page, newPost)
-      : postOnProfile(interactor, page, newPost);
+  public Post postOnPage(NewPostOnPage newPost, Long pageId)
+    throws NotAuthorizedException {
+    return postOnProfile(newPost.getPostAs(), pageId, newPost);
   }
 
-  public Post createPost(Interactor interactor, NewPost newPost) {
+  public Post createPost(Long interactorId, NewPost newPost) {
+    Interactor interactor = interactorService.getInteractor(interactorId);
+
     Post post = new Post();
     post.setInteractor(interactor);
     post.setContent(newPost.getContents().trim());
@@ -42,10 +42,24 @@ public class PostService {
   }
 
   public Post postOnProfile(
-    Interactor interactor,
-    Interactor receiverInteractor,
+    Long interactorId,
+    Long receiverInteractorId,
     NewPost newPost
-  ) {
+  )
+    throws NotAuthorizedException {
+    if (Objects.equals(interactorId, receiverInteractorId)) {
+      return createPost(interactorId, newPost);
+    }
+
+    Interactor interactor = interactorService.getInteractor(interactorId);
+    Interactor receiverInteractor = interactorService.getInteractor(
+      receiverInteractorId
+    );
+
+    if (interactor instanceof Page && receiverInteractor instanceof Person) {
+      throw new NotAuthorizedException();
+    }
+
     Post post = new Post();
     post.setInteractor(interactor);
     post.setReceiverInteractor(receiverInteractor);

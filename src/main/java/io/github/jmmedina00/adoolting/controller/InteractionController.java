@@ -113,14 +113,18 @@ public class InteractionController {
           .getPrincipal()
       ).getPerson();
 
-    Comment comment = commentService.createComment(
-      newComment,
-      authenticatedPerson,
-      interactionService.getInteractionReference(interactionId)
-    );
-    return (
-      "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()
-    );
+    try {
+      Comment comment = commentService.createComment(
+        newComment,
+        authenticatedPerson.getId(),
+        interactionId
+      );
+      return (
+        "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()
+      );
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")

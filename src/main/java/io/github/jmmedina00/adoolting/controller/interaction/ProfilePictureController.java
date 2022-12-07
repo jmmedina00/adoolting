@@ -1,17 +1,10 @@
 package io.github.jmmedina00.adoolting.controller.interaction;
 
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
-import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
-import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
-import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
-import io.github.jmmedina00.adoolting.service.InteractionService;
-import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
-import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +23,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 public class ProfilePictureController {
   @Autowired
   private ProfilePictureService profilePictureService;
-
-  @Autowired
-  private InteractionService interactionService;
-
-  @Autowired
-  private InteractorService interactorService;
 
   @Value("${DEFAULT_IMAGE}")
   private String defaultImageFile;
@@ -107,33 +94,16 @@ public class ProfilePictureController {
           .getPrincipal()
       ).getPerson();
 
-    Interactor interactor = interactorService.getInteractor(interactorId);
-
-    if (
-      interactor instanceof Person &&
-      !Objects.equals(interactor.getId(), authenticatedPerson.getId())
-    ) {
+    try {
+      ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
+        interactorId,
+        authenticatedPerson.getId(),
+        pfp
+      );
+      return ("redirect:/interaction/" + saved.getInteraction().getId());
+    } catch (Exception e) {
       return "redirect:/home?notfound";
     }
-
-    if (interactor instanceof Page) {
-      Page page = (Page) interactor;
-      if (
-        !Objects.equals(
-          page.getCreatedByPerson().getId(),
-          authenticatedPerson.getId()
-        )
-      ) {
-        return "redirect:/home?notfound";
-      }
-    }
-
-    profilePictureService.setProfilePictureOfInteractor(interactor, pfp);
-
-    return (
-      "redirect:/" +
-      ((interactor instanceof Page) ? ("page/" + interactorId) : "profile")
-    );
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/group/{id}")
@@ -161,46 +131,15 @@ public class ProfilePictureController {
           .getPrincipal()
       ).getPerson();
 
-    Interaction interaction;
     try {
-      interaction = interactionService.getInteraction(groupId);
+      profilePictureService.setProfilePictureOfGroup(
+        groupId,
+        authenticatedPerson.getId(),
+        pfp
+      );
+      return "redirect:/interaction/" + groupId;
     } catch (Exception e) {
       return "redirect:/home?notfound";
     }
-
-    if (!(interaction instanceof PeopleGroup)) {
-      System.out.println("Not a group");
-      return "redirect:/home?notfound";
-    }
-
-    PeopleGroup group = (PeopleGroup) interaction;
-    Interactor owner = group.getInteractor();
-
-    if (
-      owner instanceof Person &&
-      !Objects.equals(owner.getId(), authenticatedPerson.getId())
-    ) {
-      return "redirect:/home?notfound";
-    }
-
-    if (owner instanceof Page) {
-      Page page = (Page) owner;
-
-      if (
-        !Objects.equals(
-          page.getCreatedByPerson().getId(),
-          authenticatedPerson.getId()
-        )
-      ) {
-        return "redirect:/home?notfound";
-      }
-    }
-
-    profilePictureService.setProfilePictureOfGroup(
-      group,
-      authenticatedPerson,
-      pfp
-    );
-    return "redirect:/interaction/" + groupId;
   }
 }

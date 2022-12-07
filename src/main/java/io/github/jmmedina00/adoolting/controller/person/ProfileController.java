@@ -130,7 +130,6 @@ public class ProfileController {
       return "redirect:/profile/" + personId + "?error";
     }
 
-    Person personFromProfile = personService.getPerson(personId);
     Person authenticatedPerson =
       (
         (PersonDetails) SecurityContextHolder
@@ -139,21 +138,15 @@ public class ProfileController {
           .getPrincipal()
       ).getPerson();
 
-    Post savedPost;
-
-    if (
-      Objects.equals(personFromProfile.getId(), authenticatedPerson.getId())
-    ) {
-      savedPost = postService.createPost(authenticatedPerson, newPost);
-    } else {
-      savedPost =
-        postService.postOnProfile(
-          authenticatedPerson,
-          personFromProfile,
-          newPost
-        );
+    try {
+      Post savedPost = postService.postOnProfile(
+        authenticatedPerson.getId(),
+        personId,
+        newPost
+      );
+      return "redirect:/profile/" + personId + "?post=" + savedPost.getId();
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
     }
-
-    return "redirect:/profile/" + personId + "?post=" + savedPost.getId();
   }
 }
