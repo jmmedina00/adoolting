@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.service;
 
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
@@ -15,10 +16,24 @@ public class InteractionService {
   @Autowired
   private InteractionRepository interactionRepository;
 
-  public Interaction getInteraction(Long interactionId) {
+  public Interaction getInteraction(Long interactionId)
+    throws NotAuthorizedException {
     Interaction interaction = interactionRepository
       .findById(interactionId)
       .orElseThrow();
+
+    if (interaction.getDeletedAt() != null) {
+      throw new NotAuthorizedException();
+    }
+
+    if (interaction instanceof ConfirmableInteraction) {
+      ConfirmableInteraction cInteraction = (ConfirmableInteraction) interaction;
+
+      if (cInteraction.getConfirmedAt() == null) {
+        throw new NotAuthorizedException();
+      }
+    }
+
     return interaction;
   }
 

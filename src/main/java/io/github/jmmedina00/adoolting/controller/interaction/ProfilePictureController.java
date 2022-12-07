@@ -161,7 +161,12 @@ public class ProfilePictureController {
           .getPrincipal()
       ).getPerson();
 
-    Interaction interaction = interactionService.getInteraction(groupId);
+    Interaction interaction;
+    try {
+      interaction = interactionService.getInteraction(groupId);
+    } catch (Exception e) {
+      return "redirect:/home?notfound";
+    }
 
     if (!(interaction instanceof PeopleGroup)) {
       System.out.println("Not a group");
