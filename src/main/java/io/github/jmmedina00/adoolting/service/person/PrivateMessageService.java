@@ -76,10 +76,13 @@ public class PrivateMessageService {
   }
 
   public PrivateMessage sendMessageToPerson(
-    Person sender,
-    Person receiver,
+    Long senderId,
+    Long receiverId,
     NewMessage newMessage
   ) {
+    Person sender = personService.getPerson(senderId);
+    Person receiver = personService.getPerson(receiverId);
+
     PrivateMessage message = new PrivateMessage();
     message.setFromPerson(sender);
     message.setToPerson(receiver);

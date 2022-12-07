@@ -107,12 +107,15 @@ public class MessageController {
           .getPrincipal()
       ).getPerson();
 
-    Person person = personService.getPerson(personId);
-    if (Objects.equals(person.getId(), authenticatedPerson.getId())) {
+    if (Objects.equals(personId, authenticatedPerson.getId())) {
       return "redirect:/message";
     }
 
-    messageService.sendMessageToPerson(authenticatedPerson, person, newMessage);
+    messageService.sendMessageToPerson(
+      authenticatedPerson.getId(),
+      personId,
+      newMessage
+    );
     return "redirect:/message/" + personId + "?success";
   }
 }
