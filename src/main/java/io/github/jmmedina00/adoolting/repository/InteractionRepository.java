@@ -9,7 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 public interface InteractionRepository
   extends JpaRepository<Interaction, Long> {
   @Query(
-    "SELECT i FROM Interaction i WHERE (i.interactor.id=:interactorId OR i.receiverInteractor.id=:interactorId) AND i.deletedAt IS NULL"
+    "SELECT i FROM Interaction i WHERE " +
+    "(i.interactor.id=:interactorId OR i.receiverInteractor.id=:interactorId) " +
+    "AND i.deletedAt IS NULL AND i.id NOT IN " +
+    "(SELECT c.id FROM ConfirmableInteraction c WHERE c.confirmedAt IS NULL)"
   )
   List<Interaction> findInteractionsByInteractorId(
     @Param("interactorId") Long interactorId
