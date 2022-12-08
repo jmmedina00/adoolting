@@ -1,14 +1,12 @@
 package io.github.jmmedina00.adoolting.controller.person;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.person.NewMessage;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.person.PrivateMessageService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,17 +26,11 @@ public class MessageController {
 
   @RequestMapping(method = RequestMethod.GET)
   public String getRecentMessagesList(Model model) {
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     model.addAttribute(
       "messages",
-      messageService.getLatestMessagesForPerson(authenticatedPerson.getId())
+      messageService.getLatestMessagesForPerson(
+        AuthenticatedPerson.getPersonId()
+      )
     );
     return "message/list";
   }
@@ -56,26 +48,15 @@ public class MessageController {
       return "redirect:/home?notfound";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
-    Person person = personService.getPerson(personId);
-    if (Objects.equals(person.getId(), authenticatedPerson.getId())) {
+    Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
+    if (Objects.equals(personId, authenticatedPersonId)) {
       return "redirect:/message";
     }
 
-    model.addAttribute("person", person);
+    model.addAttribute("person", personService.getPerson(personId));
     model.addAttribute(
       "messages",
-      messageService.getMessagesBetweenPersons(
-        authenticatedPerson.getId(),
-        person.getId()
-      )
+      messageService.getMessagesBetweenPersons(authenticatedPersonId, personId)
     );
     model.addAttribute("newMessage", new NewMessage());
     return "message/conversation";
@@ -99,20 +80,14 @@ public class MessageController {
       return "redirect:/message/" + personId + "?error";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
+    Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
 
-    if (Objects.equals(personId, authenticatedPerson.getId())) {
+    if (Objects.equals(personId, authenticatedPersonId)) {
       return "redirect:/message";
     }
 
     messageService.sendMessageToPerson(
-      authenticatedPerson.getId(),
+      authenticatedPersonId,
       personId,
       newMessage
     );

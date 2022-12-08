@@ -1,18 +1,14 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.InteractionConfirmation;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,38 +31,22 @@ public class ConfirmableInteractionController {
     @Valid InteractionConfirmation confirmation,
     @PathVariable("interactionId") String interactionIdStr
   ) {
-    Long interactionId;
-
     try {
-      interactionId = Long.parseLong(interactionIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+      Long interactionId = Long.parseLong(interactionIdStr);
+      ConfirmableInteraction interaction = cInteractionService.decideInteractionResult(
+        interactionId,
+        AuthenticatedPerson.getPersonId(),
+        confirmation.getIsAccepted()
+      );
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
-    ConfirmableInteraction interaction;
-
-    try {
-      interaction =
-        cInteractionService.decideInteractionResult(
-          interactionId,
-          authenticatedPerson.getId(),
-          confirmation.getIsAccepted()
-        );
+      return (!confirmation.getGoToProfile())
+        ? "redirect:/network"
+        : "redirect:/profile/" +
+        interaction.getInteractor().getId() +
+        "?success";
     } catch (NotAuthorizedException e) {
       return "redirect:/home?notfound";
     }
-
-    return (!confirmation.getGoToProfile())
-      ? "redirect:/network"
-      : "redirect:/profile/" + interaction.getInteractor().getId() + "?success";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -75,17 +55,9 @@ public class ConfirmableInteractionController {
       "cInteraction"
     ) @Valid NewConfirmableInteraction nConfirmableInteraction
   ) {
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
       cInteractionService.addPersonAsFriend(
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         nConfirmableInteraction.getPersonId()
       );
     } catch (InvalidDTOException e) {
@@ -97,20 +69,12 @@ public class ConfirmableInteractionController {
 
   @RequestMapping(method = RequestMethod.GET)
   public String getPendingConfirmableInteractions(Model model) {
-    Authentication authentication = SecurityContextHolder
-      .getContext()
-      .getAuthentication();
-
-    if (authentication instanceof AnonymousAuthenticationToken) {
-      return "redirect:/";
-    }
-
-    Person person = ((PersonDetails) authentication.getPrincipal()).getPerson();
     model.addAttribute(
       "interactions",
-      cInteractionService.getPendingInteractionsForPerson(person.getId())
+      cInteractionService.getPendingInteractionsForPerson(
+        AuthenticatedPerson.getPersonId()
+      )
     );
-
     return "network";
   }
 }

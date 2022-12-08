@@ -1,14 +1,12 @@
 package io.github.jmmedina00.adoolting.controller.group;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,16 +40,11 @@ public class GroupOperationsController {
       return "redirect:/home?notfound";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     if (
-      !groupService.isGroupManagedByPerson(groupId, authenticatedPerson.getId())
+      !groupService.isGroupManagedByPerson(
+        groupId,
+        AuthenticatedPerson.getPersonId()
+      )
     ) {
       return "redirect:/home?notfound";
     }
@@ -91,16 +84,12 @@ public class GroupOperationsController {
       return "redirect:/group/" + groupId;
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
-      groupService.updateGroup(groupId, authenticatedPerson.getId(), newGroup);
+      groupService.updateGroup(
+        groupId,
+        AuthenticatedPerson.getPersonId(),
+        newGroup
+      );
     } catch (Exception e) {
       return "redirect:/home?notfound";
     }
@@ -110,19 +99,9 @@ public class GroupOperationsController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/join")
   public String requestToJoinGroup(@PathVariable("id") String groupIdStr) {
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
-    Long groupId;
-
     try {
-      groupId = Long.parseLong(groupIdStr);
-      joinRequestService.joinGroup(authenticatedPerson.getId(), groupId);
+      Long groupId = Long.parseLong(groupIdStr);
+      joinRequestService.joinGroup(AuthenticatedPerson.getPersonId(), groupId);
       return "redirect:/interaction/" + groupIdStr;
     } catch (Exception e) {
       return "redirect:/home?notfound";
@@ -134,28 +113,18 @@ public class GroupOperationsController {
     @PathVariable("id") String groupIdStr,
     @PathVariable("personId") String personIdStr
   ) {
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
-    Long groupId, personId;
-
     try {
-      personId = Long.parseLong(personIdStr);
-      groupId = Long.parseLong(groupIdStr);
+      Long personId = Long.parseLong(personIdStr);
+      Long groupId = Long.parseLong(groupIdStr);
       joinRequestService.inviteToGroup(
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         personId,
         groupId
       );
+
+      return "redirect:/profile/" + personId;
     } catch (Exception e) {
       return "redirect:/home?notfound";
     }
-
-    return "redirect:/profile/" + personId;
   }
 }

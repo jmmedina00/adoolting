@@ -1,18 +1,16 @@
 package io.github.jmmedina00.adoolting.controller;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -60,14 +58,6 @@ public class InteractionController {
       }
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     model.addAttribute("interaction", interaction);
     model.addAttribute(
       "comments",
@@ -79,7 +69,7 @@ public class InteractionController {
       model.addAttribute(
         "joinRequest",
         joinRequestService.getJoinRequestForPersonAndGroup(
-          authenticatedPerson.getId(),
+          AuthenticatedPerson.getPersonId(),
           interactionId
         )
       );
@@ -105,18 +95,10 @@ public class InteractionController {
       return "redirect:/interaction/" + interactionId + "?error";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
       Comment comment = commentService.createComment(
         newComment,
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         interactionId
       );
       return (
@@ -136,23 +118,14 @@ public class InteractionController {
       return "redirect:/home?notfound";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
+    Long personId = AuthenticatedPerson.getPersonId();
 
     try {
-      interactionService.deleteInteraction(
-        interactionId,
-        authenticatedPerson.getId()
-      );
+      interactionService.deleteInteraction(interactionId, personId);
     } catch (NotAuthorizedException e) {
       return "redirect:/home?notfound";
     }
 
-    return "redirect:/profile/" + authenticatedPerson.getId() + "?success";
+    return "redirect:/profile/" + personId + "?success";
   }
 }

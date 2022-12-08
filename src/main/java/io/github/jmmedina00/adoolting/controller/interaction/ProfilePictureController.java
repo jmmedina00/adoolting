@@ -1,14 +1,12 @@
 package io.github.jmmedina00.adoolting.controller.interaction;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -86,18 +84,10 @@ public class ProfilePictureController {
       throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
       ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
         interactorId,
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         pfp
       );
       return ("redirect:/interaction/" + saved.getInteraction().getId());
@@ -123,18 +113,10 @@ public class ProfilePictureController {
       throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
       profilePictureService.setProfilePictureOfGroup(
         groupId,
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         pfp
       );
       return "redirect:/interaction/" + groupId;

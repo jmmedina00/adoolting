@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.controller.person;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
@@ -13,9 +14,6 @@ import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -44,18 +42,7 @@ public class ProfileController {
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
-    Authentication authentication = SecurityContextHolder
-      .getContext()
-      .getAuthentication();
-
-    if (authentication instanceof AnonymousAuthenticationToken) {
-      return "redirect:/";
-    }
-
-    Long personId =
-      ((PersonDetails) authentication.getPrincipal()).getPerson().getId();
-
-    return "redirect:/profile/" + personId;
+    return "redirect:/profile/" + AuthenticatedPerson.getPersonId();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
@@ -71,13 +58,7 @@ public class ProfileController {
       return "redirect:/home?notfound";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
+    Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
     Person person = personService.getPerson(personId);
 
     if (person == null) {
@@ -91,7 +72,7 @@ public class ProfileController {
 
     NewConfirmableInteraction cInteraction = new NewConfirmableInteraction();
 
-    if (!Objects.equals(authenticatedPerson.getId(), person.getId())) {
+    if (!Objects.equals(authenticatedPersonId, personId)) {
       cInteraction.setPersonId(personId);
     }
 
@@ -99,10 +80,7 @@ public class ProfileController {
     model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "friendship",
-      cInteractionService.getPersonFriendship(
-        authenticatedPerson.getId(),
-        personId
-      )
+      cInteractionService.getPersonFriendship(authenticatedPersonId, personId)
     );
     model.addAttribute(
       "friends",
@@ -136,17 +114,9 @@ public class ProfileController {
       return "redirect:/profile/" + personId + "?error";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
       Post savedPost = postService.postOnProfile(
-        authenticatedPerson.getId(),
+        AuthenticatedPerson.getPersonId(),
         personId,
         newPost
       );

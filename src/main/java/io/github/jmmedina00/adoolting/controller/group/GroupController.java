@@ -1,14 +1,12 @@
 package io.github.jmmedina00.adoolting.controller.group;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,17 +52,9 @@ public class GroupController {
       return "redirect:/group";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     PeopleGroup group = groupService.createGroup(
       newGroup,
-      authenticatedPerson.getId()
+      AuthenticatedPerson.getPersonId()
     );
     return "redirect:/interaction/" + group.getId();
   }

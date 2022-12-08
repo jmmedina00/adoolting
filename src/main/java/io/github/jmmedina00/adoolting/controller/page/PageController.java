@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.controller.page;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
@@ -7,7 +8,6 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -77,32 +76,23 @@ public class PageController {
       return "redirect:/home?notfound";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
+    Person person = AuthenticatedPerson.getPerson();
+    Long personId = person.getId();
 
     List<Interactor> controlledInteractors;
-    if (
-      pageService.isPageManagedByPerson(pageId, authenticatedPerson.getId())
-    ) {
-      controlledInteractors = List.of(authenticatedPerson, page);
+    if (pageService.isPageManagedByPerson(pageId, personId)) {
+      controlledInteractors = List.of(person, page);
     } else {
       controlledInteractors =
-        new ArrayList<>(
-          pageService.getAllPersonPages(authenticatedPerson.getId())
-        );
-      controlledInteractors.add(0, authenticatedPerson);
+        new ArrayList<>(pageService.getAllPersonPages(personId));
+      controlledInteractors.add(0, person);
     }
 
     model.addAttribute("page", page);
     model.addAttribute("likeCount", likeService.getPageLikes(pageId));
     model.addAttribute(
       "givenLike",
-      likeService.getLikeToPageFromPerson(authenticatedPerson.getId(), pageId)
+      likeService.getLikeToPageFromPerson(person.getId(), pageId)
     );
     model.addAttribute("interactors", controlledInteractors);
     model.addAttribute("posts", interactionService.getInteractions(pageId));
@@ -147,21 +137,12 @@ public class PageController {
       return "redirect:/home?notfound";
     }
 
+    Long personId = AuthenticatedPerson.getPersonId();
     Page page = pageService.getPage(pageId);
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
 
     if (
       page == null ||
-      !Objects.equals(
-        page.getCreatedByPerson().getId(),
-        authenticatedPerson.getId()
-      )
+      !Objects.equals(page.getCreatedByPerson().getId(), personId)
     ) {
       return "redirect:/home?notfound";
     }
@@ -171,7 +152,7 @@ public class PageController {
     model.addAttribute("managers", pageService.getPageManagers(pageId));
     model.addAttribute(
       "friends",
-      cInteractionService.getPersonFriends(authenticatedPerson.getId())
+      cInteractionService.getPersonFriends(personId)
     );
     return "page/manage";
   }
@@ -194,19 +175,13 @@ public class PageController {
     }
 
     Page page = pageService.getPage(pageId);
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
 
+    // TODO: security checks to service
     if (
       page == null ||
       !Objects.equals(
         page.getCreatedByPerson().getId(),
-        authenticatedPerson.getId()
+        AuthenticatedPerson.getPersonId()
       )
     ) {
       return "redirect:/home?notfound";
@@ -237,16 +212,10 @@ public class PageController {
       return "redirect:/page";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
-    Page page = pageService.createPage(newPage, authenticatedPerson.getId());
-
+    Page page = pageService.createPage(
+      newPage,
+      AuthenticatedPerson.getPersonId()
+    );
     return "redirect:/page/" + page.getId();
   }
 
@@ -254,15 +223,7 @@ public class PageController {
   public String toggleLikeOnPage(@PathVariable("id") String pageIdStr) {
     try {
       Long pageId = Long.parseLong(pageIdStr);
-      Person authenticatedPerson =
-        (
-          (PersonDetails) SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getPrincipal()
-        ).getPerson();
-
-      likeService.toggleLikeToPage(authenticatedPerson.getId(), pageId);
+      likeService.toggleLikeToPage(AuthenticatedPerson.getPersonId(), pageId);
       return "redirect:/page/" + pageId;
     } catch (Exception e) {
       return "redirect:/home?notfound";

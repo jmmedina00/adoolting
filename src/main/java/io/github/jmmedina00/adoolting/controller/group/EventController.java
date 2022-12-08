@@ -1,15 +1,13 @@
 package io.github.jmmedina00.adoolting.controller.group;
 
+import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.entity.group.Event;
-import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.service.group.EventService;
 import java.util.Calendar;
 import java.util.Date;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -46,17 +44,9 @@ public class EventController {
       return "redirect:/group?event&badtime";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     Event event = eventService.createEvent(
       newEvent,
-      authenticatedPerson.getId()
+      AuthenticatedPerson.getPersonId()
     );
     return "redirect:/interaction/" + event.getId();
   }
@@ -90,16 +80,12 @@ public class EventController {
       return "redirect:/group?event&badtime";
     }
 
-    Person authenticatedPerson =
-      (
-        (PersonDetails) SecurityContextHolder
-          .getContext()
-          .getAuthentication()
-          .getPrincipal()
-      ).getPerson();
-
     try {
-      eventService.updateEvent(eventId, authenticatedPerson.getId(), newEvent);
+      eventService.updateEvent(
+        eventId,
+        AuthenticatedPerson.getPersonId(),
+        newEvent
+      );
     } catch (Exception e) {
       return "redirect:/home?notfound";
     }
