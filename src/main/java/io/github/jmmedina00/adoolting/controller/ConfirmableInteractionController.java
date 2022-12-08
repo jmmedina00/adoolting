@@ -57,7 +57,7 @@ public class ConfirmableInteractionController {
       interaction =
         cInteractionService.decideInteractionResult(
           interactionId,
-          authenticatedPerson,
+          authenticatedPerson.getId(),
           confirmation.getIsAccepted()
         );
     } catch (NotAuthorizedException e) {
@@ -85,7 +85,7 @@ public class ConfirmableInteractionController {
 
     try {
       cInteractionService.addPersonAsFriend(
-        authenticatedPerson,
+        authenticatedPerson.getId(),
         nConfirmableInteraction.getPersonId()
       );
     } catch (InvalidDTOException e) {
@@ -108,7 +108,7 @@ public class ConfirmableInteractionController {
     Person person = ((PersonDetails) authentication.getPrincipal()).getPerson();
     model.addAttribute(
       "interactions",
-      cInteractionService.getPendingInteractionsForPerson(person)
+      cInteractionService.getPendingInteractionsForPerson(person.getId())
     );
 
     return "network";

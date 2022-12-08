@@ -171,7 +171,7 @@ public class PageController {
     model.addAttribute("managers", pageService.getPageManagers(pageId));
     model.addAttribute(
       "friends",
-      cInteractionService.getPersonFriends(authenticatedPerson)
+      cInteractionService.getPersonFriends(authenticatedPerson.getId())
     );
     return "page/manage";
   }

@@ -22,16 +22,16 @@ public class ConfirmableInteractionService {
   private PersonService personService;
 
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
-    Person person
+    Long personId
   ) {
     return cInteractionRepository.findPendingConfirmableInteractionsByInteractorId(
-      person.getId()
+      personId
     );
   }
 
-  public List<ConfirmableInteraction> getPersonFriends(Person person) {
+  public List<ConfirmableInteraction> getPersonFriends(Long personId) {
     List<ConfirmableInteraction> interactions = cInteractionRepository.findConfirmedInteractionsByInteractorId(
-      person.getId()
+      personId
     );
     return interactions
       .stream()
@@ -40,12 +40,12 @@ public class ConfirmableInteractionService {
   }
 
   public ConfirmableInteraction getPersonFriendship(
-    Person person,
-    Person otherPerson
+    Long personId,
+    Long otherPersonId
   ) {
     List<ConfirmableInteraction> interactions = cInteractionRepository.findConfirmableInteractionsBetweenInteractors(
-      person.getId(),
-      otherPerson.getId()
+      personId,
+      otherPersonId
     );
 
     return interactions
@@ -57,7 +57,7 @@ public class ConfirmableInteractionService {
 
   public ConfirmableInteraction decideInteractionResult(
     Long interactionId,
-    Person person,
+    Long personId,
     boolean isAccepted
   )
     throws NotAuthorizedException {
@@ -66,16 +66,13 @@ public class ConfirmableInteractionService {
       .orElseThrow(() -> new NotAuthorizedException());
 
     if (
-      !Objects.equals(
-        person.getId(),
-        interaction.getReceiverInteractor().getId()
-      )
+      !Objects.equals(personId, interaction.getReceiverInteractor().getId())
     ) {
       throw new NotAuthorizedException();
     }
 
     if (
-      interaction.getConfirmedAt() != null && interaction.getIgnoredAt() != null
+      interaction.getConfirmedAt() != null || interaction.getIgnoredAt() != null
     ) {
       throw new NotAuthorizedException();
     }
@@ -91,21 +88,26 @@ public class ConfirmableInteractionService {
   }
 
   public ConfirmableInteraction addPersonAsFriend(
-    Person requestingPerson,
+    Long requestingPersonId,
     Long addedPersonId
   )
     throws InvalidDTOException {
-    Person addedPerson = personService.getPerson(addedPersonId);
-
     ConfirmableInteraction existingFriendship = getPersonFriendship(
-      requestingPerson,
-      addedPerson
+      requestingPersonId,
+      addedPersonId
     );
     if (
-      existingFriendship != null && existingFriendship.getConfirmedAt() != null
+      existingFriendship != null &&
+      (
+        existingFriendship.getConfirmedAt() != null ||
+        existingFriendship.getIgnoredAt() == null
+      )
     ) {
       throw new InvalidDTOException();
     }
+
+    Person requestingPerson = personService.getPerson(requestingPersonId);
+    Person addedPerson = personService.getPerson(addedPersonId);
 
     ConfirmableInteraction interaction = new ConfirmableInteraction();
     interaction.setInteractor(requestingPerson);

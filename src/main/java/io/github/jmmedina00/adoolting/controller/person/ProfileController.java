@@ -99,9 +99,15 @@ public class ProfileController {
     model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "friendship",
-      cInteractionService.getPersonFriendship(authenticatedPerson, person)
+      cInteractionService.getPersonFriendship(
+        authenticatedPerson.getId(),
+        personId
+      )
     );
-    model.addAttribute("friends", cInteractionService.getPersonFriends(person));
+    model.addAttribute(
+      "friends",
+      cInteractionService.getPersonFriends(personId)
+    );
     model.addAttribute(
       "posts",
       interactionService.getInteractions(person.getId())
