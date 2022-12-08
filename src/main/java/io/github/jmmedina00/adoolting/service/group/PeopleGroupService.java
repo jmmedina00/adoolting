@@ -9,6 +9,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.page.PageManagerService;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,15 @@ public class PeopleGroupService {
   @Autowired
   private PageManagerService pageManagerService;
 
+  @Autowired
+  private PersonService personService;
+
   public PeopleGroup getGroup(Long groupId) {
     return groupRepository.findById(groupId).orElseThrow();
   }
 
-  public PeopleGroup createGroup(NewGroup newGroup, Person person) {
+  public PeopleGroup createGroup(NewGroup newGroup, Long personId) {
+    Person person = personService.getPerson(personId);
     PeopleGroup group = new PeopleGroup();
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());

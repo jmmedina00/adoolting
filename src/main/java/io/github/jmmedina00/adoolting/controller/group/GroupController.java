@@ -62,7 +62,10 @@ public class GroupController {
           .getPrincipal()
       ).getPerson();
 
-    PeopleGroup group = groupService.createGroup(newGroup, authenticatedPerson);
+    PeopleGroup group = groupService.createGroup(
+      newGroup,
+      authenticatedPerson.getId()
+    );
     return "redirect:/interaction/" + group.getId();
   }
 }

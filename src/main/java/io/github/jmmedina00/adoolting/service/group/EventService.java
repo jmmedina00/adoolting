@@ -5,6 +5,7 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.EventRepository;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,11 @@ public class EventService {
   @Autowired
   private PeopleGroupService groupService;
 
-  public Event createEvent(NewEvent newEvent, Interactor interactor) {
+  @Autowired
+  private InteractorService interactorService;
+
+  public Event createEvent(NewEvent newEvent, Long interactorId) {
+    Interactor interactor = interactorService.getInteractor(interactorId);
     Event event = new Event();
     event.setName(newEvent.getName());
     event.setDescription(newEvent.getDescription());

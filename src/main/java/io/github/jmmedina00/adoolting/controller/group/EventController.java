@@ -54,7 +54,10 @@ public class EventController {
           .getPrincipal()
       ).getPerson();
 
-    Event event = eventService.createEvent(newEvent, authenticatedPerson);
+    Event event = eventService.createEvent(
+      newEvent,
+      authenticatedPerson.getId()
+    );
     return "redirect:/interaction/" + event.getId();
   }
 
