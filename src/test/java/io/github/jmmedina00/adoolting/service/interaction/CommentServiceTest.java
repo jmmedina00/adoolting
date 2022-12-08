@@ -10,8 +10,10 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
-import io.github.jmmedina00.adoolting.entity.page.Page;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,11 +33,16 @@ public class CommentServiceTest {
   @MockBean
   private MediumService mediumService;
 
+  @MockBean
+  private InteractorService interactorService;
+
+  @MockBean
+  private InteractionService interactionService;
+
   @Autowired
   private CommentService commentService;
-  // TODO: refactor tests to keep id refactor into account
 
-  /* @Test
+  @Test
   public void createCommentCreatesCommentWithPayloadData() throws Exception {
     Mockito
       .when(commentRepository.save(any()))
@@ -45,23 +52,37 @@ public class CommentServiceTest {
         }
       );
 
+    Mockito
+      .when(interactionService.getInteraction(any()))
+      .thenAnswer(
+        invocation -> {
+          Long id = invocation.getArgument(0);
+          Interaction interaction = new Interaction();
+          interaction.setId(id);
+          return interaction;
+        }
+      );
+
+    Mockito
+      .when(interactorService.getInteractor(any()))
+      .thenAnswer(
+        invocation -> {
+          Long id = invocation.getArgument(0);
+          Interactor interactor = new Person();
+          interactor.setId(id);
+          return interactor;
+        }
+      );
+
     NewComment newComment = new NewComment();
     MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
     newComment.setContent("Test");
     newComment.setFile(file);
 
-    Interactor interactor = new Page();
-    interactor.setAbout("This is a page");
-    Interaction interaction = new Interaction();
-
-    Comment comment = commentService.createComment(
-      newComment,
-      interactor,
-      interaction
-    );
+    Comment comment = commentService.createComment(newComment, 2L, 3L);
     assertEquals(comment.getContent(), newComment.getContent());
-    assertEquals(comment.getInteractor(), interactor);
-    assertEquals(comment.getReceiverInteraction(), interaction);
+    assertEquals(comment.getInteractor().getId(), 2L);
+    assertEquals(comment.getReceiverInteraction().getId(), 3L);
 
     verify(mediumService, times(1)).saveAllFiles(List.of(file), comment);
   }
@@ -79,14 +100,10 @@ public class CommentServiceTest {
     newComment.setContent("Test");
     newComment.setFile(file);
 
-    Interactor interactor = new Page();
-    interactor.setAbout("This is a page");
-    Interaction interaction = new Interaction();
-
     assertDoesNotThrow(
       () -> {
-        commentService.createComment(newComment, interactor, interaction);
+        commentService.createComment(newComment, 2L, 3L);
       }
     );
-  } */
+  }
 }

@@ -44,6 +44,10 @@ public abstract class Interactor implements Serializable {
     return id;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   public String getAbout() {
     return about;
   }
