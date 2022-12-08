@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
+import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +19,9 @@ public class PageService {
 
   @Autowired
   private PageManagerService pageManagerService;
+
+  @Autowired
+  private PersonService personService;
 
   public Page getPage(Long pageId) {
     return pageRepository.findById(pageId).orElse(null);
@@ -37,8 +41,7 @@ public class PageService {
     return found.isPresent();
   }
 
-  public List<Page> getAllPersonPages(Person person) {
-    Long personId = person.getId();
+  public List<Page> getAllPersonPages(Long personId) {
     List<Page> createdByPerson = pageRepository.findPagesCreatedByPerson(
       personId
     );
@@ -63,7 +66,8 @@ public class PageService {
     return finalized;
   }
 
-  public Page createPage(NewPage newPage, Person person) {
+  public Page createPage(NewPage newPage, Long personId) {
+    Person person = personService.getPerson(personId);
     Page page = new Page();
     page.setName(newPage.getName());
     page.setAbout(newPage.getAbout());

@@ -92,7 +92,9 @@ public class PageController {
       controlledInteractors = List.of(authenticatedPerson, page);
     } else {
       controlledInteractors =
-        new ArrayList<>(pageService.getAllPersonPages(authenticatedPerson));
+        new ArrayList<>(
+          pageService.getAllPersonPages(authenticatedPerson.getId())
+        );
       controlledInteractors.add(0, authenticatedPerson);
     }
 
@@ -243,7 +245,7 @@ public class PageController {
           .getPrincipal()
       ).getPerson();
 
-    Page page = pageService.createPage(newPage, authenticatedPerson);
+    Page page = pageService.createPage(newPage, authenticatedPerson.getId());
 
     return "redirect:/page/" + page.getId();
   }
