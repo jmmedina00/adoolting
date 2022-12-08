@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
@@ -47,17 +48,9 @@ public class ProfileController {
 
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
   public String getPersonProfile(
-    @PathVariable("personId") String personIdStr,
+    @PathVariable("personId") Long personId,
     Model model
   ) {
-    Long personId;
-
-    try {
-      personId = Long.parseLong(personIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
     Person person = personService.getPerson(personId);
 
@@ -98,31 +91,20 @@ public class ProfileController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
   public String commentOnPersonProfile(
-    @PathVariable("personId") String personIdStr,
+    @PathVariable("personId") Long personId,
     @ModelAttribute("newPost") @Valid NewPost newPost,
     BindingResult result
-  ) {
-    Long personId;
-
-    try {
-      personId = Long.parseLong(personIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       return "redirect:/profile/" + personId + "?error";
     }
 
-    try {
-      Post savedPost = postService.postOnProfile(
-        AuthenticatedPerson.getPersonId(),
-        personId,
-        newPost
-      );
-      return "redirect:/profile/" + personId + "?post=" + savedPost.getId();
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    Post savedPost = postService.postOnProfile(
+      AuthenticatedPerson.getPersonId(),
+      personId,
+      newPost
+    );
+    return "redirect:/profile/" + personId + "?post=" + savedPost.getId();
   }
 }

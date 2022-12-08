@@ -9,6 +9,7 @@ import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
@@ -60,22 +61,9 @@ public class PageController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
-  public String getPageProfile(
-    @PathVariable("id") String pageIdStr,
-    Model model
-  ) {
-    Long pageId;
-    try {
-      pageId = Long.parseLong(pageIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  public String getPageProfile(@PathVariable("id") Long pageId, Model model)
+    throws NotAuthorizedException {
     Page page = pageService.getPage(pageId);
-    if (page == null) {
-      return "redirect:/home?notfound";
-    }
-
     Person person = AuthenticatedPerson.getPerson();
     Long personId = person.getId();
 
@@ -102,49 +90,30 @@ public class PageController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}")
   public String createPostOnPage(
-    @PathVariable("id") String pageIdStr,
+    @PathVariable("id") Long pageId,
     @ModelAttribute("newPost") @Valid NewPostOnPage newPost,
     BindingResult result
-  ) {
-    Long pageId;
-    try {
-      pageId = Long.parseLong(pageIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       return "redirect:/page/" + pageId + "?error";
     }
 
-    try {
-      Post post = postService.postOnPage(newPost, pageId);
-      return "redirect:/page/" + pageId + "?post=" + post.getId();
-    } catch (Exception e) {
-      return "redirect:/page/" + pageId + "?error";
-    }
+    Post post = postService.postOnPage(newPost, pageId);
+    return "redirect:/page/" + pageId + "?post=" + post.getId();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}/manage")
   public String getPageManagementPage(
-    @PathVariable("id") String pageIdStr,
+    @PathVariable("id") Long pageId,
     Model model
-  ) {
-    Long pageId;
-    try {
-      pageId = Long.parseLong(pageIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     Long personId = AuthenticatedPerson.getPersonId();
     Page page = pageService.getPage(pageId);
 
-    if (
-      page == null ||
-      !Objects.equals(page.getCreatedByPerson().getId(), personId)
-    ) {
-      return "redirect:/home?notfound";
+    if (!Objects.equals(page.getCreatedByPerson().getId(), personId)) {
+      throw new NotAuthorizedException();
     }
 
     model.addAttribute("page", page);
@@ -162,18 +131,10 @@ public class PageController {
     value = "/{pageId}/manage/{personId}"
   )
   public String addPersonAsManager(
-    @PathVariable("pageId") String pageIdStr,
-    @PathVariable("personId") String personIdStr
-  ) {
-    Long pageId;
-    Long personId;
-    try {
-      pageId = Long.parseLong(pageIdStr);
-      personId = Long.parseLong(personIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+    @PathVariable("pageId") Long pageId,
+    @PathVariable("personId") Long personId
+  )
+    throws NotAuthorizedException {
     Page page = pageService.getPage(pageId);
 
     // TODO: security checks to service
@@ -220,13 +181,8 @@ public class PageController {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/like")
-  public String toggleLikeOnPage(@PathVariable("id") String pageIdStr) {
-    try {
-      Long pageId = Long.parseLong(pageIdStr);
-      likeService.toggleLikeToPage(AuthenticatedPerson.getPersonId(), pageId);
-      return "redirect:/page/" + pageId;
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+  public String toggleLikeOnPage(@PathVariable("id") Long pageId) {
+    likeService.toggleLikeToPage(AuthenticatedPerson.getPersonId(), pageId);
+    return "redirect:/page/" + pageId;
   }
 }

@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Medium;
+import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
 import io.github.jmmedina00.adoolting.repository.MediumRepository;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -66,8 +67,11 @@ public class MediumService {
     return workDirectory + toCdn + mediaDir + full;
   }
 
-  public String getThumbnailLinkForMedium(Long mediumId, int desiredSize) {
-    Medium medium = mediumRepository.findById(mediumId).get();
+  public String getThumbnailLinkForMedium(Long mediumId, int desiredSize)
+    throws MediumNotFoundException {
+    Medium medium = mediumRepository
+      .findById(mediumId)
+      .orElseThrow(MediumNotFoundException::new);
 
     List<Integer> cycleSizes = new ArrayList<>(
       Arrays.stream(expectedSizes).boxed().toList()

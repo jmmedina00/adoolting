@@ -37,17 +37,9 @@ public class MessageController {
 
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
   public String getMessagesWithPerson(
-    @PathVariable("personId") String personIdStr,
+    @PathVariable("personId") Long personId,
     Model model
   ) {
-    Long personId;
-
-    try {
-      personId = Long.parseLong(personIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
     if (Objects.equals(personId, authenticatedPersonId)) {
       return "redirect:/message";
@@ -64,18 +56,10 @@ public class MessageController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
   public String sendMessageToPerson(
-    @PathVariable("personId") String personIdStr,
+    @PathVariable("personId") Long personId,
     @ModelAttribute("newMessage") @Valid NewMessage newMessage,
     BindingResult result
   ) {
-    Long personId;
-
-    try {
-      personId = Long.parseLong(personIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
     if (result.hasErrors()) {
       return "redirect:/message/" + personId + "?error";
     }

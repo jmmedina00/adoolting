@@ -3,10 +3,11 @@ package io.github.jmmedina00.adoolting.controller.interaction;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
+import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,106 +23,74 @@ public class ProfilePictureController {
   @Autowired
   private ProfilePictureService profilePictureService;
 
-  @Value("${DEFAULT_IMAGE}")
-  private String defaultImageFile;
-
   @RequestMapping(method = RequestMethod.GET, value = "/interactor/{id}")
   public String getProfilePictureOfInteractor(
-    @PathVariable("id") String idStr,
+    @PathVariable("id") Long interactorId,
     @RequestParam(required = false, name = "size") String size
-  ) {
-    try {
-      Long interactorId = Long.parseLong(idStr);
-      ProfilePicture pfp = profilePictureService.getProfilePictureOfInteractor(
-        interactorId
-      );
-      return (
-        "redirect:/media/thumbnail/" +
-        (size == null ? 64 : size) +
-        "/" +
-        pfp.getId()
-      );
-    } catch (Exception e) {
-      return "redirect:/cdn/" + defaultImageFile;
-    }
+  )
+    throws MediumNotFoundException {
+    ProfilePicture pfp = profilePictureService.getProfilePictureOfInteractor(
+      interactorId
+    );
+    return provideFinalThumbnail(pfp, size);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/group/{id}")
   public String getProfilePictureOfGroup(
-    @PathVariable("id") String idStr,
+    @PathVariable("id") Long groupId,
     @RequestParam(required = false, name = "size") String size
-  ) {
-    try {
-      Long groupId = Long.parseLong(idStr);
-      ProfilePicture pfp = profilePictureService.getProfilePictureOfGroup(
-        groupId
-      );
-      return (
-        "redirect:/media/thumbnail/" +
-        (size == null ? 64 : size) +
-        "/" +
-        pfp.getId()
-      );
-    } catch (Exception e) {
-      return "redirect:/cdn/default";
-    }
+  )
+    throws MediumNotFoundException {
+    ProfilePicture pfp = profilePictureService.getProfilePictureOfGroup(
+      groupId
+    );
+    return provideFinalThumbnail(pfp, size);
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/interactor/{id}")
   public String setProfilePictureOfInteractor(
-    @PathVariable("id") String idStr,
+    @PathVariable("id") Long interactorId,
     @ModelAttribute("pfp") @Valid ProfilePictureFile pfp,
     BindingResult result
-  ) {
-    Long interactorId;
-    try {
-      interactorId = Long.parseLong(idStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
     }
 
-    try {
-      ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
-        interactorId,
-        AuthenticatedPerson.getPersonId(),
-        pfp
-      );
-      return ("redirect:/interaction/" + saved.getInteraction().getId());
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
+      interactorId,
+      AuthenticatedPerson.getPersonId(),
+      pfp
+    );
+    return ("redirect:/interaction/" + saved.getInteraction().getId());
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/group/{id}")
   public String setProfilePictureOfGroup(
-    @PathVariable("id") String idStr,
+    @PathVariable("id") Long groupId,
     @ModelAttribute("pfp") @Valid ProfilePictureFile pfp,
     BindingResult result
-  ) {
-    Long groupId;
-    try {
-      groupId = Long.parseLong(idStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
     }
 
-    try {
-      profilePictureService.setProfilePictureOfGroup(
-        groupId,
-        AuthenticatedPerson.getPersonId(),
-        pfp
-      );
-      return "redirect:/interaction/" + groupId;
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    profilePictureService.setProfilePictureOfGroup(
+      groupId,
+      AuthenticatedPerson.getPersonId(),
+      pfp
+    );
+    return "redirect:/interaction/" + groupId;
+  }
+
+  private String provideFinalThumbnail(ProfilePicture pfp, String sizeStr) {
+    return (
+      "redirect:/media/thumbnail/" +
+      (sizeStr == null ? 64 : sizeStr) +
+      "/" +
+      pfp.getId()
+    );
   }
 }

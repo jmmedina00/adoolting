@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.controller.group;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.entity.group.Event;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.group.EventService;
 import java.util.Calendar;
 import java.util.Date;
@@ -53,19 +54,12 @@ public class EventController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}")
   public String updateEventInfo(
-    @PathVariable("id") String eventIdStr,
+    @PathVariable("id") Long eventId,
     @ModelAttribute("form") @Valid NewEvent newEvent,
     BindingResult result,
     RedirectAttributes attributes
-  ) {
-    Long eventId;
-
-    try {
-      eventId = Long.parseLong(eventIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.form",
@@ -80,15 +74,11 @@ public class EventController {
       return "redirect:/group?event&badtime";
     }
 
-    try {
-      eventService.updateEvent(
-        eventId,
-        AuthenticatedPerson.getPersonId(),
-        newEvent
-      );
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    eventService.updateEvent(
+      eventId,
+      AuthenticatedPerson.getPersonId(),
+      newEvent
+    );
 
     return "redirect:/interaction/" + eventId;
   }

@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.controller.group;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import javax.validation.Valid;
@@ -27,18 +28,11 @@ public class GroupOperationsController {
 
   @RequestMapping(method = RequestMethod.GET)
   public String getGroupManagementForm(
-    @PathVariable("id") String groupIdStr,
+    @PathVariable("id") Long groupId,
     Model model
-  ) {
-    Long groupId;
-    PeopleGroup group;
-
-    try {
-      groupId = Long.parseLong(groupIdStr);
-      group = groupService.getGroup(groupId);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+  )
+    throws NotAuthorizedException {
+    PeopleGroup group = groupService.getGroup(groupId);
 
     if (
       !groupService.isGroupManagedByPerson(
@@ -46,7 +40,7 @@ public class GroupOperationsController {
         AuthenticatedPerson.getPersonId()
       )
     ) {
-      return "redirect:/home?notfound";
+      throw new NotAuthorizedException();
     }
 
     model.addAttribute("group", group);
@@ -62,19 +56,12 @@ public class GroupOperationsController {
 
   @RequestMapping(method = RequestMethod.POST)
   public String updateGroupInfo(
-    @PathVariable("id") String groupIdStr,
+    @PathVariable("id") Long groupId,
     @ModelAttribute("form") @Valid NewGroup newGroup,
     BindingResult result,
     RedirectAttributes attributes
-  ) {
-    Long groupId;
-
-    try {
-      groupId = Long.parseLong(groupIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       attributes.addFlashAttribute(
         "org.springframework.validation.BindingResult.form",
@@ -84,47 +71,34 @@ public class GroupOperationsController {
       return "redirect:/group/" + groupId;
     }
 
-    try {
-      groupService.updateGroup(
-        groupId,
-        AuthenticatedPerson.getPersonId(),
-        newGroup
-      );
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    groupService.updateGroup(
+      groupId,
+      AuthenticatedPerson.getPersonId(),
+      newGroup
+    );
 
     return "redirect:/interaction/" + groupId;
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/join")
-  public String requestToJoinGroup(@PathVariable("id") String groupIdStr) {
-    try {
-      Long groupId = Long.parseLong(groupIdStr);
-      joinRequestService.joinGroup(AuthenticatedPerson.getPersonId(), groupId);
-      return "redirect:/interaction/" + groupIdStr;
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+  public String requestToJoinGroup(@PathVariable("id") Long groupId)
+    throws NotAuthorizedException {
+    joinRequestService.joinGroup(AuthenticatedPerson.getPersonId(), groupId);
+    return "redirect:/interaction/" + groupId;
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/invite/{personId}")
   public String invitePersonToGroup(
-    @PathVariable("id") String groupIdStr,
-    @PathVariable("personId") String personIdStr
-  ) {
-    try {
-      Long personId = Long.parseLong(personIdStr);
-      Long groupId = Long.parseLong(groupIdStr);
-      joinRequestService.inviteToGroup(
-        AuthenticatedPerson.getPersonId(),
-        personId,
-        groupId
-      );
+    @PathVariable("id") Long groupId,
+    @PathVariable("personId") Long personId
+  )
+    throws NotAuthorizedException {
+    joinRequestService.inviteToGroup(
+      AuthenticatedPerson.getPersonId(),
+      personId,
+      groupId
+    );
 
-      return "redirect:/profile/" + personId;
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    return "redirect:/profile/" + personId;
   }
 }

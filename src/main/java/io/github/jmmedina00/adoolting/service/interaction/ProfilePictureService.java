@@ -7,6 +7,7 @@ import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
+import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.ProfilePictureRepository;
 import io.github.jmmedina00.adoolting.service.MediumService;
@@ -46,20 +47,22 @@ public class ProfilePictureService {
 
   // TODO: common parts to their own methods
 
-  public ProfilePicture getProfilePictureOfInteractor(Long interactorId) {
+  public ProfilePicture getProfilePictureOfInteractor(Long interactorId)
+    throws MediumNotFoundException {
     return pfpRepository
       .findInteractorsProfilePictures(interactorId)
       .stream()
       .findFirst()
-      .get();
+      .orElseThrow(MediumNotFoundException::new);
   }
 
-  public ProfilePicture getProfilePictureOfGroup(Long groupId) {
+  public ProfilePicture getProfilePictureOfGroup(Long groupId)
+    throws MediumNotFoundException {
     return pfpRepository
       .findGroupsProfilePictures(groupId)
       .stream()
       .findFirst()
-      .get();
+      .orElseThrow(MediumNotFoundException::new);
   }
 
   public ProfilePicture setProfilePictureOfInteractor(

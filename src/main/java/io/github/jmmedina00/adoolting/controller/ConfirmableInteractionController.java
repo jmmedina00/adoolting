@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.InteractionConfirmation;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import javax.validation.Valid;
@@ -29,24 +28,18 @@ public class ConfirmableInteractionController {
   )
   public String decideInteractionResult(
     @Valid InteractionConfirmation confirmation,
-    @PathVariable("interactionId") String interactionIdStr
-  ) {
-    try {
-      Long interactionId = Long.parseLong(interactionIdStr);
-      ConfirmableInteraction interaction = cInteractionService.decideInteractionResult(
-        interactionId,
-        AuthenticatedPerson.getPersonId(),
-        confirmation.getIsAccepted()
-      );
+    @PathVariable("interactionId") Long interactionId
+  )
+    throws NotAuthorizedException {
+    ConfirmableInteraction interaction = cInteractionService.decideInteractionResult(
+      interactionId,
+      AuthenticatedPerson.getPersonId(),
+      confirmation.getIsAccepted()
+    );
 
-      return (!confirmation.getGoToProfile())
-        ? "redirect:/network"
-        : "redirect:/profile/" +
-        interaction.getInteractor().getId() +
-        "?success";
-    } catch (NotAuthorizedException e) {
-      return "redirect:/home?notfound";
-    }
+    return (!confirmation.getGoToProfile())
+      ? "redirect:/network"
+      : "redirect:/profile/" + interaction.getInteractor().getId() + "?success";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -54,16 +47,12 @@ public class ConfirmableInteractionController {
     @ModelAttribute(
       "cInteraction"
     ) @Valid NewConfirmableInteraction nConfirmableInteraction
-  ) {
-    try {
-      cInteractionService.addPersonAsFriend(
-        AuthenticatedPerson.getPersonId(),
-        nConfirmableInteraction.getPersonId()
-      );
-    } catch (InvalidDTOException e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
+    cInteractionService.addPersonAsFriend(
+      AuthenticatedPerson.getPersonId(),
+      nConfirmableInteraction.getPersonId()
+    );
     return "redirect:/profile/" + nConfirmableInteraction.getPersonId();
   }
 

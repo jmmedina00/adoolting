@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.service.page;
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
@@ -23,17 +24,13 @@ public class PageService {
   @Autowired
   private PersonService personService;
 
-  public Page getPage(Long pageId) {
-    return pageRepository.findById(pageId).orElse(null);
+  public Page getPage(Long pageId) throws NotAuthorizedException {
+    return pageRepository
+      .findById(pageId)
+      .orElseThrow(NotAuthorizedException::new);
   }
 
   public boolean isPageManagedByPerson(Long pageId, Long personId) {
-    Page page = getPage(pageId);
-
-    if (page == null) {
-      return false;
-    }
-
     Optional<Person> found = getPageManagers(pageId)
       .stream()
       .filter(foundPerson -> Objects.equals(foundPerson.getId(), personId))

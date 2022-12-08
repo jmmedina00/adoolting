@@ -3,7 +3,6 @@ package io.github.jmmedina00.adoolting.service;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
@@ -91,7 +90,7 @@ public class ConfirmableInteractionService {
     Long requestingPersonId,
     Long addedPersonId
   )
-    throws InvalidDTOException {
+    throws NotAuthorizedException {
     ConfirmableInteraction existingFriendship = getPersonFriendship(
       requestingPersonId,
       addedPersonId
@@ -103,7 +102,7 @@ public class ConfirmableInteractionService {
         existingFriendship.getIgnoredAt() == null
       )
     ) {
-      throw new InvalidDTOException();
+      throw new NotAuthorizedException();
     }
 
     Person requestingPerson = personService.getPerson(requestingPersonId);

@@ -33,17 +33,11 @@ public class InteractionController {
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getInteraction(
-    @PathVariable("id") String interactionIdStr,
+    @PathVariable("id") Long interactionId,
     Model model
-  ) {
-    Long interactionId;
-    Interaction interaction;
-    try {
-      interactionId = Long.parseLong(interactionIdStr);
-      interaction = interactionService.getInteraction(interactionId);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+  )
+    throws NotAuthorizedException {
+    Interaction interaction = interactionService.getInteraction(interactionId);
 
     if (interaction instanceof Comment) {
       Comment comment = (Comment) interaction;
@@ -80,52 +74,30 @@ public class InteractionController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/comment")
   public String commentOnInteraction(
-    @PathVariable("id") String interactionIdStr,
+    @PathVariable("id") Long interactionId,
     @ModelAttribute("newComment") @Valid NewComment newComment,
     BindingResult result
-  ) {
-    Long interactionId;
-    try {
-      interactionId = Long.parseLong(interactionIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  )
+    throws NotAuthorizedException {
     if (result.hasErrors()) {
       return "redirect:/interaction/" + interactionId + "?error";
     }
 
-    try {
-      Comment comment = commentService.createComment(
-        newComment,
-        AuthenticatedPerson.getPersonId(),
-        interactionId
-      );
-      return (
-        "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()
-      );
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    Comment comment = commentService.createComment(
+      newComment,
+      AuthenticatedPerson.getPersonId(),
+      interactionId
+    );
+    return (
+      "redirect:/interaction/" + interactionId + "?comment=" + comment.getId()
+    );
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
-  public String deleteInteraction(@PathVariable("id") String interactionIdStr) {
-    Long interactionId;
-    try {
-      interactionId = Long.parseLong(interactionIdStr);
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
-
+  public String deleteInteraction(@PathVariable("id") Long interactionId)
+    throws NotAuthorizedException {
     Long personId = AuthenticatedPerson.getPersonId();
-
-    try {
-      interactionService.deleteInteraction(interactionId, personId);
-    } catch (NotAuthorizedException e) {
-      return "redirect:/home?notfound";
-    }
-
+    interactionService.deleteInteraction(interactionId, personId);
     return "redirect:/profile/" + personId + "?success";
   }
 }
