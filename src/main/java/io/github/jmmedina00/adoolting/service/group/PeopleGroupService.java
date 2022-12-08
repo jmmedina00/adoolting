@@ -8,7 +8,7 @@ import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
-import io.github.jmmedina00.adoolting.service.page.PageManagerService;
+import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class PeopleGroupService {
   private PeopleGroupRepository groupRepository;
 
   @Autowired
-  private PageManagerService pageManagerService;
+  private PageService pageService;
 
   @Autowired
   private PersonService personService;
@@ -72,26 +72,17 @@ public class PeopleGroupService {
   }
 
   public boolean isGroupManagedByPerson(Long groupId, Long personId) {
-    PeopleGroup group;
-
     try {
-      group = getGroup(groupId);
+      PeopleGroup group = getGroup(groupId);
+      Interactor interactor = group.getInteractor();
+
+      if (interactor instanceof Person) {
+        return Objects.equals(interactor.getId(), personId);
+      }
+
+      return pageService.isPageManagedByPerson(interactor.getId(), personId);
     } catch (Exception e) {
       return false;
     }
-
-    Interactor interactor = group.getInteractor();
-
-    if (interactor instanceof Person) {
-      return Objects.equals(interactor.getId(), personId);
-    }
-
-    Person matchingManager = pageManagerService
-      .getPeopleManagingPage(interactor.getId())
-      .stream()
-      .filter(person -> Objects.equals(person.getId(), personId))
-      .findFirst()
-      .orElse(null);
-    return matchingManager != null;
   }
 }

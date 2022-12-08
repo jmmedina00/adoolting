@@ -23,17 +23,16 @@ public class PageService {
     return pageRepository.findById(pageId).orElse(null);
   }
 
-  public boolean isPageManagedByPerson(Page page, Person person) {
-    if (Objects.equals(page.getCreatedByPerson().getId(), person.getId())) {
-      return true;
+  public boolean isPageManagedByPerson(Long pageId, Long personId) {
+    Page page = getPage(pageId);
+
+    if (page == null) {
+      return false;
     }
 
-    Optional<Person> found = pageManagerService
-      .getPeopleManagingPage(page.getId())
+    Optional<Person> found = getPageManagers(pageId)
       .stream()
-      .filter(
-        foundPerson -> Objects.equals(foundPerson.getId(), person.getId())
-      )
+      .filter(foundPerson -> Objects.equals(foundPerson.getId(), personId))
       .findFirst();
     return found.isPresent();
   }

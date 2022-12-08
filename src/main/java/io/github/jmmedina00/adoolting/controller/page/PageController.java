@@ -86,7 +86,9 @@ public class PageController {
       ).getPerson();
 
     List<Interactor> controlledInteractors;
-    if (pageService.isPageManagedByPerson(page, authenticatedPerson)) {
+    if (
+      pageService.isPageManagedByPerson(pageId, authenticatedPerson.getId())
+    ) {
       controlledInteractors = List.of(authenticatedPerson, page);
     } else {
       controlledInteractors =

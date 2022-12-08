@@ -7,7 +7,6 @@ import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
-import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.ProfilePictureRepository;
 import io.github.jmmedina00.adoolting.service.MediumService;
@@ -16,7 +15,6 @@ import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
 import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,15 +144,9 @@ public class ProfilePictureService {
     Long interactorId,
     Long personId
   ) {
-    if (Objects.equals(interactorId, personId)) {
-      return true;
-    }
-
-    Optional<Person> matchingPerson = pageService
-      .getPageManagers(interactorId)
-      .stream()
-      .filter(person -> Objects.equals(person.getId(), personId))
-      .findFirst();
-    return matchingPerson.isPresent();
+    return (
+      Objects.equals(interactorId, personId) ||
+      pageService.isPageManagedByPerson(interactorId, personId)
+    );
   }
 }
