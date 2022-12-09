@@ -32,10 +32,7 @@ public class CommentService {
     Long interactionId,
     Pageable pageable
   ) {
-    return commentRepository.findByReceiverInteractionId(
-      interactionId,
-      pageable
-    );
+    return commentRepository.findByReceiverInteraction(interactionId, pageable);
   }
 
   public Comment createComment(
