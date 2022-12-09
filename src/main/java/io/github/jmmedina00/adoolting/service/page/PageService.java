@@ -26,10 +26,8 @@ public class PageService {
   @Autowired
   private PersonService personService;
 
-  public Page getPage(Long pageId) throws NotAuthorizedException {
-    return pageRepository
-      .findById(pageId)
-      .orElseThrow(NotAuthorizedException::new);
+  public Page getPage(Long pageId) {
+    return pageRepository.findActivePage(pageId).orElseThrow();
   }
 
   public boolean isPageManagedByPerson(Long pageId, Long personId) {

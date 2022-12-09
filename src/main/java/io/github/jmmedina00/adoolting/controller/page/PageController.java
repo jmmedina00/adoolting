@@ -39,8 +39,7 @@ public class PageController {
   private PostService postService;
 
   @RequestMapping(method = RequestMethod.GET)
-  public String getPageProfile(@PathVariable("id") Long pageId, Model model)
-    throws NotAuthorizedException {
+  public String getPageProfile(@PathVariable("id") Long pageId, Model model) {
     Page page = pageService.getPage(pageId);
     Person person = AuthenticatedPerson.getPerson();
     Long personId = person.getId();
