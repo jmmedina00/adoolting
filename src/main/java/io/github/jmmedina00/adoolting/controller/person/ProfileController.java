@@ -14,6 +14,8 @@ import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -48,6 +50,7 @@ public class ProfileController {
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
   public String getPersonProfile(
     @PathVariable("personId") Long personId,
+    @PageableDefault(value = 10, page = 0) Pageable pageable,
     Model model
   ) {
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
@@ -70,7 +73,7 @@ public class ProfileController {
     );
     model.addAttribute(
       "posts",
-      interactionService.getInteractions(person.getId())
+      interactionService.getInteractions(person.getId(), pageable)
     );
     model.addAttribute("newPost", new NewPost());
     model.addAttribute("cInteraction", cInteraction);

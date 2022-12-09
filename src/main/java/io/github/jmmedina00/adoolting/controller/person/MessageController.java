@@ -7,6 +7,8 @@ import io.github.jmmedina00.adoolting.service.person.PrivateMessageService;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -38,6 +40,7 @@ public class MessageController {
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
   public String getMessagesWithPerson(
     @PathVariable("personId") Long personId,
+    @PageableDefault(value = 10, page = 0) Pageable pageable,
     Model model
   ) {
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
@@ -48,7 +51,11 @@ public class MessageController {
     model.addAttribute("person", personService.getPerson(personId));
     model.addAttribute(
       "messages",
-      messageService.getMessagesBetweenPersons(authenticatedPersonId, personId)
+      messageService.getMessagesBetweenPersons(
+        authenticatedPersonId,
+        personId,
+        pageable
+      )
     );
     model.addAttribute("newMessage", new NewMessage());
     return "message/conversation";

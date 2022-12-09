@@ -10,6 +10,8 @@ import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,8 +28,14 @@ public class CommentService {
   @Autowired
   private InteractionService interactionService;
 
-  public List<Comment> getCommentsFromInteraction(Long interactionId) {
-    return commentRepository.findByReceiverInteractionId(interactionId);
+  public Page<Comment> getCommentsFromInteraction(
+    Long interactionId,
+    Pageable pageable
+  ) {
+    return commentRepository.findByReceiverInteractionId(
+      interactionId,
+      pageable
+    );
   }
 
   public Comment createComment(

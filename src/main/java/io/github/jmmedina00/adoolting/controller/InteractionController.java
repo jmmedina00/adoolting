@@ -11,6 +11,8 @@ import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,6 +36,7 @@ public class InteractionController {
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getInteraction(
     @PathVariable("id") Long interactionId,
+    @PageableDefault(value = 10, page = 0) Pageable pageable,
     Model model
   ) {
     Interaction interaction = interactionService.getInteraction(interactionId);
@@ -54,7 +57,7 @@ public class InteractionController {
     model.addAttribute("interaction", interaction);
     model.addAttribute(
       "comments",
-      commentService.getCommentsFromInteraction(interactionId)
+      commentService.getCommentsFromInteraction(interactionId, pageable)
     );
     model.addAttribute("newComment", new NewComment());
     if (interaction instanceof PeopleGroup) {

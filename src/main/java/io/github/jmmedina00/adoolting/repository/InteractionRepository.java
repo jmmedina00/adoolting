@@ -2,8 +2,9 @@ package io.github.jmmedina00.adoolting.repository;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.lettuce.core.dynamic.annotation.Param;
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -32,9 +33,11 @@ public interface InteractionRepository
     "SELECT i FROM Interaction i WHERE " +
     "(i.interactor.id=:interactorId OR i.receiverInteractor.id=:interactorId) " +
     "AND i.deletedAt IS NULL AND i.id NOT IN " +
-    "(SELECT c.id FROM ConfirmableInteraction c WHERE c.confirmedAt IS NULL)"
+    "(SELECT c.id FROM ConfirmableInteraction c WHERE c.confirmedAt IS NULL) " +
+    "ORDER BY i.createdAt DESC"
   )
-  List<Interaction> findInteractionsByInteractorId(
-    @Param("interactorId") Long interactorId
+  Page<Interaction> findInteractionsByInteractorId(
+    @Param("interactorId") Long interactorId,
+    Pageable pageable
   );
 }

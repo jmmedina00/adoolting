@@ -4,8 +4,9 @@ import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import java.util.Date;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +20,14 @@ public class InteractionService {
       .orElseThrow();
   }
 
-  public List<Interaction> getInteractions(Long interactorId) {
-    return interactionRepository.findInteractionsByInteractorId(interactorId);
+  public Page<Interaction> getInteractions(
+    Long interactorId,
+    Pageable pageable
+  ) {
+    return interactionRepository.findInteractionsByInteractorId(
+      interactorId,
+      pageable
+    );
   }
 
   public void deleteInteraction(Long interactionId, Long interactorId)

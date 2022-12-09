@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,9 +57,10 @@ public class PrivateMessageService {
     }
   }
 
-  public List<PrivateMessage> getMessagesBetweenPersons(
+  public Page<PrivateMessage> getMessagesBetweenPersons(
     Long receiverId,
-    Long senderId
+    Long senderId,
+    Pageable pageable
   ) {
     PersonLatestMessages cache = latestMessagesRepository
       .findById(receiverId)
@@ -72,7 +75,11 @@ public class PrivateMessageService {
       }
     }
 
-    return messageRepository.findMessagesByPersonIds(receiverId, senderId);
+    return messageRepository.findMessagesByPersonIds(
+      receiverId,
+      senderId,
+      pageable
+    );
   }
 
   public PrivateMessage sendMessageToPerson(

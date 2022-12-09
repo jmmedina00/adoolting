@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -39,7 +41,11 @@ public class PageController {
   private PostService postService;
 
   @RequestMapping(method = RequestMethod.GET)
-  public String getPageProfile(@PathVariable("id") Long pageId, Model model) {
+  public String getPageProfile(
+    @PathVariable("id") Long pageId,
+    @PageableDefault(value = 10, page = 0) Pageable pageable,
+    Model model
+  ) {
     Page page = pageService.getPage(pageId);
     Person person = AuthenticatedPerson.getPerson();
     Long personId = person.getId();
@@ -60,7 +66,10 @@ public class PageController {
       likeService.getLikeToPageFromPerson(person.getId(), pageId)
     );
     model.addAttribute("interactors", controlledInteractors);
-    model.addAttribute("posts", interactionService.getInteractions(pageId));
+    model.addAttribute(
+      "posts",
+      interactionService.getInteractions(pageId, pageable)
+    );
     model.addAttribute("newPost", new NewPostOnPage());
     return "page/existing";
   }
