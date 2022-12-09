@@ -3,9 +3,7 @@ package io.github.jmmedina00.adoolting.service.page;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.repository.page.PageManagerRepository;
-import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +12,6 @@ import org.springframework.stereotype.Service;
 public class PageManagerService {
   @Autowired
   private PageManagerRepository pageManagerRepository;
-
-  @Autowired
-  private PersonService personService;
 
   public List<Page> getPagesManagedByPerson(Long personId) {
     return pageManagerRepository
@@ -34,21 +29,7 @@ public class PageManagerService {
       .toList();
   }
 
-  public PageManager addManagerForPage(Long personId, Page page)
-    throws Exception {
-    Person person = personService.getPerson(personId);
-    if (person == null) {
-      throw new Exception();
-    }
-
-    List<Page> samePages = getPagesManagedByPerson(personId)
-      .stream()
-      .filter(managedPage -> managedPage.getId() == page.getId())
-      .toList();
-    if (samePages.size() > 0) {
-      throw new AlreadyInPlaceException();
-    }
-
+  public PageManager addManagerForPage(Person person, Page page) {
     PageManager manager = new PageManager();
 
     manager.setPage(page);

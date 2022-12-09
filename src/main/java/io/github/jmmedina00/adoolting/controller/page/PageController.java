@@ -14,7 +14,6 @@ import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.page.PageLikeService;
-import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,9 +38,6 @@ public class PageController {
 
   @Autowired
   private PageLikeService likeService;
-
-  @Autowired
-  private PageManagerService managerService;
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
@@ -134,28 +131,13 @@ public class PageController {
     @PathVariable("pageId") Long pageId,
     @PathVariable("personId") Long personId
   )
-    throws NotAuthorizedException {
-    Page page = pageService.getPage(pageId);
-
-    // TODO: security checks to service
-    if (
-      page == null ||
-      !Objects.equals(
-        page.getCreatedByPerson().getId(),
-        AuthenticatedPerson.getPersonId()
-      )
-    ) {
-      return "redirect:/home?notfound";
-    }
-
-    try {
-      managerService.addManagerForPage(personId, page);
-      return "redirect:/page/" + pageId + "/manage";
-    } catch (AlreadyInPlaceException e) {
-      return "redirect:/page/" + pageId + "/manage?error";
-    } catch (Exception e) {
-      return "redirect:/home?notfound";
-    }
+    throws Exception {
+    pageService.addManagerToPage(
+      AuthenticatedPerson.getPersonId(),
+      personId,
+      pageId
+    );
+    return "redirect:/page/" + pageId + "/manage";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -184,5 +166,10 @@ public class PageController {
   public String toggleLikeOnPage(@PathVariable("id") Long pageId) {
     likeService.toggleLikeToPage(AuthenticatedPerson.getPersonId(), pageId);
     return "redirect:/page/" + pageId;
+  }
+
+  @ExceptionHandler(AlreadyInPlaceException.class)
+  public String redirectToManagementWithError(AlreadyInPlaceException e) {
+    return "redirect:/page/" + e.getPageId() + "/manage?error";
   }
 }

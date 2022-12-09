@@ -2,7 +2,9 @@ package io.github.jmmedina00.adoolting.service.page;
 
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.entity.page.Page;
+import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
@@ -72,5 +74,26 @@ public class PageService {
     page.setCreatedByPerson(person);
 
     return pageRepository.save(page);
+  }
+
+  public PageManager addManagerToPage(
+    Long attemptingPersonId,
+    Long addedPersonId,
+    Long pageId
+  )
+    throws Exception {
+    Page page = getPage(pageId);
+    Long creatorId = page.getCreatedByPerson().getId();
+
+    if (!Objects.equals(creatorId, attemptingPersonId)) {
+      throw new NotAuthorizedException();
+    }
+
+    if (isPageManagedByPerson(pageId, addedPersonId)) {
+      throw new AlreadyInPlaceException(pageId);
+    }
+
+    Person person = personService.getPerson(addedPersonId);
+    return pageManagerService.addManagerForPage(person, page);
   }
 }
