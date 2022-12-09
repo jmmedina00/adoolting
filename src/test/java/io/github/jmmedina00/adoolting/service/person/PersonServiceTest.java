@@ -1,7 +1,6 @@
 package io.github.jmmedina00.adoolting.service.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,17 +45,20 @@ public class PersonServiceTest {
     Person expected = new Person();
 
     Mockito
-      .when(personRepository.findById((long) 1))
+      .when(personRepository.findActivePerson((long) 1))
       .thenReturn(Optional.of(expected));
     assertEquals(expected, personService.getPerson((long) 1));
   }
 
   @Test
   public void getPersonByBadIdReturnsNull() {
-    Mockito
-      .when(personRepository.findById((long) 1))
-      .thenReturn(Optional.ofNullable(null));
-    assertNull(personService.getPerson((long) 1));
+    Mockito.when(personRepository.findActivePerson((long) 1)).thenThrow();
+    assertThrows(
+      Exception.class,
+      () -> {
+        personService.getPerson((long) 1);
+      }
+    );
   }
 
   @Test
@@ -65,7 +67,7 @@ public class PersonServiceTest {
     String newPassword = "mypassword";
 
     Mockito
-      .when(personRepository.findById((long) 1))
+      .when(personRepository.findActivePerson((long) 1))
       .thenReturn(Optional.of(person));
     Mockito
       .when(personRepository.save(any()))
@@ -81,7 +83,7 @@ public class PersonServiceTest {
     assertEquals(saved.getPassword(), "ENCODED");
 
     verify(passwordEncoder, times(1)).encode(newPassword);
-    verify(personRepository, times(1)).findById((long) 1);
+    verify(personRepository, times(1)).findActivePerson((long) 1);
     verify(personRepository, times(1)).save(person);
   }
 

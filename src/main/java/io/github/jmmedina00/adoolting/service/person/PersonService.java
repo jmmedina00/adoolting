@@ -30,7 +30,7 @@ public class PersonService implements UserDetailsService {
   private PersonStatusService statusService;
 
   public Person getPerson(Long personId) {
-    return personRepository.findById(personId).orElse(null);
+    return personRepository.findActivePerson(personId).orElseThrow();
   }
 
   public List<Person> getPersons(Iterable<Long> personIds) {
@@ -43,11 +43,6 @@ public class PersonService implements UserDetailsService {
 
   public PersonInfo getPersonInfo(Long personId) {
     Person person = getPerson(personId);
-
-    if (person == null) {
-      return null;
-    }
-
     PersonInfo info = new PersonInfo();
     info.setFirstName(person.getFirstName());
     info.setLastName(person.getLastName());
@@ -57,11 +52,7 @@ public class PersonService implements UserDetailsService {
   }
 
   public Person updatePerson(Long personId, PersonInfo info) {
-    Person person = personRepository.findById(personId).orElse(null);
-
-    if (person == null) {
-      return null;
-    }
+    Person person = getPerson(personId);
 
     person.setFirstName(info.getFirstName());
     person.setLastName(info.getLastName());
@@ -74,12 +65,7 @@ public class PersonService implements UserDetailsService {
   }
 
   public Person changePersonPassword(Long personId, String newPassword) {
-    Person person = personRepository.findById(personId).orElse(null);
-
-    if (person == null) {
-      return null;
-    }
-
+    Person person = getPerson(personId);
     person.setPassword(passwordEncoder.encode(newPassword));
     return personRepository.save(person);
   }

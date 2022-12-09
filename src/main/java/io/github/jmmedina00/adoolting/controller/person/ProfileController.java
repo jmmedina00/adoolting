@@ -5,7 +5,6 @@ import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
@@ -53,16 +52,6 @@ public class ProfileController {
   ) {
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
     Person person = personService.getPerson(personId);
-
-    if (person == null) {
-      return "redirect:/home?notfound";
-    }
-
-    PersonDetails details = new PersonDetails(person);
-    if (!details.isEnabled()) {
-      return "redirect:/home?notfound";
-    }
-
     NewConfirmableInteraction cInteraction = new NewConfirmableInteraction();
 
     if (!Objects.equals(authenticatedPersonId, personId)) {
