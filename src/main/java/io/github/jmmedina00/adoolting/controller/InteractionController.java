@@ -35,8 +35,7 @@ public class InteractionController {
   public String getInteraction(
     @PathVariable("id") Long interactionId,
     Model model
-  )
-    throws NotAuthorizedException {
+  ) {
     Interaction interaction = interactionService.getInteraction(interactionId);
 
     if (interaction instanceof Comment) {
@@ -77,8 +76,7 @@ public class InteractionController {
     @PathVariable("id") Long interactionId,
     @ModelAttribute("newComment") @Valid NewComment newComment,
     BindingResult result
-  )
-    throws NotAuthorizedException {
+  ) {
     if (result.hasErrors()) {
       return "redirect:/interaction/" + interactionId + "?error";
     }

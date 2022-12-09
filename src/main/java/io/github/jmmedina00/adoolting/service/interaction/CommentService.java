@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
-import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
@@ -35,8 +34,7 @@ public class CommentService {
     NewComment newComment,
     Long interactorId,
     Long interactionId
-  )
-    throws NotAuthorizedException {
+  ) {
     Interactor interactor = interactorService.getInteractor(interactorId);
     Interaction interaction = interactionService.getInteraction(interactionId);
 
