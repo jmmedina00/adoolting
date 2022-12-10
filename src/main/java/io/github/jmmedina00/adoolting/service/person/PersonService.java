@@ -2,9 +2,9 @@ package io.github.jmmedina00.adoolting.service.person;
 
 import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.dto.User;
+import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
-import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.List;
@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindException;
+import org.springframework.validation.DirectFieldBindingResult;
 
 @Service
 public class PersonService implements UserDetailsService {
@@ -51,17 +53,22 @@ public class PersonService implements UserDetailsService {
     return info;
   }
 
-  public boolean isPasswordMatchingPersonPassword(
+  public Person getPersonWithMatchingPassword(
     Long personId,
-    String password
-  ) {
-    try {
-      Person person = getPerson(personId);
-      String encodedPassword = person.getPassword();
-      return passwordEncoder.matches(password, encodedPassword);
-    } catch (Exception e) {
-      return false;
-    }
+    SecureDeletion confirmation
+  )
+    throws Exception {
+    Person person = getPerson(personId);
+    String encodedPassword = person.getPassword();
+    if (
+      passwordEncoder.matches(confirmation.getPassword(), encodedPassword)
+    ) return person;
+    DirectFieldBindingResult result = new DirectFieldBindingResult(
+      confirmation,
+      "confirm"
+    );
+    result.rejectValue("password", "error.password.incorrect");
+    throw new BindException(result);
   }
 
   public Person updatePerson(Long personId, PersonInfo info) {
@@ -83,9 +90,14 @@ public class PersonService implements UserDetailsService {
     return personRepository.save(person);
   }
 
-  public Person createPersonFromUser(User userDto) throws EmailIsUsedException {
+  public Person createPersonFromUser(User userDto) throws BindException {
     if (isEmailAlreadyUsed(userDto.getEmail())) {
-      throw new EmailIsUsedException();
+      DirectFieldBindingResult result = new DirectFieldBindingResult(
+        userDto,
+        "user"
+      );
+      result.rejectValue("email", "error.email.used");
+      throw new BindException(result);
     }
 
     Person person = new Person();

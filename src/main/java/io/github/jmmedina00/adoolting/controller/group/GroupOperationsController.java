@@ -3,7 +3,6 @@ package io.github.jmmedina00.adoolting.controller.group;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
@@ -91,23 +90,18 @@ public class GroupOperationsController {
     return "group-delete";
   }
 
-  // TODO: handle "invalid DTOs" a little bit better
   @RequestMapping(method = RequestMethod.POST, value = "/delete")
   public String deleteGroup(
     @PathVariable("id") Long groupId,
     @ModelAttribute("confirm") @Valid SecureDeletion confirmation
   )
     throws Exception {
-    try {
-      groupService.deleteGroup(
-        groupId,
-        AuthenticatedPerson.getPersonId(),
-        confirmation
-      );
-      return "redirect:/profile";
-    } catch (InvalidDTOException e) {
-      return "redirect:/group/" + groupId + "?error";
-    }
+    groupService.deleteGroup(
+      groupId,
+      AuthenticatedPerson.getPersonId(),
+      confirmation
+    );
+    return "redirect:/profile";
   }
 
   private void precheckFormAccess(Long groupId) throws NotAuthorizedException {

@@ -7,7 +7,6 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
@@ -80,17 +79,13 @@ public class PeopleGroupService {
     SecureDeletion confirmation
   )
     throws Exception {
-    if (!isGroupManagedByPerson(groupId, attemptingPersonId)) {
-      throw new NotAuthorizedException();
-    }
+    Person person = personService.getPersonWithMatchingPassword(
+      attemptingPersonId,
+      confirmation
+    );
 
-    if (
-      !personService.isPasswordMatchingPersonPassword(
-        attemptingPersonId,
-        confirmation.getPassword()
-      )
-    ) {
-      throw new InvalidDTOException();
+    if (!isGroupManagedByPerson(groupId, person.getId())) {
+      throw new NotAuthorizedException();
     }
 
     PeopleGroup group = getGroup(groupId);

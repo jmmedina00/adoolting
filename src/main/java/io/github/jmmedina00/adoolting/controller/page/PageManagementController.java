@@ -5,7 +5,6 @@ import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
@@ -87,16 +86,12 @@ public class PageManagementController {
     @ModelAttribute("confirm") @Valid SecureDeletion confirmation
   )
     throws Exception {
-    try {
-      pageService.deletePage(
-        pageId,
-        AuthenticatedPerson.getPersonId(),
-        confirmation
-      );
-      return "redirect:/profile";
-    } catch (InvalidDTOException e) {
-      return "redirect:/page/" + pageId + "/manage?error";
-    }
+    pageService.deletePage(
+      pageId,
+      AuthenticatedPerson.getPersonId(),
+      confirmation
+    );
+    return "redirect:/profile";
   }
 
   @ExceptionHandler(AlreadyInPlaceException.class)

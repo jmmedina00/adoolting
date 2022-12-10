@@ -6,7 +6,6 @@ import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
@@ -85,18 +84,13 @@ public class PageService {
     throws Exception {
     Page page = getPage(pageId);
     Long creatorId = page.getCreatedByPerson().getId();
+    Person person = personService.getPersonWithMatchingPassword(
+      attemptingPersonId,
+      confirmation
+    );
 
-    if (!Objects.equals(creatorId, attemptingPersonId)) {
+    if (!Objects.equals(creatorId, person.getId())) {
       throw new NotAuthorizedException();
-    }
-
-    if (
-      !personService.isPasswordMatchingPersonPassword(
-        attemptingPersonId,
-        confirmation.getPassword()
-      )
-    ) {
-      throw new InvalidDTOException();
     }
 
     page.setDeletedAt(new Date());

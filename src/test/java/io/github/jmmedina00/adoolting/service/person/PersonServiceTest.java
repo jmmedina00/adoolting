@@ -11,7 +11,6 @@ import io.github.jmmedina00.adoolting.dto.User;
 import io.github.jmmedina00.adoolting.entity.enums.Gender;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
-import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.Date;
@@ -24,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.validation.BindException;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -88,8 +88,7 @@ public class PersonServiceTest {
   }
 
   @Test
-  public void createPersonCreatesPersonFromUserData()
-    throws EmailIsUsedException {
+  public void createPersonCreatesPersonFromUserData() throws BindException {
     String unusedEmail = "juanmi@juanmi.com";
     User user = new User(); // Service expects valid payload from controller
     user.setFirstName("Juanmi");
@@ -135,7 +134,7 @@ public class PersonServiceTest {
       .thenReturn(new Person());
 
     assertThrows(
-      EmailIsUsedException.class,
+      BindException.class,
       () -> {
         personService.createPersonFromUser(user);
       }

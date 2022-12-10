@@ -1,8 +1,6 @@
 package io.github.jmmedina00.adoolting.controller.anonymous;
 
 import io.github.jmmedina00.adoolting.dto.User;
-import io.github.jmmedina00.adoolting.exception.EmailIsUsedException;
-import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
@@ -13,12 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/")
@@ -73,28 +70,8 @@ public class LandingController {
 
   @RequestMapping(method = RequestMethod.POST, value = "/register")
   public String registerNewPerson(@ModelAttribute("user") @Valid User user)
-    throws InvalidDTOException {
+    throws BindException {
     personService.createPersonFromUser(user);
     return "valid";
-  }
-
-  private String failToRegisterPerson(
-    User user,
-    BindingResult result,
-    RedirectAttributes attributes,
-    InvalidDTOException e
-  ) {
-    // Preserve errors and originally input values when redirecting
-    attributes.addFlashAttribute(
-      "org.springframework.validation.BindingResult.user",
-      result
-    );
-    attributes.addFlashAttribute("user", user);
-
-    if (e instanceof EmailIsUsedException) {
-      result.rejectValue("email", "error.email.used");
-    }
-
-    return "redirect:";
   }
 }
