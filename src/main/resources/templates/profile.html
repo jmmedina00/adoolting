@@ -108,10 +108,8 @@
     </span>
   </h3>
   <!-- instanceOf does not work reliably between restarts -->
-  <p
-    th:if="${post.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
-    th:text="${post.content}"
-  ></p>
+  <p th:text="${post.getFirstParagraph()}"></p>
+  <p th:if="${#arrays.length(post.getParagraphs()) > 1}">...</p>
   <img
     th:each="medium : ${post.media}"
     th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"

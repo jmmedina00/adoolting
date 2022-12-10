@@ -10,10 +10,10 @@ public class Post extends Interaction {
   private String content;
 
   public String getContent() {
-    return content;
+    return content.trim();
   }
 
   public void setContent(String content) {
-    this.content = content;
+    this.content = content.trim();
   }
 }

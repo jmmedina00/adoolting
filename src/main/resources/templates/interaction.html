@@ -67,10 +67,9 @@
     <button type="submit">Delete</button>
   </form>
 </div>
-<p
-  th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.interaction.Post')}"
-  th:text="${interaction.content}"
-></p>
+<div>
+  <p th:each="p : ${interaction.getParagraphs()}" th:text="${p}"></p>
+</div>
 <img
   th:each="medium : ${interaction.media}"
   th:src="@{/media/thumbnail/512/{id}(id=${medium.id})}"

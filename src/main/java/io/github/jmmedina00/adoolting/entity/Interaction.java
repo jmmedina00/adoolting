@@ -94,4 +94,16 @@ public class Interaction {
   public void setMedia(List<Medium> media) {
     this.media = media;
   }
+
+  public String getContent() {
+    return "";
+  }
+
+  public String[] getParagraphs() {
+    return getContent().split("\r\n");
+  }
+
+  public String getFirstParagraph() {
+    return getParagraphs()[0];
+  }
 }

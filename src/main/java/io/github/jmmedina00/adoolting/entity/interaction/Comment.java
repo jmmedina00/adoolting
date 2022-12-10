@@ -25,10 +25,10 @@ public class Comment extends Interaction {
   }
 
   public String getContent() {
-    return content;
+    return content.trim();
   }
 
   public void setContent(String content) {
-    this.content = content;
+    this.content = content.trim();
   }
 }
