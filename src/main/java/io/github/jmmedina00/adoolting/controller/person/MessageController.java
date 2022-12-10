@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,13 +63,8 @@ public class MessageController {
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
   public String sendMessageToPerson(
     @PathVariable("personId") Long personId,
-    @ModelAttribute("newMessage") @Valid NewMessage newMessage,
-    BindingResult result
+    @ModelAttribute("newMessage") @Valid NewMessage newMessage
   ) {
-    if (result.hasErrors()) {
-      return "redirect:/message/" + personId + "?error";
-    }
-
     Long authenticatedPersonId = AuthenticatedPerson.getPersonId();
 
     if (Objects.equals(personId, authenticatedPersonId)) {

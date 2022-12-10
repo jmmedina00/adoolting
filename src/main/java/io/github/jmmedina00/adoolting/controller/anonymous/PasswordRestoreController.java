@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/restore-password")
@@ -33,19 +31,8 @@ public class PasswordRestoreController {
 
   @RequestMapping(method = RequestMethod.POST)
   public String sendRestoreLink(
-    @ModelAttribute("forgotPassword") @Valid ForgotPassword forgotPassword,
-    BindingResult result,
-    RedirectAttributes attributes
+    @ModelAttribute("forgotPassword") @Valid ForgotPassword forgotPassword
   ) {
-    if (result.hasErrors()) {
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.forgotPassword",
-        result
-      );
-      attributes.addFlashAttribute("forgotPassword", forgotPassword);
-      return "redirect:restore-password";
-    }
-
     try {
       restoreService.createTokenFromEmail(forgotPassword.getEmail());
     } catch (UsernameNotFoundException e) {
@@ -55,6 +42,7 @@ public class PasswordRestoreController {
     return "password/email-sent";
   }
 
+  // TODO: add useful checks to service
   @RequestMapping(method = RequestMethod.GET, value = "/{token}")
   public String getRestoreForm(
     @PathVariable("token") String token,
@@ -77,21 +65,10 @@ public class PasswordRestoreController {
   @RequestMapping(method = RequestMethod.POST, value = "/{token}")
   public String restorePassword(
     @PathVariable("token") String token,
-    @ModelAttribute("newPassword") @Valid RestorePassword restorePassword,
-    BindingResult result,
-    RedirectAttributes attributes
+    @ModelAttribute("newPassword") @Valid RestorePassword restorePassword
   ) {
     if (!restoreService.isTokenStillUseful(token)) {
       return "redirect:/";
-    }
-
-    if (result.hasErrors()) {
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.newPassword",
-        result
-      );
-      attributes.addFlashAttribute("newPassword", restorePassword);
-      return "redirect:/restore-password/" + token;
     }
 
     restoreService.changePasswordWithToken(

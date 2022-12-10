@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,21 +69,19 @@ public class PageController {
       "posts",
       interactionService.getInteractions(pageId, pageable)
     );
-    model.addAttribute("newPost", new NewPostOnPage());
+    if (!model.containsAttribute("newPost")) {
+      model.addAttribute("newPost", new NewPostOnPage());
+    }
+
     return "page/existing";
   }
 
   @RequestMapping(method = RequestMethod.POST)
   public String createPostOnPage(
     @PathVariable("id") Long pageId,
-    @ModelAttribute("newPost") @Valid NewPostOnPage newPost,
-    BindingResult result
+    @ModelAttribute("newPost") @Valid NewPostOnPage newPost
   )
     throws NotAuthorizedException {
-    if (result.hasErrors()) {
-      return "redirect:/page/" + pageId + "?error";
-    }
-
     Post post = postService.postOnPage(newPost, pageId);
     return "redirect:/page/" + pageId + "?post=" + post.getId();
   }

@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,13 +76,8 @@ public class InteractionController {
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/comment")
   public String commentOnInteraction(
     @PathVariable("id") Long interactionId,
-    @ModelAttribute("newComment") @Valid NewComment newComment,
-    BindingResult result
+    @ModelAttribute("newComment") @Valid NewComment newComment
   ) {
-    if (result.hasErrors()) {
-      return "redirect:/interaction/" + interactionId + "?error";
-    }
-
     Comment comment = commentService.createComment(
       newComment,
       AuthenticatedPerson.getPersonId(),

@@ -14,7 +14,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,14 +84,9 @@ public class PageManagementController {
   @RequestMapping(method = RequestMethod.POST, value = "/delete")
   public String deletePage(
     @PathVariable("id") Long pageId,
-    @ModelAttribute("confirm") @Valid SecureDeletion confirmation,
-    BindingResult result
+    @ModelAttribute("confirm") @Valid SecureDeletion confirmation
   )
     throws Exception {
-    if (result.hasErrors()) {
-      return "redirect:/page/" + pageId + "/manage?error";
-    }
-
     try {
       pageService.deletePage(
         pageId,

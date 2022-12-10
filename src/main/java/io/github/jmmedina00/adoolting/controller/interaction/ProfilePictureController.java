@@ -9,13 +9,11 @@ import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Controller
 @RequestMapping("/pfp")
@@ -50,14 +48,9 @@ public class ProfilePictureController {
   @RequestMapping(method = RequestMethod.POST, value = "/interactor/{id}")
   public String setProfilePictureOfInteractor(
     @PathVariable("id") Long interactorId,
-    @ModelAttribute("pfp") @Valid ProfilePictureFile pfp,
-    BindingResult result
+    @ModelAttribute("pfp") @Valid ProfilePictureFile pfp
   )
     throws NotAuthorizedException {
-    if (result.hasErrors()) {
-      throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
-    }
-
     ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
       interactorId,
       AuthenticatedPerson.getPersonId(),
@@ -69,14 +62,9 @@ public class ProfilePictureController {
   @RequestMapping(method = RequestMethod.POST, value = "/group/{id}")
   public String setProfilePictureOfGroup(
     @PathVariable("id") Long groupId,
-    @ModelAttribute("pfp") @Valid ProfilePictureFile pfp,
-    BindingResult result
+    @ModelAttribute("pfp") @Valid ProfilePictureFile pfp
   )
     throws NotAuthorizedException {
-    if (result.hasErrors()) {
-      throw new MaxUploadSizeExceededException(0); // Take advantage of exception advice
-    }
-
     profilePictureService.setProfilePictureOfGroup(
       groupId,
       AuthenticatedPerson.getPersonId(),

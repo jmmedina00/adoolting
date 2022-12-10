@@ -9,12 +9,10 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/group")
@@ -39,19 +37,8 @@ public class GroupController {
 
   @RequestMapping(method = RequestMethod.POST)
   public String createNewGroup(
-    @ModelAttribute("newGroup") @Valid NewGroup newGroup,
-    BindingResult result,
-    RedirectAttributes attributes
+    @ModelAttribute("newGroup") @Valid NewGroup newGroup
   ) {
-    if (result.hasErrors()) {
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.newGroup",
-        result
-      );
-      attributes.addFlashAttribute("newGroup", newGroup);
-      return "redirect:/group";
-    }
-
     PeopleGroup group = groupService.createGroup(
       newGroup,
       AuthenticatedPerson.getPersonId()

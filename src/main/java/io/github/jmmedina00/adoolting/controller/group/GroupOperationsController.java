@@ -11,12 +11,10 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/group/{id}")
@@ -48,20 +46,9 @@ public class GroupOperationsController {
   @RequestMapping(method = RequestMethod.POST)
   public String updateGroupInfo(
     @PathVariable("id") Long groupId,
-    @ModelAttribute("form") @Valid NewGroup newGroup,
-    BindingResult result,
-    RedirectAttributes attributes
+    @ModelAttribute("form") @Valid NewGroup newGroup
   )
     throws NotAuthorizedException {
-    if (result.hasErrors()) {
-      attributes.addFlashAttribute(
-        "org.springframework.validation.BindingResult.form",
-        result
-      );
-      attributes.addFlashAttribute("form", newGroup);
-      return "redirect:/group/" + groupId;
-    }
-
     groupService.updateGroup(
       groupId,
       AuthenticatedPerson.getPersonId(),
@@ -98,21 +85,19 @@ public class GroupOperationsController {
     throws NotAuthorizedException {
     precheckFormAccess(groupId);
     model.addAttribute("group", groupService.getGroup(groupId));
-    model.addAttribute("confirm", new SecureDeletion());
+    if (!model.containsAttribute("confirm")) {
+      model.addAttribute("confirm", new SecureDeletion());
+    }
     return "group-delete";
   }
 
+  // TODO: handle "invalid DTOs" a little bit better
   @RequestMapping(method = RequestMethod.POST, value = "/delete")
   public String deleteGroup(
     @PathVariable("id") Long groupId,
-    @ModelAttribute("confirm") @Valid SecureDeletion confirmation,
-    BindingResult result
+    @ModelAttribute("confirm") @Valid SecureDeletion confirmation
   )
     throws Exception {
-    if (result.hasErrors()) {
-      return "redirect:/group/" + groupId + "?error";
-    }
-
     try {
       groupService.deleteGroup(
         groupId,
