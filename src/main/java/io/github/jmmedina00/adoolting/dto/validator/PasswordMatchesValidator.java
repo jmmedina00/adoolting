@@ -11,6 +11,15 @@ public class PasswordMatchesValidator
   @Override
   public boolean isValid(Object value, ConstraintValidatorContext context) {
     WithConfirmablePassword passwordPair = (WithConfirmablePassword) value;
-    return passwordPair.getPassword().equals(passwordPair.getConfirmPassword());
+    if (passwordPair.getPassword().equals(passwordPair.getConfirmPassword())) {
+      return true;
+    }
+
+    context.disableDefaultConstraintViolation();
+    context
+      .buildConstraintViolationWithTemplate("{error.password.confirm}")
+      .addPropertyNode("confirmPassword")
+      .addConstraintViolation();
+    return false;
   }
 }

@@ -8,9 +8,20 @@ import javax.validation.ConstraintValidatorContext;
 public class EmailMatchesValidator
   implements ConstraintValidator<EmailMatches, Object> {
 
+  // https://stackoverflow.com/questions/7109296/bind-global-errors-generated-from-form-validation-to-specific-form-fields-in-spr
+
   @Override
   public boolean isValid(Object value, ConstraintValidatorContext context) {
     User userDto = (User) value;
-    return userDto.getEmail().equals(userDto.getConfirmEmail());
+    if (userDto.getEmail().equals(userDto.getConfirmEmail())) {
+      return true;
+    }
+
+    context.disableDefaultConstraintViolation();
+    context
+      .buildConstraintViolationWithTemplate("{error.email.confirm}")
+      .addPropertyNode("confirmEmail")
+      .addConstraintViolation();
+    return false;
   }
 }

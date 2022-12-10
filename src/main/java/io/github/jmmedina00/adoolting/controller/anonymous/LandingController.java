@@ -6,7 +6,6 @@ import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
-import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -15,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,16 +72,10 @@ public class LandingController {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/register")
-  public String registerNewPerson(
-    @ModelAttribute("user") @Valid User user,
-    BindingResult result,
-    RedirectAttributes attributes
-  ) {
-    try {
-      return tryToRegisterPerson(user, result, attributes);
-    } catch (InvalidDTOException e) {
-      return failToRegisterPerson(user, result, attributes, e);
-    }
+  public String registerNewPerson(@ModelAttribute("user") @Valid User user)
+    throws InvalidDTOException {
+    personService.createPersonFromUser(user);
+    return "valid";
   }
 
   private String failToRegisterPerson(
@@ -104,29 +96,5 @@ public class LandingController {
     }
 
     return "redirect:";
-  }
-
-  private String tryToRegisterPerson(
-    User user,
-    BindingResult result,
-    RedirectAttributes attributes
-  )
-    throws InvalidDTOException {
-    if (!result.hasErrors()) {
-      personService.createPersonFromUser(user);
-      return "valid";
-    }
-
-    for (ObjectError err : result.getGlobalErrors()) {
-      switch (Optional.of(err.getCode()).orElse("")) {
-        case "EmailMatches":
-          result.rejectValue("confirmEmail", "error.email.confirm");
-          break;
-        case "PasswordMatches":
-          result.rejectValue("confirmPassword", "error.password.confirm");
-          break;
-      }
-    }
-    throw new InvalidDTOException();
   }
 }
