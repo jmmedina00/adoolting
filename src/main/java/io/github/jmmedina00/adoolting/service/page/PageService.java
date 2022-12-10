@@ -1,14 +1,17 @@
 package io.github.jmmedina00.adoolting.service.page;
 
 import io.github.jmmedina00.adoolting.dto.page.NewPage;
+import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -71,6 +74,32 @@ public class PageService {
     page.setUrl(newPage.getUrl());
     page.setCreatedByPerson(person);
 
+    return pageRepository.save(page);
+  }
+
+  public Page deletePage(
+    Long pageId,
+    Long attemptingPersonId,
+    SecureDeletion confirmation
+  )
+    throws Exception {
+    Page page = getPage(pageId);
+    Long creatorId = page.getCreatedByPerson().getId();
+
+    if (!Objects.equals(creatorId, attemptingPersonId)) {
+      throw new NotAuthorizedException();
+    }
+
+    if (
+      !personService.isPasswordMatchingPersonPassword(
+        attemptingPersonId,
+        confirmation.getPassword()
+      )
+    ) {
+      throw new InvalidDTOException();
+    }
+
+    page.setDeletedAt(new Date());
     return pageRepository.save(page);
   }
 

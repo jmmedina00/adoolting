@@ -1,0 +1,31 @@
+<h1>Deleting <span th:text="${page.name}"></span></h1>
+
+<!DOCTYPE html>
+<form
+  method="post"
+  th:object="${confirm}"
+  th:action="@{/page/{id}/manage/delete(id=${page.id})}"
+  enctype="utf8"
+>
+  <div>
+    <label>Password</label>
+    <input th:field="*{password}" type="password" />
+    <p
+      th:if="${#fields.hasErrors('password')}"
+      th:text="${#fields.errors('password')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>Confirm password</label>
+    <input th:field="*{confirmPassword}" type="password" />
+    <p
+      th:if="${#fields.hasErrors('global')}"
+      th:text="${#fields.errors('global')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <button type="submit">Submit</button>
+</form>

@@ -2,16 +2,21 @@ package io.github.jmmedina00.adoolting.controller.page;
 
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
+import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +53,21 @@ public class PageManagementController {
     return "page/manage";
   }
 
+  @RequestMapping(method = RequestMethod.GET, value = "/delete")
+  public String showDeleteForm(@PathVariable("id") Long pageId, Model model)
+    throws NotAuthorizedException {
+    Long personId = AuthenticatedPerson.getPersonId();
+    Page page = pageService.getPage(pageId);
+
+    if (!Objects.equals(page.getCreatedByPerson().getId(), personId)) {
+      throw new NotAuthorizedException();
+    }
+
+    model.addAttribute("page", page);
+    model.addAttribute("confirm", new SecureDeletion());
+    return "page/delete";
+  }
+
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
   public String addPersonAsManager(
     @PathVariable("id") Long pageId,
@@ -60,6 +80,29 @@ public class PageManagementController {
       pageId
     );
     return "redirect:/page/" + pageId + "/manage";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/delete")
+  public String deletePage(
+    @PathVariable("id") Long pageId,
+    @ModelAttribute("confirm") @Valid SecureDeletion confirmation,
+    BindingResult result
+  )
+    throws Exception {
+    if (result.hasErrors()) {
+      return "redirect:/page/" + pageId + "/manage?error";
+    }
+
+    try {
+      pageService.deletePage(
+        pageId,
+        AuthenticatedPerson.getPersonId(),
+        confirmation
+      );
+      return "redirect:/profile";
+    } catch (InvalidDTOException e) {
+      return "redirect:/page/" + pageId + "/manage?error";
+    }
   }
 
   @ExceptionHandler(AlreadyInPlaceException.class)
