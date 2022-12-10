@@ -51,6 +51,19 @@ public class PersonService implements UserDetailsService {
     return info;
   }
 
+  public boolean isPasswordMatchingPersonPassword(
+    Long personId,
+    String password
+  ) {
+    try {
+      Person person = getPerson(personId);
+      String encodedPassword = person.getPassword();
+      return passwordEncoder.matches(password, encodedPassword);
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   public Person updatePerson(Long personId, PersonInfo info) {
     Person person = getPerson(personId);
 

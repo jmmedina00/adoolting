@@ -2,14 +2,17 @@ package io.github.jmmedina00.adoolting.service.group;
 
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
+import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import java.util.Date;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class PeopleGroupService {
   private PersonService personService;
 
   public PeopleGroup getGroup(Long groupId) {
-    return groupRepository.findById(groupId).orElseThrow();
+    return groupRepository.findActiveGroup(groupId).orElseThrow();
   }
 
   public PeopleGroup createGroup(NewGroup newGroup, Long personId) {
@@ -69,6 +72,30 @@ public class PeopleGroupService {
     form.setName(group.getName());
 
     return form;
+  }
+
+  public PeopleGroup deleteGroup(
+    Long groupId,
+    Long attemptingPersonId,
+    SecureDeletion confirmation
+  )
+    throws Exception {
+    if (!isGroupManagedByPerson(groupId, attemptingPersonId)) {
+      throw new NotAuthorizedException();
+    }
+
+    if (
+      !personService.isPasswordMatchingPersonPassword(
+        attemptingPersonId,
+        confirmation.getPassword()
+      )
+    ) {
+      throw new InvalidDTOException();
+    }
+
+    PeopleGroup group = getGroup(groupId);
+    group.setDeletedAt(new Date());
+    return groupRepository.save(group);
   }
 
   public boolean isGroupManagedByPerson(Long groupId, Long personId) {

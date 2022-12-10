@@ -2,7 +2,8 @@ package io.github.jmmedina00.adoolting.controller.group;
 
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
-import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
+import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
+import io.github.jmmedina00.adoolting.exception.InvalidDTOException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
@@ -32,18 +33,8 @@ public class GroupOperationsController {
     Model model
   )
     throws NotAuthorizedException {
-    PeopleGroup group = groupService.getGroup(groupId);
-
-    if (
-      !groupService.isGroupManagedByPerson(
-        groupId,
-        AuthenticatedPerson.getPersonId()
-      )
-    ) {
-      throw new NotAuthorizedException();
-    }
-
-    model.addAttribute("group", group);
+    precheckFormAccess(groupId);
+    model.addAttribute("group", groupService.getGroup(groupId));
     model.addAttribute(
       "cInteractions",
       joinRequestService.getExistingForGroup(groupId)
@@ -100,5 +91,48 @@ public class GroupOperationsController {
     );
 
     return "redirect:/profile/" + personId;
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/delete")
+  public String showDeleteForm(@PathVariable("id") Long groupId, Model model)
+    throws NotAuthorizedException {
+    precheckFormAccess(groupId);
+    model.addAttribute("group", groupService.getGroup(groupId));
+    model.addAttribute("confirm", new SecureDeletion());
+    return "group-delete";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/delete")
+  public String deleteGroup(
+    @PathVariable("id") Long groupId,
+    @ModelAttribute("confirm") @Valid SecureDeletion confirmation,
+    BindingResult result
+  )
+    throws Exception {
+    if (result.hasErrors()) {
+      return "redirect:/group/" + groupId + "?error";
+    }
+
+    try {
+      groupService.deleteGroup(
+        groupId,
+        AuthenticatedPerson.getPersonId(),
+        confirmation
+      );
+      return "redirect:/profile";
+    } catch (InvalidDTOException e) {
+      return "redirect:/group/" + groupId + "?error";
+    }
+  }
+
+  private void precheckFormAccess(Long groupId) throws NotAuthorizedException {
+    if (
+      !groupService.isGroupManagedByPerson(
+        groupId,
+        AuthenticatedPerson.getPersonId()
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
   }
 }

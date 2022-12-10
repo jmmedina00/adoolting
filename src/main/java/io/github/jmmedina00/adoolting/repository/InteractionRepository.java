@@ -21,7 +21,8 @@ public interface InteractionRepository
 
   @Query(
     "SELECT i FROM Interaction i WHERE i.id=:interactionId AND " +
-    "(i.interactor.id=:interactorId OR i.receiverInteractor.id=:interactorId) " +
+    "(i.interactor.id=:interactorId OR i.receiverInteractor.id=:interactorId) AND " +
+    "i.id NOT IN (SELECT g.id FROM PeopleGroup g) " +
     "AND i.deletedAt IS NULL"
   )
   Optional<Interaction> findDeletableInteractionForInteractor(
