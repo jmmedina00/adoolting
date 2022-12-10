@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -84,14 +83,9 @@ public class ProfileController {
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")
   public String commentOnPersonProfile(
     @PathVariable("personId") Long personId,
-    @ModelAttribute("newPost") @Valid NewPost newPost,
-    BindingResult result
+    @ModelAttribute("newPost") @Valid NewPost newPost
   )
     throws NotAuthorizedException {
-    if (result.hasErrors()) {
-      return "redirect:/profile/" + personId + "?error";
-    }
-
     Post savedPost = postService.postOnProfile(
       AuthenticatedPerson.getPersonId(),
       personId,
