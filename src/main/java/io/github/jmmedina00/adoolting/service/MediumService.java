@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
@@ -45,6 +44,9 @@ public class MediumService {
   private String square = "square/";
 
   private int[] expectedSizes = { 512, 256, 128, 64 };
+
+  private static int FULL_FOLDER = 0;
+  private static int SQUARE_FOLDER = 1;
 
   @PostConstruct
   public void initializeDirectoriesIfNeeded() {
@@ -140,79 +142,33 @@ public class MediumService {
     }
   }
 
-  // TODO: refactor to make it more likeable by JobRunr
   @Job(name = "Get image square")
   public void getImageSquare(Long mediumId) throws Exception {
-    Medium medium = mediumRepository.findById(mediumId).orElse(null);
-
-    if (medium == null) {
-      return;
-    }
-
-    String extension = medium.getReference().replace("cdn:", "");
-    File fullFile = new File(
-      workDirectory + toCdn + mediaDir + full + mediumId + extension
-    );
-    File squareFile = new File(
-      workDirectory + toCdn + mediaDir + square + mediumId + extension
-    );
+    Medium medium = mediumRepository.findById(mediumId).get();
+    File fullFile = getMediumFile(medium, FULL_FOLDER);
+    File squareFile = getMediumFile(medium, SQUARE_FOLDER);
 
     if (!fullFile.exists() || squareFile.exists()) {
       return;
     }
 
-    ImageWriter writer = getProperImageWriter(fullFile);
     BufferedImage sourceImage = ImageIO.read(fullFile);
-    ImageOutputStream outputStream = new FileImageOutputStream(squareFile);
-
     int imageType = sourceImage.getColorModel().hasAlpha()
       ? BufferedImage.TYPE_4BYTE_ABGR
       : sourceImage.getType(); // Account for transparent image cases, fallback for JPGs - writer doesn't like it
 
-    int minDimension = Stream
-      .of(sourceImage.getWidth(), sourceImage.getHeight())
-      .mapToInt(v -> v)
-      .min()
-      .getAsInt();
-
+    int width = sourceImage.getWidth();
+    int height = sourceImage.getHeight();
+    int minDimension = width > height ? height : width;
     BufferedImage square = new BufferedImage(
       minDimension,
       minDimension,
       imageType
     );
-    Graphics2D graphics = square.createGraphics();
-    graphics.setRenderingHint(
-      RenderingHints.KEY_INTERPOLATION,
-      RenderingHints.VALUE_INTERPOLATION_BICUBIC
-    );
-    graphics.setBackground(new Color(0, 0, 0, 0));
-
-    if (sourceImage.getWidth() > sourceImage.getHeight()) {
-      int offset = (sourceImage.getWidth() - sourceImage.getHeight()) / 2;
-      graphics.drawImage(
-        sourceImage,
-        offset * -1,
-        0,
-        sourceImage.getWidth(),
-        sourceImage.getHeight(),
-        null
-      );
-    } else {
-      int offset = (sourceImage.getHeight() - sourceImage.getWidth()) / 2;
-      graphics.drawImage(
-        sourceImage,
-        0,
-        offset * -1,
-        sourceImage.getWidth(),
-        sourceImage.getHeight(),
-        null
-      );
-    }
-
+    Graphics2D graphics = prepareGraphics(square);
+    drawOnToGraphics(graphics, sourceImage);
     graphics.dispose();
-    writer.setOutput(outputStream);
-    writer.write(square);
-    outputStream.close();
+    writeImageToTargetFile(fullFile, squareFile, square);
 
     for (int size : expectedSizes) {
       if (minDimension >= size) {
@@ -223,49 +179,81 @@ public class MediumService {
 
   @Job(name = "Scale squared image")
   public void scaleSquareImageToSize(Long mediumId, int size) throws Exception {
-    Medium medium = mediumRepository.findById(mediumId).orElse(null);
-
-    if (medium == null) {
-      return;
-    }
-
-    String extension = medium.getReference().replace("cdn:", "");
-    File squareFile = new File(
-      workDirectory + toCdn + mediaDir + square + mediumId + extension
-    );
-    File scaledFile = new File(
-      workDirectory + toCdn + mediaDir + size + "/" + mediumId + extension
-    );
+    Medium medium = mediumRepository.findById(mediumId).get();
+    File squareFile = getMediumFile(medium, SQUARE_FOLDER);
+    File scaledFile = getMediumFile(medium, size);
 
     if (!squareFile.exists() || scaledFile.exists()) {
       return;
     }
 
-    ImageWriter writer = getProperImageWriter(squareFile);
     BufferedImage sourceImage = ImageIO.read(squareFile);
-    ImageOutputStream outputStream = new FileImageOutputStream(scaledFile);
-
     int imageType = sourceImage.getColorModel().hasAlpha()
       ? BufferedImage.TYPE_4BYTE_ABGR
       : sourceImage.getType();
 
     BufferedImage target = new BufferedImage(size, size, imageType);
+    Graphics2D graphics = prepareGraphics(target);
+    graphics.drawImage(sourceImage, 0, 0, size, size, null);
+    graphics.dispose();
+    writeImageToTargetFile(squareFile, scaledFile, target);
+  }
+
+  private Graphics2D prepareGraphics(BufferedImage target) {
     Graphics2D graphics = target.createGraphics();
     graphics.setRenderingHint(
       RenderingHints.KEY_INTERPOLATION,
       RenderingHints.VALUE_INTERPOLATION_BICUBIC
     );
     graphics.setBackground(new Color(0, 0, 0, 0));
-    graphics.drawImage(sourceImage, 0, 0, size, size, null);
-    graphics.dispose();
-
-    writer.setOutput(outputStream);
-    writer.write(target);
-    outputStream.close();
+    return graphics;
   }
 
-  private ImageWriter getProperImageWriter(File file) throws Exception {
-    String imageMimeType = Files.probeContentType(file.toPath());
-    return ImageIO.getImageWritersByMIMEType(imageMimeType).next();
+  private File getMediumFile(Medium medium, int size) {
+    String baseDir = workDirectory + toCdn + mediaDir;
+    String fileName =
+      medium.getId() + medium.getReference().replace("cdn:", "");
+    String specificFolder = Integer.toString(size) + "/";
+
+    if (size == FULL_FOLDER) {
+      specificFolder = full;
+    }
+
+    if (size == SQUARE_FOLDER) {
+      specificFolder = square;
+    }
+
+    return new File(baseDir + specificFolder + fileName);
+  }
+
+  private void drawOnToGraphics(Graphics2D graphics, BufferedImage source) {
+    int width = source.getWidth();
+    int height = source.getHeight();
+    int offset;
+
+    if (width > height) {
+      offset = (width - height) / 2;
+      graphics.drawImage(source, offset * -1, 0, width, height, null);
+    } else {
+      offset = (height - width) / 2;
+      graphics.drawImage(source, 0, offset * -1, width, height, null);
+    }
+  }
+
+  private void writeImageToTargetFile(
+    File source,
+    File target,
+    BufferedImage image
+  )
+    throws Exception {
+    String imageMimeType = Files.probeContentType(source.toPath());
+    ImageWriter writer = ImageIO
+      .getImageWritersByMIMEType(imageMimeType)
+      .next();
+    ImageOutputStream outputStream = new FileImageOutputStream(target);
+
+    writer.setOutput(outputStream);
+    writer.write(image);
+    outputStream.close();
   }
 }
