@@ -1,7 +1,7 @@
 <h1>New group</h1>
 <form
   th:object="${newGroup}"
-  th:action="${param.event} ? @{/event} : @{/group}"
+  th:action="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'} ? @{/event} : @{/group}"
   th:method="post"
 >
   <div>
