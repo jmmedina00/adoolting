@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.controller.anonymous;
 
 import io.github.jmmedina00.adoolting.dto.util.ForgotPassword;
 import io.github.jmmedina00.adoolting.dto.util.RestorePassword;
+import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.util.PasswordRestoreService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,23 +43,18 @@ public class PasswordRestoreController {
     return "password/email-sent";
   }
 
-  // TODO: add useful checks to service
   @RequestMapping(method = RequestMethod.GET, value = "/{token}")
   public String getRestoreForm(
     @PathVariable("token") String token,
     Model model
-  ) {
-    if (!restoreService.isTokenStillUseful(token)) {
-      return "redirect:/";
-    }
-
+  )
+    throws TokenExpiredException {
     if (!model.containsAttribute("newPassword")) {
       RestorePassword restorePassword = new RestorePassword();
       model.addAttribute("newPassword", restorePassword);
     }
 
-    model.addAttribute("token", token);
-
+    model.addAttribute("token", restoreService.getToken(token));
     return "password/restore-password";
   }
 
@@ -66,11 +62,8 @@ public class PasswordRestoreController {
   public String restorePassword(
     @PathVariable("token") String token,
     @ModelAttribute("newPassword") @Valid RestorePassword restorePassword
-  ) {
-    if (!restoreService.isTokenStillUseful(token)) {
-      return "redirect:/";
-    }
-
+  )
+    throws TokenExpiredException {
     restoreService.changePasswordWithToken(
       token,
       restorePassword.getPassword()

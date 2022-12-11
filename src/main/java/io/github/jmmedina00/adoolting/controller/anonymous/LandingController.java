@@ -56,16 +56,10 @@ public class LandingController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/confirm/{token}")
-  public String confirmToken(@PathVariable("token") String token) {
-    String query = "?success";
-
-    try {
-      confirmationService.confirmToken(token);
-    } catch (TokenExpiredException e) {
-      query = "?expired";
-    }
-
-    return "redirect:/" + query;
+  public String confirmToken(@PathVariable("token") String token)
+    throws TokenExpiredException {
+    confirmationService.confirmToken(token);
+    return "redirect:/?success";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/register")

@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.service.util;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PasswordRestoreToken;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
+import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.repository.util.PasswordRestoreTokenRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Calendar;
@@ -28,25 +29,16 @@ public class PasswordRestoreService {
   @Value("${restoretoken.expires.hours}")
   private int expireInHours;
 
-  public boolean isTokenStillUseful(String token) {
-    PasswordRestoreToken tokenObj = restoreTokenRepository.findByToken(token);
-
-    if (tokenObj == null) {
-      return false;
-    }
-
-    return (
-      tokenObj.getExpiresAt().after(new Date()) && tokenObj.getUsedAt() == null
-    );
+  public PasswordRestoreToken getToken(String token)
+    throws TokenExpiredException {
+    return restoreTokenRepository
+      .findToken(token)
+      .orElseThrow(TokenExpiredException::new);
   }
 
-  public void changePasswordWithToken(String token, String newPassword) {
-    PasswordRestoreToken tokenObj = restoreTokenRepository.findByToken(token);
-
-    if (tokenObj == null) {
-      return;
-    }
-
+  public void changePasswordWithToken(String token, String newPassword)
+    throws TokenExpiredException {
+    PasswordRestoreToken tokenObj = getToken(token);
     personService.changePersonPassword(
       tokenObj.getPerson().getId(),
       newPassword
