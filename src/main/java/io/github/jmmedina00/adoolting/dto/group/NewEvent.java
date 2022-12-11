@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.dto.group;
 
+import io.github.jmmedina00.adoolting.dto.annotation.HasFutureThreshold;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
+@HasFutureThreshold
 public class NewEvent extends NewGroup {
   @NotNull(message = "{error.not_empty}")
   @NotEmpty(message = "{error.not_empty}")
@@ -57,6 +59,10 @@ public class NewEvent extends NewGroup {
   }
 
   public Date getFinalizedDate() {
+    if (date == null || time == null) {
+      return new Date(Long.MAX_VALUE);
+    }
+
     Calendar calendarDate = Calendar.getInstance();
     calendarDate.setTime(date);
     Calendar calendarTime = Calendar.getInstance();
