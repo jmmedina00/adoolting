@@ -18,22 +18,10 @@
 </ul>
 <h3>Add as managers</h3>
 <ul>
-  <li
-    th:each="friend : ${friends}"
-    th:object="${#authentication.principal.person}"
-  >
-    <span
-      th:unless="${friend.interactor.id} == *{id}"
-      th:text="${friend.interactor.firstName + ' ' + friend.interactor.lastName}"
-    >
-    </span>
-    <span
-      th:unless="${friend.receiverInteractor.id} == *{id}"
-      th:text="${friend.receiverInteractor.firstName + ' ' + friend.receiverInteractor.lastName}"
-    >
-    </span>
+  <li th:each="friend : ${friends}">
+    <span th:text="${friend.getFullName()}"> </span>
     <form
-      th:action="@{/page/{pageId}/manage/{personId}(pageId=${page.id},personId=${friend.interactor.id} == *{id} ? ${friend.receiverInteractor.id} : ${friend.interactor.id})}"
+      th:action="@{/page/{pageId}/manage/{personId}(pageId=${page.id},personId=${friend.id)}"
       method="post"
     >
       <button type="submit">Add</button>

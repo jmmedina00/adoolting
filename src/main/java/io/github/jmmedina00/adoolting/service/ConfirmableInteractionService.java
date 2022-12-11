@@ -7,6 +7,7 @@ import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepositor
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +27,6 @@ public class ConfirmableInteractionService {
     );
   }
 
-  public List<ConfirmableInteraction> getPersonFriends(Long personId) {
-    return cInteractionRepository.findFriendsByInteractorId(personId);
-  }
-
   public ConfirmableInteraction getPersonFriendship(
     Long personId,
     Long otherPersonId
@@ -38,6 +35,22 @@ public class ConfirmableInteractionService {
       personId,
       otherPersonId
     );
+  }
+
+  public List<Person> getPersonFriends(Long personId) {
+    return cInteractionRepository
+      .findFriendsByInteractorId(personId)
+      .stream()
+      .map(
+        cInteraction -> {
+          Person person = (Person) cInteraction.getInteractor();
+          Person receiverPerson = (Person) cInteraction.getReceiverInteractor();
+          return Objects.equals(personId, person.getId())
+            ? receiverPerson
+            : person;
+        }
+      )
+      .toList();
   }
 
   public ConfirmableInteraction decideInteractionResult(

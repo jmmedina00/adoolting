@@ -7,18 +7,7 @@
   <span th:unless="${status}">Not set</span>
 </p>
 <ul>
-  <li th:each="friend : ${friends}">
-    <span
-      th:unless="${friend.interactor.id == person.id}"
-      th:text="${friend.interactor.getFullName()}"
-    >
-    </span>
-    <span
-      th:unless="${friend.receiverInteractor.id == person.id}"
-      th:text="${friend.receiverInteractor.getFullName()}"
-    >
-    </span>
-  </li>
+  <li th:each="friend : ${friends}" th:text="${friend.getFullName()}"></li>
 </ul>
 <span th:unless="${friendship == null}">
   <span
@@ -107,7 +96,6 @@
       <span th:text="${post.receiverInteractor.getFullName()}"></span>
     </span>
   </h3>
-  <!-- instanceOf does not work reliably between restarts -->
   <p th:text="${post.getFirstParagraph()}"></p>
   <p th:if="${#arrays.length(post.getParagraphs()) > 1}">...</p>
   <img
