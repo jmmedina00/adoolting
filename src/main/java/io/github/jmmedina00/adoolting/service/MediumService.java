@@ -61,14 +61,6 @@ public class MediumService {
     }
   }
 
-  public String getProperPublicPath() {
-    return "/cdn/" + mediaDir + full;
-  }
-
-  public String getProperFullPath() {
-    return workDirectory + toCdn + mediaDir + full;
-  }
-
   public String getThumbnailLinkForMedium(Long mediumId, int desiredSize)
     throws MediumNotFoundException {
     Medium medium = mediumRepository
@@ -121,25 +113,37 @@ public class MediumService {
       }
 
       Medium medium = new Medium();
-
       medium.setInteraction(interaction);
-      medium.setReference("cdn:" + "." + extension);
-
-      Medium saved = mediumRepository.save(medium);
-      String path =
-        workDirectory +
-        toCdn +
-        mediaDir +
-        full +
-        saved.getId() +
-        "." +
-        extension;
-
-      File writingFile = new File(path);
-      file.transferTo(writingFile);
-
-      jobScheduler.enqueue(() -> getImageSquare(medium.getId()));
+      saveImageMedium(medium, file);
     }
+  }
+
+  public Medium saveImageMedium(Medium medium, MultipartFile uploaded) {
+    String extension = FilenameUtils.getExtension(
+      uploaded.getOriginalFilename()
+    );
+    medium.setReference("cdn:" + "." + extension);
+    mediumRepository.save(medium);
+
+    String path =
+      workDirectory +
+      toCdn +
+      mediaDir +
+      full +
+      medium.getId() +
+      "." +
+      extension;
+
+    File writingFile = new File(path);
+
+    try {
+      uploaded.transferTo(writingFile);
+      jobScheduler.enqueue(() -> getImageSquare(medium.getId()));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return medium;
   }
 
   @Job(name = "Get image square")

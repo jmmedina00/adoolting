@@ -13,10 +13,7 @@ import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
-import java.io.File;
 import java.util.Objects;
-import org.apache.commons.io.FilenameUtils;
-import org.jobrunr.scheduling.JobScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,9 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfilePictureService {
   @Autowired
   private ProfilePictureRepository pfpRepository;
-
-  @Autowired
-  private JobScheduler jobScheduler;
 
   @Autowired
   private MediumService mediumService;
@@ -77,7 +71,6 @@ public class ProfilePictureService {
     }
 
     MultipartFile file = pfpFile.getFile();
-    String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
     Post post = new Post();
     post.setContent("");
@@ -86,11 +79,9 @@ public class ProfilePictureService {
 
     ProfilePicture profilePicture = new ProfilePicture();
     profilePicture.setInteraction(post);
-    profilePicture.setReference("cdn:" + "." + extension);
 
-    ProfilePicture saved = pfpRepository.save(profilePicture);
-    writeFile(saved, file, extension);
-    return saved;
+    mediumService.saveImageMedium(profilePicture, file);
+    return profilePicture;
   }
 
   public ProfilePicture setProfilePictureOfGroup(
@@ -104,9 +95,7 @@ public class ProfilePictureService {
     }
 
     PeopleGroup group = groupService.getGroup(groupId);
-
     MultipartFile file = pfpFile.getFile();
-    String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
     Comment comment = new Comment();
     comment.setContent("");
@@ -116,28 +105,9 @@ public class ProfilePictureService {
 
     ProfilePicture profilePicture = new ProfilePicture();
     profilePicture.setInteraction(comment);
-    profilePicture.setReference("cdn:" + "." + extension);
 
-    ProfilePicture saved = pfpRepository.save(profilePicture);
-    writeFile(saved, file, extension);
-    return saved;
-  }
-
-  private void writeFile(
-    ProfilePicture saved,
-    MultipartFile file,
-    String extension
-  ) {
-    String path =
-      mediumService.getProperFullPath() + "/" + saved.getId() + "." + extension;
-
-    File writingFile = new File(path);
-    try {
-      file.transferTo(writingFile);
-      jobScheduler.enqueue(() -> mediumService.getImageSquare(saved.getId()));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    mediumService.saveImageMedium(profilePicture, file);
+    return profilePicture;
   }
 
   private boolean isPersonAuthorizedToChangeInteractor(
