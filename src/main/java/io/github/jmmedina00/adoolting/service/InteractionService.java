@@ -14,6 +14,10 @@ public class InteractionService {
   @Autowired
   private InteractionRepository interactionRepository;
 
+  public Interaction saveInteraction(Interaction interaction) {
+    return interactionRepository.save(interaction);
+  }
+
   public Interaction getInteraction(Long interactionId) {
     return interactionRepository
       .findActiveInteraction(interactionId)

@@ -1,7 +1,5 @@
 package io.github.jmmedina00.adoolting.service.interaction;
 
-import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
-import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
@@ -10,11 +8,12 @@ import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
 import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.ProfilePictureRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.jobrunr.scheduling.JobScheduler;
@@ -34,10 +33,10 @@ public class ProfilePictureService {
   private MediumService mediumService;
 
   @Autowired
-  private PostService postService;
+  private InteractorService interactorService;
 
   @Autowired
-  private CommentService commentService;
+  private InteractionService interactionService;
 
   @Autowired
   private PageService pageService;
@@ -80,10 +79,10 @@ public class ProfilePictureService {
     MultipartFile file = pfpFile.getFile();
     String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
-    NewPost postTemplate = new NewPost();
-    postTemplate.setContents("");
-    postTemplate.setMedia(List.of());
-    Post post = postService.createPost(interactorId, postTemplate);
+    Post post = new Post();
+    post.setContent("");
+    post.setInteractor(interactorService.getInteractor(interactorId));
+    interactionService.saveInteraction(post);
 
     ProfilePicture profilePicture = new ProfilePicture();
     profilePicture.setInteraction(post);
@@ -109,13 +108,11 @@ public class ProfilePictureService {
     MultipartFile file = pfpFile.getFile();
     String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
-    NewComment commentTemplate = new NewComment();
-    commentTemplate.setContent("");
-    Comment comment = commentService.createComment(
-      commentTemplate,
-      group.getInteractor().getId(),
-      groupId
-    );
+    Comment comment = new Comment();
+    comment.setContent("");
+    comment.setInteractor(group.getInteractor());
+    comment.setReceiverInteraction(group);
+    interactionService.saveInteraction(comment);
 
     ProfilePicture profilePicture = new ProfilePicture();
     profilePicture.setInteraction(comment);
