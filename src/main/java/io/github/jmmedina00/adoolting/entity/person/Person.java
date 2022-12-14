@@ -61,6 +61,9 @@ public class Person extends Interactor {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private List<PasswordRestoreToken> restoreTokens;
 
+  @OneToMany(mappedBy = "forPerson", fetch = FetchType.LAZY)
+  private List<Notification> notifications;
+
   public String getFirstName() {
     return firstName;
   }

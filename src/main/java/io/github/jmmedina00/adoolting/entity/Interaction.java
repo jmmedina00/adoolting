@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.entity;
 
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.person.Notification;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -46,6 +47,9 @@ public class Interaction {
 
   @OneToMany(mappedBy = "interaction", fetch = FetchType.LAZY)
   private List<Medium> media;
+
+  @OneToMany(mappedBy = "interaction", fetch = FetchType.LAZY)
+  private List<Notification> notifications;
 
   public Long getId() {
     return id;
