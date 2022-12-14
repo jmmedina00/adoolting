@@ -8,6 +8,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
@@ -34,6 +35,9 @@ public class ProfileController {
 
   @Autowired
   private PostService postService;
+
+  @Autowired
+  private PeopleGroupService groupService;
 
   @Autowired
   private InteractionService interactionService;
@@ -65,6 +69,10 @@ public class ProfileController {
     model.addAttribute(
       "friendship",
       cInteractionService.getPersonFriendship(authenticatedPersonId, personId)
+    );
+    model.addAttribute(
+      "groups",
+      groupService.getGroupsManagedByPerson(authenticatedPersonId)
     );
     model.addAttribute(
       "friends",

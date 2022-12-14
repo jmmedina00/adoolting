@@ -11,7 +11,9 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,19 @@ public class PeopleGroupService {
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
     return groupRepository.save(group);
+  }
+
+  public List<PeopleGroup> getGroupsManagedByPerson(Long personId) {
+    ArrayList<Interactor> interactors = new ArrayList<>(
+      pageService.getAllPersonPages(personId)
+    );
+    interactors.add(personService.getPerson(personId));
+    List<Long> ids = interactors
+      .stream()
+      .map(interactor -> interactor.getId())
+      .sorted()
+      .toList();
+    return groupRepository.findActiveGroupsByInteractorList(ids);
   }
 
   public PeopleGroup updateGroup(

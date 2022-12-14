@@ -58,6 +58,17 @@
   <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
   <!-- <span th:unless="${friendship.ignoredAt == null}">Ignored</span> -->
 </span>
+<ul>
+  <li th:each="group : ${groups}">
+    <span th:text="${group.name}"></span>
+    <form
+      th:action="@{/group/{groupId}/invite/{personId}(groupId=${group.id},personId=${person.id})}"
+      method="post"
+    >
+      <button type="submit">Invite</button>
+    </form>
+  </li>
+</ul>
 
 <form
   th:if="${(friendship == null && cInteraction.personId != 0) || friendship?.ignoredAt != null}"
