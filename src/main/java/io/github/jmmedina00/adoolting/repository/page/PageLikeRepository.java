@@ -7,12 +7,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface PageLikeRepository extends JpaRepository<PageLike, Long> {
   @Query(
-    "SELECT COUNT(l) FROM PageLike l WHERE l.receiverInteractor.id=:pageId AND l.deletedAt IS NULL"
+    "SELECT COUNT(l) FROM PageLike l WHERE " +
+    "l.receiverInteractor.id=:pageId AND l.deletedAt IS NULL"
   )
   Long countPageLikes(@Param("pageId") Long pageId);
 
   @Query(
-    "SELECT l FROM PageLike l WHERE l.interactor.id=:personId AND l.receiverInteractor.id=:pageId AND l.deletedAt IS NULL"
+    "SELECT l FROM PageLike l WHERE l.interactor.id=:personId AND " +
+    "l.receiverInteractor.id=:pageId AND l.deletedAt IS NULL"
   )
   PageLike findPageLikeFromPerson(
     @Param("personId") Long personId,

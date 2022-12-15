@@ -9,12 +9,14 @@ import org.springframework.data.repository.query.Param;
 public interface PageManagerRepository
   extends JpaRepository<PageManager, Long> {
   @Query(
-    "SELECT pm FROM PageManager pm WHERE pm.page.id=:pageId AND pm.deletedAt IS NULL"
+    "SELECT pm FROM PageManager pm WHERE pm.page.id=:pageId AND " +
+    "pm.deletedAt IS NULL"
   )
   List<PageManager> findPageManagers(@Param("pageId") Long pageId);
 
   @Query(
-    "SELECT pm FROM PageManager pm WHERE pm.person.id=:personId AND pm.deletedAt IS NULL"
+    "SELECT pm FROM PageManager pm WHERE pm.person.id=:personId AND " +
+    "pm.deletedAt IS NULL"
   )
   List<PageManager> findPersonManagements(@Param("personId") Long personId);
 }

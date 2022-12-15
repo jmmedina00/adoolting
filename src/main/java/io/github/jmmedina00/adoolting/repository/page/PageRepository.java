@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface PageRepository extends JpaRepository<Page, Long> {
   @Query(
-    "SELECT p FROM Page p WHERE p.createdByPerson.id=:personId AND p.deletedAt IS NULL"
+    "SELECT p FROM Page p WHERE p.createdByPerson.id=:personId AND " +
+    "p.deletedAt IS NULL"
   )
   List<Page> findPagesCreatedByPerson(@Param("personId") Long personId);
 
