@@ -8,6 +8,7 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,9 @@ public class CommentService {
 
   @Autowired
   private InteractionService interactionService;
+
+  @Autowired
+  private NotificationService notificationService;
 
   public Page<Comment> getCommentsFromInteraction(
     Long interactionId,
@@ -49,6 +53,10 @@ public class CommentService {
     comment.setReceiverInteraction(interaction);
 
     Comment saved = commentRepository.save(comment);
+    notificationService.createNotifications(
+      comment,
+      interaction.getInteractor()
+    );
     if (newComment.getFile() == null) {
       return saved;
     }

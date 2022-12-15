@@ -6,8 +6,11 @@ import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
+import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ConfirmableInteractionController {
   @Autowired
   private ConfirmableInteractionService cInteractionService;
+
+  @Autowired
+  private NotificationService notificationService;
 
   @RequestMapping(
     method = RequestMethod.POST,
@@ -57,13 +63,31 @@ public class ConfirmableInteractionController {
   }
 
   @RequestMapping(method = RequestMethod.GET)
-  public String getPendingConfirmableInteractions(Model model) {
+  public String getPendingConfirmableInteractions(
+    Model model,
+    @PageableDefault(value = 10, page = 0) Pageable pageable
+  ) {
     model.addAttribute(
-      "interactions",
-      cInteractionService.getPendingInteractionsForPerson(
-        AuthenticatedPerson.getPersonId()
+      "notifications",
+      notificationService.getNotificationsForPerson(
+        AuthenticatedPerson.getPersonId(),
+        pageable
       )
     );
     return "network";
+  }
+
+  @RequestMapping(
+    method = RequestMethod.POST,
+    value = "/delete/{notificationId}"
+  )
+  public String deleteNotification(
+    @PathVariable("notificationId") Long notificationId
+  ) {
+    notificationService.deleteNotification(
+      notificationId,
+      AuthenticatedPerson.getPersonId()
+    );
+    return "redirect:/network";
   }
 }

@@ -1,31 +1,56 @@
-<div th:each="interaction : ${interactions}">
-  <span th:text="${interaction.id}"></span>
+<div
+  th:each="notification : ${notifications}"
+  th:object="${notification.interaction}"
+>
+  <span th:text="*{id}"></span>
   -
-  <span th:text="${interaction.class.name}"></span>
+  <span th:text="*{class.name}"></span>
   -
+  <span th:text="*{interactor.getFullName()}"> </span>
   <span
-    th:text="${interaction.interactor.firstName + ' ' + interaction.interactor.lastName}"
-  >
-  </span>
-  <span
-    th:if="${interaction.class.name.equals('io.github.jmmedina00.adoolting.entity.group.JoinRequest')}"
-    >- Extended <span th:text="${interaction.group.id}"></span>
+    th:if="*{class.name.equals('io.github.jmmedina00.adoolting.entity.group.JoinRequest')}"
+    >- Extended <span th:text="*{group.id}"></span>
   </span>
 
   <form
-    th:action="@{/network/{interaction}(interaction=${interaction.id})}"
+    th:unless="${notification.isActionable()}"
+    th:action="@{/network/delete/{notification}(notification=${notification.id})}"
     method="post"
   >
-    <input type="text" name="isAccepted" value="true" style="display: none" />
-    <input type="text" name="goToProfile" value="false" style="display: none" />
-    <button type="submit">Accept</button>
+    <button type="submit">Delete</button>
   </form>
-  <form
-    th:action="@{/network/{interaction}(interaction=${interaction.id})}"
-    method="post"
-  >
-    <input type="text" name="isAccepted" value="false" style="display: none" />
-    <input type="text" name="goToProfile" value="false" style="display: none" />
-    <button type="submit">Ignore</button>
-  </form>
+
+  <div th:if="${notification.isActionable()}">
+    <form
+      th:action="@{/network/{interaction}(interaction=*{id})}"
+      method="post"
+    >
+      <input type="text" name="isAccepted" value="true" style="display: none" />
+      <input
+        type="text"
+        name="goToProfile"
+        value="false"
+        style="display: none"
+      />
+      <button type="submit">Accept</button>
+    </form>
+    <form
+      th:action="@{/network/{interaction}(interaction=*{id})}"
+      method="post"
+    >
+      <input
+        type="text"
+        name="isAccepted"
+        value="false"
+        style="display: none"
+      />
+      <input
+        type="text"
+        name="goToProfile"
+        value="false"
+        style="display: none"
+      />
+      <button type="submit">Ignore</button>
+    </form>
+  </div>
 </div>
