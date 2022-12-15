@@ -67,6 +67,10 @@ public class MediumService {
       .findById(mediumId)
       .orElseThrow(MediumNotFoundException::new);
 
+    if (!medium.isInCDN()) {
+      throw new MediumNotFoundException();
+    }
+
     List<Integer> cycleSizes = new ArrayList<>(
       Arrays.stream(expectedSizes).boxed().toList()
     );
@@ -116,6 +120,13 @@ public class MediumService {
       medium.setInteraction(interaction);
       saveImageMedium(medium, file);
     }
+  }
+
+  public Medium saveLinkMedium(String link, Interaction interaction) {
+    Medium medium = new Medium();
+    medium.setReference(link);
+    medium.setInteraction(interaction);
+    return mediumRepository.save(medium);
   }
 
   public Medium saveImageMedium(Medium medium, MultipartFile uploaded) {

@@ -95,6 +95,7 @@
       accept="image/png, image/jpeg"
       multiple
     />
+    <input type="text" th:field="*{url}" />
   </div>
   <button type="submit">Send</button>
 </form>
@@ -109,10 +110,14 @@
   </h3>
   <p th:text="${post.getFirstParagraph()}"></p>
   <p th:if="${#arrays.length(post.getParagraphs()) > 1}">...</p>
-  <img
-    th:each="medium : ${post.media}"
-    th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
-  />
+  <div th:each="medium : ${post.media}">
+    <img
+      th:if="${medium.isInCDN()}"
+      th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
+    />
+    <a th:href="${medium.reference}" th:unless="${medium.isInCDN()}">Link</a>
+  </div>
+
   <p th:text="${post.class.name}"></p>
   <p><span th:text="${post.comments.size()}"></span> comments</p>
 </div>

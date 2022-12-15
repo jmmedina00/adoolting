@@ -68,4 +68,8 @@ public class Medium {
   public void setInteraction(Interaction interaction) {
     this.interaction = interaction;
   }
+
+  public boolean isInCDN() {
+    return reference.startsWith("cdn:");
+  }
 }

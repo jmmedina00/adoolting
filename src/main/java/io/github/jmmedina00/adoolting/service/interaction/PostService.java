@@ -11,6 +11,7 @@ import io.github.jmmedina00.adoolting.repository.interaction.PostRepository;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,11 @@ public class PostService {
   }
 
   private void handleNewPostFiles(NewPost post, Post savedPost) {
+    if (!Optional.of(post.getUrl()).orElse("").isEmpty()) {
+      mediumService.saveLinkMedium(post.getUrl(), savedPost);
+      return;
+    }
+
     try {
       mediumService.saveAllFiles(post.getMedia(), savedPost);
     } catch (Exception e) {
