@@ -12,11 +12,7 @@ public class PersonStatusService {
   private PersonStatusRepository statusRepository;
 
   public PersonStatus getPersonStatus(Long personId) {
-    return statusRepository
-      .findFirst1ByPersonIdOrderByCreatedAtDesc(personId)
-      .stream()
-      .findFirst()
-      .orElse(null);
+    return statusRepository.findFirst1ByPersonIdOrderByCreatedAtDesc(personId);
   }
 
   public PersonStatus updatePersonStatus(Person person, String content) {
