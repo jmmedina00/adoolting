@@ -36,7 +36,7 @@ public class PostService {
 
     Post post = new Post();
     post.setInteractor(interactor);
-    post.setContent(newPost.getContents().trim());
+    post.setContent(newPost.getContent().trim());
     Post saved = postRepository.save(post);
     handleNewPostFiles(newPost, saved);
     return saved;
@@ -64,7 +64,7 @@ public class PostService {
     Post post = new Post();
     post.setInteractor(interactor);
     post.setReceiverInteractor(receiverInteractor);
-    post.setContent(newPost.getContents().trim());
+    post.setContent(newPost.getContent().trim());
     Post saved = postRepository.save(post);
     handleNewPostFiles(newPost, saved);
     return saved;
