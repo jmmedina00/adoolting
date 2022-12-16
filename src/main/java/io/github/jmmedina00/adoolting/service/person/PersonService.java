@@ -35,10 +35,6 @@ public class PersonService implements UserDetailsService {
     return personRepository.findActivePerson(personId).orElseThrow();
   }
 
-  public List<Person> getPersons(Iterable<Long> personIds) {
-    return personRepository.findAllById(personIds);
-  }
-
   public List<Person> getAllActivePersons() {
     return personRepository.findConfirmedPersons();
   }

@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.controller.person;
 
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.person.NewMessage;
+import io.github.jmmedina00.adoolting.service.cache.PersonLatestMessagesService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.person.PrivateMessageService;
 import java.util.Objects;
@@ -23,13 +24,16 @@ public class MessageController {
   private PrivateMessageService messageService;
 
   @Autowired
+  private PersonLatestMessagesService latestMessagesService;
+
+  @Autowired
   private PersonService personService;
 
   @RequestMapping(method = RequestMethod.GET)
   public String getRecentMessagesList(Model model) {
     model.addAttribute(
       "messages",
-      messageService.getLatestMessagesForPerson(
+      latestMessagesService.getLatestMessagesForPerson(
         AuthenticatedPerson.getPersonId()
       )
     );
