@@ -61,6 +61,12 @@ public class MediumService {
     }
   }
 
+  public Medium getMedium(Long mediumId) throws MediumNotFoundException {
+    return mediumRepository
+      .findById(mediumId)
+      .orElseThrow(MediumNotFoundException::new);
+  }
+
   public String getThumbnailLinkForMedium(Long mediumId, int desiredSize)
     throws MediumNotFoundException {
     Medium medium = mediumRepository

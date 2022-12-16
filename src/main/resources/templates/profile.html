@@ -115,7 +115,16 @@
       th:if="${medium.isInCDN()}"
       th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
     />
-    <a th:href="${medium.reference}" th:unless="${medium.isInCDN()}">Link</a>
+    <a
+      th:unless="${medium.isInCDN()}"
+      th:with="info=${@linkInformationService.getLinkInfo(medium.id)}"
+      th:href="${#strings.defaultString(info.actualLink, medium.reference)}"
+    >
+      <span th:text="${#strings.defaultString(info.title, medium.reference)}">
+      </span>
+      <span th:text="${info.getPage()}"></span>
+      <img th:src="${info.pathToImage}" />
+    </a>
   </div>
 
   <p th:text="${post.class.name}"></p>
