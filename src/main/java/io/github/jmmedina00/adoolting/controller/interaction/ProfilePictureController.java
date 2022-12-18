@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
 import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
-import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.interaction.ProfilePictureService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class ProfilePictureController {
     @PathVariable("id") Long interactorId,
     @ModelAttribute("pfp") @Valid ProfilePictureFile pfp
   )
-    throws NotAuthorizedException {
+    throws Exception {
     ProfilePicture saved = profilePictureService.setProfilePictureOfInteractor(
       interactorId,
       AuthenticatedPerson.getPersonId(),
@@ -64,7 +63,7 @@ public class ProfilePictureController {
     @PathVariable("id") Long groupId,
     @ModelAttribute("pfp") @Valid ProfilePictureFile pfp
   )
-    throws NotAuthorizedException {
+    throws Exception {
     profilePictureService.setProfilePictureOfGroup(
       groupId,
       AuthenticatedPerson.getPersonId(),

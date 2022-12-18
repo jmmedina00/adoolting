@@ -38,8 +38,6 @@ public class ProfilePictureService {
   @Autowired
   private PeopleGroupService groupService;
 
-  // TODO: common parts to their own methods
-
   public ProfilePicture getProfilePictureOfInteractor(Long interactorId)
     throws MediumNotFoundException {
     return pfpRepository
@@ -63,7 +61,7 @@ public class ProfilePictureService {
     Long attemptingPersonId,
     ProfilePictureFile pfpFile
   )
-    throws NotAuthorizedException {
+    throws Exception {
     if (
       !isPersonAuthorizedToChangeInteractor(interactorId, attemptingPersonId)
     ) {
@@ -89,7 +87,7 @@ public class ProfilePictureService {
     Long attemptingPersonId,
     ProfilePictureFile pfpFile
   )
-    throws NotAuthorizedException {
+    throws Exception {
     if (!groupService.isGroupManagedByPerson(groupId, attemptingPersonId)) {
       throw new NotAuthorizedException();
     }
