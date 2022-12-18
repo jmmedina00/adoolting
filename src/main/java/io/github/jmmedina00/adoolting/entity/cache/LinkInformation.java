@@ -10,7 +10,6 @@ public class LinkInformation implements Serializable {
   private Long id;
   private String actualLink;
   private String title;
-  private String pathToImage;
 
   public Long getId() {
     return id;
@@ -34,14 +33,6 @@ public class LinkInformation implements Serializable {
 
   public void setTitle(String title) {
     this.title = title;
-  }
-
-  public String getPathToImage() {
-    return pathToImage;
-  }
-
-  public void setPathToImage(String pathToImage) {
-    this.pathToImage = pathToImage;
   }
 
   public String getPage() {

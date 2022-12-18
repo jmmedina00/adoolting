@@ -31,11 +31,9 @@ public class MediumService {
       .findById(mediumId)
       .orElseThrow(MediumNotFoundException::new);
 
-    if (!medium.isInCDN()) {
-      throw new MediumNotFoundException();
-    }
-
-    String fileName = getFilename(medium);
+    String fileName = medium.isInCDN()
+      ? getFilename(medium)
+      : mediumId + ".jpg";
     return fileService.getExistingPathForFile(fileName, desiredSize);
   }
 

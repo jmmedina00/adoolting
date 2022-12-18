@@ -32,8 +32,6 @@ public class FileService {
 
   @PostConstruct
   public void initializeDirectoriesIfNeeded() {
-    System.err.println(cdnDir);
-    System.err.println(mediaFullDir);
     File fullDir = new File(mediaFullDir);
     File squareDir = new File(mediaSquareDir);
     fullDir.mkdirs();
@@ -43,6 +41,22 @@ public class FileService {
       File dir = new File(mediaDir + size + "/");
       dir.mkdirs();
     }
+  }
+
+  public void saveImage(MultipartFile file, String filename) throws Exception {
+    File writingTo = new File(mediaFullDir + filename);
+    file.transferTo(writingTo);
+    jobScheduler.enqueue(() -> setupImageScaling(filename));
+  }
+
+  public void cacheImageForLinkMedium(String url, Long mediumId)
+    throws Exception {
+    String filename = mediumId + ".jpg";
+    graphicsService.saveImageFromNetwork(
+      url,
+      new File(mediaFullDir + filename)
+    );
+    jobScheduler.enqueue(() -> setupImageScaling(filename));
   }
 
   public String getExistingPathForFile(String filename, int desiredSize) {
@@ -62,12 +76,6 @@ public class FileService {
     return defaultSquareFile.exists()
       ? getFileUrl(defaultSquareFile)
       : getFileUrl(mediaFullDir + filename);
-  }
-
-  public void saveImage(MultipartFile file, String filename) throws Exception {
-    File writingTo = new File(mediaFullDir + filename);
-    file.transferTo(writingTo);
-    jobScheduler.enqueue(() -> setupImageScaling(filename));
   }
 
   @Job(name = "Setup image scaling")

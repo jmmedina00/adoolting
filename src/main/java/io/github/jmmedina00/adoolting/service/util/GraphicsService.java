@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
@@ -22,6 +23,16 @@ public class GraphicsService {
       .of(sourceImage.getWidth(), sourceImage.getHeight())
       .min()
       .getAsInt();
+  }
+
+  public void saveImageFromNetwork(String url, File file) throws Exception {
+    BufferedImage image = ImageIO.read(new URL(url));
+    FileImageOutputStream stream = new FileImageOutputStream(file);
+    ImageWriter writer = ImageIO.getImageWritersByMIMEType("image/jpeg").next();
+
+    writer.setOutput(stream);
+    writer.write(image);
+    stream.close();
   }
 
   public void snipImageToSquare(String sourcePath, String destPath)

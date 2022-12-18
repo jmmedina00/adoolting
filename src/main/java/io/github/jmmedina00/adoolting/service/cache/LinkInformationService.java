@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.entity.Medium;
 import io.github.jmmedina00.adoolting.entity.cache.LinkInformation;
 import io.github.jmmedina00.adoolting.repository.cache.LinkInformationRepository;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.util.FileService;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Optional;
@@ -26,6 +27,9 @@ public class LinkInformationService {
 
   @Autowired
   private MediumService mediumService;
+
+  @Autowired
+  private FileService fileService;
 
   @Autowired
   private JobScheduler jobScheduler;
@@ -83,16 +87,15 @@ public class LinkInformationService {
     String actualLink = Optional
       .ofNullable(tagInfo.get("og:url"))
       .orElse(reference);
+    Optional<String> image = Optional.ofNullable(tagInfo.get("og:image"));
 
-    // TODO: get image scaled and cached if too large to fetch
-    String image = Optional
-      .ofNullable(tagInfo.get("og:image"))
-      .orElse("/cdn/" + defaultImageFile);
+    if (image.isPresent()) {
+      fileService.cacheImageForLinkMedium(image.get(), mediumId);
+    }
 
     LinkInformation info = new LinkInformation();
     info.setId(mediumId);
     info.setActualLink(actualLink);
-    info.setPathToImage(image);
     info.setTitle(title);
     infoRepository.save(info);
   }
@@ -100,7 +103,6 @@ public class LinkInformationService {
   private LinkInformation getBlankInfo() {
     LinkInformation info = new LinkInformation();
     info.setActualLink("");
-    info.setPathToImage("/cdn/" + defaultImageFile);
     info.setTitle("");
     return info;
   }

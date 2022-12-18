@@ -123,7 +123,7 @@
       <span th:text="${#strings.defaultString(info.title, medium.reference)}">
       </span>
       <span th:text="${info.getPage()}"></span>
-      <img th:src="${info.pathToImage}" />
+      <img th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}" />
     </a>
   </div>
 
