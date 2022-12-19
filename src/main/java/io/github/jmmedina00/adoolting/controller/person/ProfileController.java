@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.controller.person;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
@@ -11,6 +12,7 @@ import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.person.PersonSettingsService;
 import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import java.util.Objects;
 import javax.validation.Valid;
@@ -29,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProfileController {
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private PersonSettingsService settingsService;
 
   @Autowired
   private PersonStatusService statusService;
@@ -64,12 +69,27 @@ public class ProfileController {
       cInteraction.setPersonId(personId);
     }
 
-    model.addAttribute("person", person);
-    model.addAttribute("status", statusService.getPersonStatus(personId));
-    model.addAttribute(
-      "friendship",
-      cInteractionService.getPersonFriendship(authenticatedPersonId, personId)
+    ConfirmableInteraction friendship = cInteractionService.getPersonFriendship(
+      authenticatedPersonId,
+      personId
     );
+
+    model.addAttribute("person", person);
+    model.addAttribute("friendship", friendship);
+    model.addAttribute("cInteraction", cInteraction);
+
+    if (
+      !Objects.equals(personId, authenticatedPersonId) &&
+      (friendship == null || friendship.getConfirmedAt() == null) &&
+      !settingsService.isAllowedByPerson(
+        personId,
+        PersonSettingsService.ENTER_PROFILE
+      )
+    ) {
+      return "profile-locked";
+    }
+
+    model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "groups",
       groupService.getGroupsManagedByPerson(authenticatedPersonId)
@@ -83,7 +103,6 @@ public class ProfileController {
       interactionService.getInteractions(person.getId(), pageable)
     );
     model.addAttribute("newPost", new NewPost());
-    model.addAttribute("cInteraction", cInteraction);
 
     return "profile";
   }

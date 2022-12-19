@@ -13,6 +13,15 @@ public class PersonSettingsService {
   @Autowired
   private PersonSettingsRepository settingsRepository;
 
+  public static final int ENTER_PROFILE = 1;
+  public static final int COMMENT_ON_INTERACTION = 2;
+  public static final int INVITE_TO_GROUP = 3;
+  public static final int AUTO_ACCEPT_INVITE = 4;
+  public static final int EMAIL_CONFIRMABLE = 5;
+
+  public static final int NOTIFY_COMMENT = 20;
+  public static final int NOTIFY_POST_FROM_OTHER = 21;
+
   public PersonSettings createSettingsForPerson(Person person) {
     PersonSettings settings = new PersonSettings();
     settings.setPerson(person);
@@ -61,5 +70,35 @@ public class PersonSettingsService {
     settings.setNotifyPeoplesBirthdays(form.getNotifyPeoplesBirthdays());
 
     return settingsRepository.save(settings);
+  }
+
+  public boolean isAllowedByPerson(Long personId, int desiredAction) {
+    PersonSettings settings = settingsRepository
+      .findByPersonId(personId)
+      .orElse(null);
+    if (settings == null) return false;
+    boolean permission;
+
+    switch (desiredAction) {
+      case ENTER_PROFILE:
+        permission = settings.isAllowStrangersIntoProfile();
+        break;
+      case COMMENT_ON_INTERACTION:
+        permission = settings.isAllowPostsAndCommentsFromStrangers();
+        break;
+      case INVITE_TO_GROUP:
+        permission = settings.isAllowInvitesFromStrangers();
+        break;
+      case AUTO_ACCEPT_INVITE:
+        permission = settings.isAcceptInvitesAutomatically();
+        break;
+      case EMAIL_CONFIRMABLE:
+        permission = settings.isEmailOnConfirmables();
+        break;
+      default:
+        permission = false;
+    }
+
+    return permission;
   }
 }
