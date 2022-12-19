@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.entity.person;
 
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,7 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
 @Entity
-public class PersonSettings {
+public class PersonSettings implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
