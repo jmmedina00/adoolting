@@ -29,6 +29,9 @@ public class PersonService implements UserDetailsService {
   private ConfirmationService confirmationService;
 
   @Autowired
+  private PersonSettingsService settingsService;
+
+  @Autowired
   private PersonStatusService statusService;
 
   public Person getPerson(Long personId) {
@@ -106,6 +109,7 @@ public class PersonService implements UserDetailsService {
 
     Person saved = personRepository.save(person);
     confirmationService.createTokenforPerson(saved);
+    settingsService.createSettingsForPerson(saved);
     return saved;
   }
 
