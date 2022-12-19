@@ -24,6 +24,20 @@
       Validation error
     </p>
   </div>
+  <div>
+    <label>Access level</label>
+    <select th:field="*{accessLevel}">
+      <option th:value="'OPEN'">Open</option>
+      <option th:value="'WATCH_ONLY'">Watch only</option>
+      <option th:value="'CLOSED'">Closed</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('accessLevel')}"
+      th:text="${#fields.errors('accessLevel')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
   <div
     th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
   >

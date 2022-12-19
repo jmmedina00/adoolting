@@ -25,6 +25,7 @@ public class EventService {
     Event event = new Event();
     event.setName(newEvent.getName());
     event.setDescription(newEvent.getDescription());
+    event.setAccessLevel(newEvent.getAccessLevel());
     event.setInteractor(interactor);
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
@@ -41,6 +42,7 @@ public class EventService {
     Event event = eventRepository.findById(eventId).orElseThrow();
     event.setName(newEvent.getName());
     event.setDescription(newEvent.getDescription());
+    event.setAccessLevel(newEvent.getAccessLevel());
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
     return eventRepository.save(event);

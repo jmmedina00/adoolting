@@ -1,10 +1,13 @@
 package io.github.jmmedina00.adoolting.entity.group;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
@@ -18,6 +21,10 @@ public class PeopleGroup extends Interaction {
 
   @Column
   private String description;
+
+  @Enumerated(EnumType.STRING)
+  @Column
+  private GroupAccessLevel accessLevel;
 
   @UpdateTimestamp
   private Date updatedAt;
@@ -39,6 +46,14 @@ public class PeopleGroup extends Interaction {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public GroupAccessLevel getAccessLevel() {
+    return accessLevel;
+  }
+
+  public void setAccessLevel(GroupAccessLevel accessLevel) {
+    this.accessLevel = accessLevel;
   }
 
   public Date getUpdatedAt() {

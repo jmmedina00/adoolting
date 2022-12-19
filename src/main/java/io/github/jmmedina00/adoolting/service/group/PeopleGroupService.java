@@ -39,6 +39,7 @@ public class PeopleGroupService {
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
+    group.setAccessLevel(newGroup.getAccessLevel());
     return groupRepository.save(group);
   }
 
@@ -68,6 +69,7 @@ public class PeopleGroupService {
     PeopleGroup group = getGroup(groupId);
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
+    group.setAccessLevel(newGroup.getAccessLevel());
     return groupRepository.save(group);
   }
 
@@ -82,6 +84,7 @@ public class PeopleGroupService {
       form = eventForm;
     }
 
+    form.setAccessLevel(group.getAccessLevel());
     form.setDescription(group.getDescription());
     form.setName(group.getName());
 
