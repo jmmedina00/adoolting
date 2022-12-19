@@ -1,0 +1,124 @@
+<h1>Settings</h1>
+<form th:object="${settings}" th:action="@{/settings}" method="post">
+  <div>
+    <label>allowStrangersIntoProfile</label>
+    <input type="checkbox" th:field="*{allowStrangersIntoProfile}" />
+    <p
+      th:if="${#fields.hasErrors('allowStrangersIntoProfile')}"
+      th:text="${#fields.errors('allowStrangersIntoProfile')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>allowPostsAndCommentsFromStrangers</label>
+    <input type="checkbox" th:field="*{allowPostsAndCommentsFromStrangers}" />
+    <p
+      th:if="${#fields.hasErrors('allowPostsAndCommentsFromStrangers')}"
+      th:text="${#fields.errors('allowPostsAndCommentsFromStrangers')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>allowInvitesFromStrangers</label>
+    <input type="checkbox" th:field="*{allowInvitesFromStrangers}" />
+    <p
+      th:if="${#fields.hasErrors('allowInvitesFromStrangers')}"
+      th:text="${#fields.errors('allowInvitesFromStrangers')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>acceptInvitesAutomatically</label>
+    <input type="checkbox" th:field="*{acceptInvitesAutomatically}" />
+    <p
+      th:if="${#fields.hasErrors('acceptInvitesAutomatically')}"
+      th:text="${#fields.errors('acceptInvitesAutomatically')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>emailOnConfirmables</label>
+    <input type="checkbox" th:field="*{emailOnConfirmables}" />
+    <p
+      th:if="${#fields.hasErrors('emailOnConfirmables')}"
+      th:text="${#fields.errors('emailOnConfirmables')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>notifyIncomingEvents</label>
+    <select th:field="*{notifyIncomingEvents}">
+      <option th:value="'EMAIL'">Email</option>
+      <option th:value="'IN_APP'">In app</option>
+      <option th:value="'NONE'">None</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('notifyIncomingEvents')}"
+      th:text="${#fields.errors('notifyIncomingEvents')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>notifyComments</label>
+    <select th:field="*{notifyComments}">
+      <option th:value="'EMAIL'">Email</option>
+      <option th:value="'IN_APP'">In app</option>
+      <option th:value="'NONE'">None</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('notifyComments')}"
+      th:text="${#fields.errors('notifyComments')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>notifyPostsFromOthers</label>
+    <select th:field="*{notifyPostsFromOthers}">
+      <option th:value="'EMAIL'">Email</option>
+      <option th:value="'IN_APP'">In app</option>
+      <option th:value="'NONE'">None</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('notifyPostsFromOthers')}"
+      th:text="${#fields.errors('notifyPostsFromOthers')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>notifyActivityFromPages</label>
+    <select th:field="*{notifyActivityFromPages}">
+      <option th:value="'EMAIL'">Email</option>
+      <option th:value="'IN_APP'">In app</option>
+      <option th:value="'NONE'">None</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('notifyActivityFromPages')}"
+      th:text="${#fields.errors('notifyActivityFromPages')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <div>
+    <label>notifyPeoplesBirthdays</label>
+    <select th:field="*{notifyPeoplesBirthdays}">
+      <option th:value="'EMAIL'">Email</option>
+      <option th:value="'IN_APP'">In app</option>
+      <option th:value="'NONE'">None</option>
+    </select>
+    <p
+      th:if="${#fields.hasErrors('notifyPeoplesBirthdays')}"
+      th:text="${#fields.errors('notifyPeoplesBirthdays')[0]}"
+    >
+      Validation error
+    </p>
+  </div>
+  <button type="submit">Save</button>
+</form>
