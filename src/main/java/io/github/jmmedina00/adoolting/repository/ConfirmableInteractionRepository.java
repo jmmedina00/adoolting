@@ -44,7 +44,7 @@ public interface ConfirmableInteractionRepository
     "((c.interactor.id=:firstId AND c.receiverInteractor.id=:secondId) OR " +
     "(c.interactor.id=:secondId AND c.receiverInteractor.id=:firstId)) AND " +
     "c.id NOT in (SELECT j.id FROM JoinRequest j) AND " +
-    "c.deletedAt IS NULL AND c.confirmedAt IS NOT NULL AND c.ignoredAt IS NULL " +
+    "c.deletedAt IS NULL AND c.ignoredAt IS NULL " +
     "ORDER BY c.createdAt DESC"
   )
   ConfirmableInteraction findFriendshipBetweenInteractors(
