@@ -58,6 +58,9 @@ public class Person extends Interactor {
   @OneToOne(mappedBy = "person", fetch = FetchType.LAZY)
   private ConfirmationToken confirmationToken;
 
+  @OneToOne(mappedBy = "person", fetch = FetchType.LAZY)
+  private PersonSettings settings;
+
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   private List<PasswordRestoreToken> restoreTokens;
 
@@ -114,6 +117,10 @@ public class Person extends Interactor {
 
   public ConfirmationToken getConfirmationToken() {
     return confirmationToken;
+  }
+
+  public PersonSettings getSettings() {
+    return settings;
   }
 
   public List<Page> getCreatedPages() {
