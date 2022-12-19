@@ -23,11 +23,11 @@ public class FileService {
   private int[] expectedSizes = { 64, 128, 256, 512 };
 
   public FileService(@Value("${user.dir}") String workDirectory) {
-    dataFolder = workDirectory + "/data";
-    cdnDir = dataFolder + "/cdn/";
-    mediaDir = cdnDir + "media/";
-    mediaFullDir = mediaDir + "full/";
-    mediaSquareDir = mediaDir + "square/";
+    dataFolder = workDirectory + File.separator + "data";
+    cdnDir = dataFolder + File.separator + "cdn" + File.separator;
+    mediaDir = cdnDir + "media" + File.separator;
+    mediaFullDir = mediaDir + "full" + File.separator;
+    mediaSquareDir = mediaDir + "square" + File.separator;
   }
 
   @PostConstruct
@@ -100,7 +100,7 @@ public class FileService {
   }
 
   private String getFileUrl(String path) {
-    return path.replace(dataFolder, "");
+    return path.replace(dataFolder, "").replace(File.separator, "/");
   }
 
   private String getFileUrl(File file) {
