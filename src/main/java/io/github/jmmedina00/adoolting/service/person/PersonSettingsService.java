@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.service.person;
 
 import io.github.jmmedina00.adoolting.dto.person.SettingsForm;
+import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PersonSettings;
 import io.github.jmmedina00.adoolting.repository.person.PersonSettingsRepository;
@@ -21,6 +22,7 @@ public class PersonSettingsService {
 
   public static final int NOTIFY_COMMENT = 20;
   public static final int NOTIFY_POST_FROM_OTHER = 21;
+  public static final int NOTIFY_PAGE_INTERACTION = 22;
 
   public PersonSettings createSettingsForPerson(Person person) {
     PersonSettings settings = new PersonSettings();
@@ -70,6 +72,30 @@ public class PersonSettingsService {
     settings.setNotifyPeoplesBirthdays(form.getNotifyPeoplesBirthdays());
 
     return settingsRepository.save(settings);
+  }
+
+  public NotificationSetting getNotificationSetting(Long personId, int code) {
+    PersonSettings settings = settingsRepository
+      .findByPersonId(personId)
+      .orElse(null);
+    if (settings == null) return NotificationSetting.NONE;
+    NotificationSetting setting;
+
+    switch (code) {
+      case NOTIFY_COMMENT:
+        setting = settings.getNotifyComments();
+        break;
+      case NOTIFY_POST_FROM_OTHER:
+        setting = settings.getNotifyPostsFromOthers();
+        break;
+      case NOTIFY_PAGE_INTERACTION:
+        setting = settings.getNotifyActivityFromPages();
+        break;
+      default:
+        setting = NotificationSetting.NONE;
+    }
+
+    return setting;
   }
 
   public boolean isAllowedByPerson(Long personId, int desiredAction) {
