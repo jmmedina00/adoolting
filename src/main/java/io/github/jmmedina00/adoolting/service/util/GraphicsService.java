@@ -28,7 +28,7 @@ public class GraphicsService {
   public void saveImageFromNetwork(String url, File file) throws Exception {
     BufferedImage image = ImageIO.read(new URL(url));
     FileImageOutputStream stream = new FileImageOutputStream(file);
-    ImageWriter writer = ImageIO.getImageWritersByMIMEType("image/jpeg").next();
+    ImageWriter writer = ImageIO.getImageWritersByMIMEType("image/png").next();
 
     writer.setOutput(stream);
     writer.write(image);

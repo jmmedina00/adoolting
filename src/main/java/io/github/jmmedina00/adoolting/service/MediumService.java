@@ -33,7 +33,7 @@ public class MediumService {
 
     String fileName = medium.isInCDN()
       ? getFilename(medium)
-      : mediumId + ".jpg";
+      : mediumId + ".png";
     return fileService.getExistingPathForFile(fileName, desiredSize);
   }
 

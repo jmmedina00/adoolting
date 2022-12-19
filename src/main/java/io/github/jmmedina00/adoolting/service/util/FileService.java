@@ -51,7 +51,7 @@ public class FileService {
 
   public void cacheImageForLinkMedium(String url, Long mediumId)
     throws Exception {
-    String filename = mediumId + ".jpg";
+    String filename = mediumId + ".png";
     graphicsService.saveImageFromNetwork(
       url,
       new File(mediaFullDir + filename)
