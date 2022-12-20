@@ -9,7 +9,11 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
+import java.text.MessageFormat;
 import javax.validation.Valid;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,6 +36,10 @@ public class InteractionController {
   @Autowired
   private JoinRequestService joinRequestService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    InteractionController.class
+  );
+
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getInteraction(
     @PathVariable("id") Long interactionId,
@@ -43,7 +51,26 @@ public class InteractionController {
     if (interaction instanceof Comment) {
       Comment comment = (Comment) interaction;
 
-      if (!(comment.getReceiverInteraction() instanceof PeopleGroup)) {
+      logger.debug(
+        MessageFormat.format(
+          "Fetched interaction {0} is a comment",
+          interactionId
+        )
+      );
+
+      if (
+        !(
+          Hibernate.unproxy(
+            comment.getReceiverInteraction()
+          ) instanceof PeopleGroup
+        )
+      ) {
+        logger.debug(
+          MessageFormat.format(
+            "{0} is not a group. Redirecting to parent interaction.",
+            comment.getReceiverInteraction().getId()
+          )
+        );
         return (
           "redirect:/interaction/" +
           comment.getReceiverInteraction().getId() +
@@ -60,6 +87,12 @@ public class InteractionController {
     );
     model.addAttribute("newComment", new NewComment());
     if (interaction instanceof PeopleGroup) {
+      logger.debug(
+        MessageFormat.format(
+          "{0} is a group. Fetching additional info",
+          interactionId
+        )
+      );
       model.addAttribute("groupPfp", "/pfp/group/" + interactionId);
       model.addAttribute(
         "joinRequest",

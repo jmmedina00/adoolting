@@ -9,7 +9,10 @@ import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.person.NotificationService;
+import java.text.MessageFormat;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +35,10 @@ public class CommentService {
   @Autowired
   private NotificationService notificationService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    CommentService.class
+  );
+
   public Page<Comment> getCommentsFromInteraction(
     Long interactionId,
     Pageable pageable
@@ -53,6 +60,15 @@ public class CommentService {
     comment.setReceiverInteraction(interaction);
 
     Comment saved = commentRepository.save(comment);
+    logger.info(
+      MessageFormat.format(
+        "Interactor {0} has successfully commented on interaction {1}, id {2}",
+        interactorId,
+        interactionId,
+        comment.getId()
+      )
+    );
+
     notificationService.createNotifications(
       comment,
       interaction.getInteractor()
