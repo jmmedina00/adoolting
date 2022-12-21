@@ -1,0 +1,50 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <property name="LOG_DIR" value="./data/log" />
+    <property name="FORMAT" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+
+    <appender name="APP_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/info.log</file>
+        <filter class="io.github.jmmedina00.adoolting.config.log.InfoOnlyFilter" />
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/info.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FORMAT}</pattern>
+        </encoder>
+    </appender>
+    <appender name="APP_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/debug.log</file>
+        <filter class="io.github.jmmedina00.adoolting.config.log.DebugOnlyFilter" />
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/debug.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FORMAT}</pattern>
+        </encoder>
+    </appender>
+    <appender name="APP_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/error.log</file>
+        <filter class="io.github.jmmedina00.adoolting.config.log.BelowInfoFilter" />
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/error.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FORMAT}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info" additivity="false">
+        <appender-ref ref="APP_INFO" />
+        <appender-ref ref="APP_ERROR" />
+    </root>
+    <logger name="io.github.jmmedina00.adoolting">
+        <appender-ref ref="APP_DEBUG" />
+    </logger>
+</configuration>
