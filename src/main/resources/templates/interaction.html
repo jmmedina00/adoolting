@@ -84,6 +84,7 @@
   <span>New comment:</span><textarea th:field="*{content}"></textarea>
   <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
   <button type="submit">Send</button>
+  <input type="text" th:field="*{url}" />
 </form>
 <h3>Comments</h3>
 <div th:each="comment : ${comments}">

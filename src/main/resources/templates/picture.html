@@ -1,0 +1,15 @@
+<h1>Picture</h1>
+<ul>
+  <li th:each="picture : ${media}" th:text="${picture.id}"></li>
+</ul>
+
+<img
+  th:src="@{/cdn/media/full/{id}{extension}(id=${original.id},extension=${#strings.replace(original.reference, 'cdn:', '')})}"
+/>
+
+<a th:if="${previous}" th:href="@{/picture/{id}(id=${previous.id})}">
+  Previous
+</a>
+<a th:if="${next}" th:href="@{/picture/{id}(id=${next.id})}">Next</a>
+
+<p th:text="${interaction.getFirstParagraph()}"></p>
