@@ -14,9 +14,11 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
+@Profile("sample-data")
 public class SampleDataPopulationApplication implements CommandLineRunner {
   @Autowired
   private PostService postService;
@@ -25,10 +27,10 @@ public class SampleDataPopulationApplication implements CommandLineRunner {
     SampleDataPopulationApplication.class
   );
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     System.setProperty("spring.main.web-application-type", "NONE");
+    System.setProperty("spring.profiles.active", "sample-data");
 
-    logger.info("Running standalone application");
     ApplicationContext context = SpringApplication.run(
       SampleDataPopulationApplication.class,
       args
