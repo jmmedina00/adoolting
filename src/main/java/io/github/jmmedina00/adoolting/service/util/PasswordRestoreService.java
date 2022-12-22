@@ -5,6 +5,7 @@ import io.github.jmmedina00.adoolting.entity.util.PasswordRestoreToken;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.repository.util.PasswordRestoreTokenRepository;
+import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,6 +23,9 @@ public class PasswordRestoreService {
 
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private PersonLocaleConfigService localeConfigService;
 
   @Autowired
   private EmailService emailService;
@@ -80,6 +84,7 @@ public class PasswordRestoreService {
     token.setExpiresAt(expiresAt);
 
     PasswordRestoreToken saved = restoreTokenRepository.save(token);
+    localeConfigService.refreshForPerson(person.getId());
     emailService.setUpEmailJob(saved, "restore");
     return saved;
   }
