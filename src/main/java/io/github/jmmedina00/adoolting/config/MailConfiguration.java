@@ -36,7 +36,6 @@ public class MailConfiguration {
       "mail.smtp.starttls.enable",
       isStmpServerSecure ? "true" : "false"
     );
-    props.put("mail.debug", "true");
 
     return mailSender;
   }

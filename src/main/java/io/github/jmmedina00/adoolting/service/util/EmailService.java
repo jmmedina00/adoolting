@@ -5,6 +5,7 @@ import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang3.LocaleUtils;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -50,6 +53,10 @@ public class EmailService {
   @Value("${EMAIL_ADDRESS}")
   private String sender;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    EmailService.class
+  );
+
   public void setUpEmailJob(Emailable emailable, String template) {
     EmailData data = emailable.getEmailData();
     setUpEmailJob(data, template);
@@ -60,19 +67,39 @@ public class EmailService {
     data.setId(id);
     dataRepository.save(data);
     jobScheduler.enqueue(() -> prepareEmail(id, template));
+    logger.info(
+      MessageFormat.format(
+        "New email set up with template {0}, data id: {1}",
+        template,
+        id
+      )
+    );
   }
 
   @Job(name = "Send email")
   public void prepareEmail(String dataId, String template) throws Exception {
     EmailData data = dataRepository.findById(dataId).orElse(null);
     if (data == null) {
-      return; // Already sent
+      logger.info(
+        MessageFormat.format(
+          "Email with data {0} not found. Assuming already sent",
+          dataId
+        )
+      );
+      return;
     }
 
     Long personId = data.getReceiverPersonId();
     PersonLocaleConfig localeConfig = localeConfigService.getConfig(personId);
     Locale locale = LocaleUtils.toLocale(
       Optional.ofNullable(localeConfig.getLocale()).orElse("en")
+    );
+    logger.debug(
+      MessageFormat.format(
+        "Will send email {0} with locale {1}",
+        dataId,
+        locale.toString()
+      )
     );
 
     Context context = generateContext(locale);
@@ -89,7 +116,16 @@ public class EmailService {
       "Email",
       locale
     );
+    logger.debug(
+      MessageFormat.format("Email {0} subject is {1}", data.getId(), subject)
+    );
     sendEmail(data.getDestination(), subject, contents);
+    logger.info(
+      MessageFormat.format(
+        "Email {0} has been sent successfully and will be deleted from cache",
+        data.getId()
+      )
+    );
     dataRepository.deleteById(dataId);
   }
 
