@@ -10,7 +10,9 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Date;
-import java.util.Objects;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,10 @@ public class NotificationService {
   @Autowired
   private PersonSettingsService settingsService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    NotificationService.class
+  );
+
   public Page<Notification> getNotificationsForPerson(
     Long personId,
     Pageable pageable
@@ -41,13 +47,23 @@ public class NotificationService {
     Interaction interaction,
     Interactor interactor
   ) {
+    logger.debug(
+      "Start notifying interaction id {} to interactor {}",
+      interaction.getId(),
+      interactor.getId()
+    );
+
     if (interactor instanceof Person) {
-      createNotificationForPerson(interaction, (Person) interactor);
+      logger.debug(
+        "Interactor {} is a person. Not looping through managers.",
+        interactor.getId()
+      );
+      notifyPersonIfWanted(interaction, (Person) interactor);
       return;
     }
 
     for (Person person : pageService.getPageManagers(interactor.getId())) {
-      createNotificationForPerson(interaction, person);
+      notifyPersonIfWanted(interaction, person);
     }
   }
 
@@ -56,59 +72,58 @@ public class NotificationService {
       .findDeletableNotification(notificationId, personId)
       .orElseThrow();
     notification.setDeletedAt(new Date());
+    logger.info("Deleting notification {}");
     return notificationRepository.save(notification);
   }
 
-  private void createNotificationForPerson(
-    Interaction interaction,
-    Person person
-  ) {
+  private void notifyPersonIfWanted(Interaction interaction, Person person) {
+    if (interaction instanceof ConfirmableInteraction) {
+      logger.debug(
+        "Interaction {} is confirmable, resorting to confirmable flow"
+      );
+      notifyConfirmable((ConfirmableInteraction) interaction, person);
+      return;
+    }
+
     Long personId = person.getId();
     int code = (interaction instanceof Comment)
       ? PersonSettingsService.NOTIFY_COMMENT
       : (interaction.getInteractor() instanceof Page)
         ? PersonSettingsService.NOTIFY_PAGE_INTERACTION
         : PersonSettingsService.NOTIFY_POST_FROM_OTHER;
+    logger.debug(
+      "According to interaction {}, notification setting {} is needed",
+      interaction.toString(),
+      code
+    );
+
     NotificationSetting setting = settingsService.getNotificationSetting(
       personId,
       code
     );
+    logger.debug("Person {}'s code {} set to {}", personId, code, setting);
 
-    if (
-      !(interaction instanceof ConfirmableInteraction) &&
-      setting == NotificationSetting.NONE
-    ) {
+    if (setting == NotificationSetting.NONE) {
+      logger.debug("No notification wanted by {}");
       return;
     }
 
-    Notification notification = new Notification();
-    notification.setForPerson(person);
-    notification.setInteraction(interaction);
-    notificationRepository.save(notification);
-
-    if (interaction instanceof ConfirmableInteraction) {
-      emailOnConfirmable((ConfirmableInteraction) interaction, person);
-    }
+    Notification notification = createNotification(interaction, person);
 
     if (setting == NotificationSetting.EMAIL) {
-      System.out.println(
-        "Email will be sent to " +
-        person.getFullName() +
-        " for " +
-        interaction.getId()
+      logger.debug(
+        "Notification {} will also be emailed",
+        notification.getId()
       );
     }
   }
 
-  private void emailOnConfirmable(
+  private void notifyConfirmable(
     ConfirmableInteraction interaction,
     Person person
   ) {
-    Long personId = interaction.getReceiverInteractor().getId();
-
-    if (!Objects.equals(person.getId(), personId)) {
-      return;
-    }
+    Long personId = person.getId();
+    Notification notification = createNotification(interaction, person);
 
     if (
       !settingsService.isAllowedByPerson(
@@ -116,11 +131,48 @@ public class NotificationService {
         PersonSettingsService.EMAIL_CONFIRMABLE
       )
     ) {
+      logger.debug(
+        "Person {} to not be emailed about notification {}",
+        person.getId(),
+        notification.getId()
+      );
       return;
     }
 
-    System.out.println(
-      "Sending email to " + personId + " on " + interaction.getId()
+    logger.debug(
+      "Email on notification {} to be sent to person {}",
+      notification.getId(),
+      person.getId()
     );
+    List<Long> interactorIds = List.of(
+      interaction.getInteractor().getId(),
+      interaction.getReceiverInteractor().getId()
+    );
+    int position = interactorIds.indexOf(person.getId());
+    String wantedTemplate = (position == 1) ? "pending" : "accepted"; // Assuming anything other than 1 to be (manager of) interactor
+
+    logger.debug(
+      "Wanted template for notification {} is {}",
+      notification.getId(),
+      wantedTemplate
+    );
+  }
+
+  private Notification createNotification(
+    Interaction interaction,
+    Person person
+  ) {
+    Notification notification = new Notification();
+    notification.setForPerson(person);
+    notification.setInteraction(interaction);
+    Notification saved = notificationRepository.save(notification);
+    logger.info(
+      "Created notification {} on interaction {} for person {}",
+      notification.getId(),
+      interaction.getId(),
+      person.getId()
+    );
+
+    return saved;
   }
 }
