@@ -24,12 +24,6 @@ public class PersonSettings implements Serializable {
   private Person person;
 
   @Column
-  private String locale;
-
-  @Column
-  private int offsetFromUTC;
-
-  @Column
   private boolean allowStrangersIntoProfile = true;
 
   @Column
@@ -76,22 +70,6 @@ public class PersonSettings implements Serializable {
 
   public void setPerson(Person person) {
     this.person = person;
-  }
-
-  public String getLocale() {
-    return locale;
-  }
-
-  public void setLocale(String locale) {
-    this.locale = locale;
-  }
-
-  public int getOffsetFromUTC() {
-    return offsetFromUTC;
-  }
-
-  public void setOffsetFromUTC(int offsetFromUTC) {
-    this.offsetFromUTC = offsetFromUTC;
   }
 
   public boolean isAllowStrangersIntoProfile() {

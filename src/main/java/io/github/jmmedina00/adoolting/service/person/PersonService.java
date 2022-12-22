@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
+import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class PersonService implements UserDetailsService {
 
   @Autowired
   private PersonSettingsService settingsService;
+
+  @Autowired
+  private PersonLocaleConfigService localeConfigService;
 
   @Autowired
   private PersonStatusService statusService;
@@ -110,6 +114,7 @@ public class PersonService implements UserDetailsService {
     Person saved = personRepository.save(person);
     confirmationService.createTokenforPerson(saved);
     settingsService.createSettingsForPerson(saved);
+    localeConfigService.refreshForPerson(saved.getId());
     return saved;
   }
 
