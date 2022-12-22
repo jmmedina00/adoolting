@@ -1,9 +1,13 @@
 package io.github.jmmedina00.adoolting.service.util;
 
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
+import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
+import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
+import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -26,6 +30,9 @@ public class EmailService {
   private EmailDataRepository dataRepository;
 
   @Autowired
+  private PersonLocaleConfigService localeConfigService;
+
+  @Autowired
   private JavaMailSender emailSender;
 
   @Autowired
@@ -43,6 +50,11 @@ public class EmailService {
   @Value("${EMAIL_ADDRESS}")
   private String sender;
 
+  public void setUpEmailJob(Emailable emailable, String template) {
+    EmailData data = emailable.getEmailData();
+    setUpEmailJob(data, template);
+  }
+
   public void setUpEmailJob(EmailData data, String template) {
     String id = UUID.randomUUID().toString();
     data.setId(id);
@@ -57,8 +69,14 @@ public class EmailService {
       return; // Already sent
     }
 
-    Locale locale = LocaleUtils.toLocale(data.getLocale());
+    Long personId = data.getReceiverPersonId();
+    PersonLocaleConfig localeConfig = localeConfigService.getConfig(personId);
+    Locale locale = LocaleUtils.toLocale(
+      Optional.ofNullable(localeConfig.getLocale()).orElse("en")
+    );
+
     Context context = generateContext(locale);
+    context.setVariable("utcOffset", localeConfig.getOffsetFromUTC());
 
     for (Map.Entry<String, String> entry : data.getParameters().entrySet()) {
       context.setVariable(entry.getKey(), entry.getValue());

@@ -14,7 +14,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.context.i18n.LocaleContextHolder;
 
 @Entity
 public class PasswordRestoreToken implements Emailable {
@@ -83,10 +82,7 @@ public class PasswordRestoreToken implements Emailable {
 
   @Override
   public EmailData getEmailData() {
-    EmailData data = new EmailData(
-      person.getEmail(),
-      LocaleContextHolder.getLocale().toString()
-    );
+    EmailData data = new EmailData(person);
     HashMap<String, String> parameters = new HashMap<>();
     parameters.put("token", token);
 

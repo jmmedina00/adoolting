@@ -34,7 +34,7 @@ public class ConfirmationService {
     token.setExpiresAt(expiresAt);
 
     ConfirmationToken saved = tokenRepository.save(token);
-    emailService.setUpEmailJob(saved.getEmailData(), "confirm");
+    emailService.setUpEmailJob(saved, "confirm");
     return saved;
   }
 

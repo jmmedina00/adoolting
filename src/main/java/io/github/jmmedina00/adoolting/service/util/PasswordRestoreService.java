@@ -80,7 +80,7 @@ public class PasswordRestoreService {
     token.setExpiresAt(expiresAt);
 
     PasswordRestoreToken saved = restoreTokenRepository.save(token);
-    emailService.setUpEmailJob(saved.getEmailData(), "restore");
+    emailService.setUpEmailJob(saved, "restore");
     return saved;
   }
 }
