@@ -1,5 +1,6 @@
 <p>
   <span th:text="#{email.restore}"></span>
+  <span th:text="${person.firstName}"></span>
 </p>
 <a
   th:href="${@environment.getProperty('SITE_URL') + '/restore-password/' + token}"

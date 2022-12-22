@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.service.util;
 
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
 import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
+import io.github.jmmedina00.adoolting.entity.cache.simple.SimplePerson;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
@@ -69,7 +70,8 @@ public class EmailService {
     jobScheduler.enqueue(() -> prepareEmail(id, template));
     logger.info(
       MessageFormat.format(
-        "New email set up with template {0}, data id: {1}",
+        "New email set up to person {0} with template {1}, data id: {2}",
+        data.getPerson().getId(),
         template,
         id
       )
@@ -89,8 +91,10 @@ public class EmailService {
       return;
     }
 
-    Long personId = data.getReceiverPersonId();
-    PersonLocaleConfig localeConfig = localeConfigService.getConfig(personId);
+    SimplePerson person = data.getPerson();
+    PersonLocaleConfig localeConfig = localeConfigService.getConfig(
+      person.getId()
+    );
     Locale locale = LocaleUtils.toLocale(
       Optional.ofNullable(localeConfig.getLocale()).orElse("en")
     );
@@ -104,6 +108,7 @@ public class EmailService {
 
     Context context = generateContext(locale);
     context.setVariable("utcOffset", localeConfig.getOffsetFromUTC());
+    context.setVariable("person", person);
 
     for (Map.Entry<String, String> entry : data.getParameters().entrySet()) {
       context.setVariable(entry.getKey(), entry.getValue());
@@ -117,9 +122,16 @@ public class EmailService {
       locale
     );
     logger.debug(
-      MessageFormat.format("Email {0} subject is {1}", data.getId(), subject)
+      MessageFormat.format(
+        "Email {0} subject is {1}. Sending to {2}",
+        data.getId(),
+        subject,
+        person.getEmail()
+      )
     );
-    sendEmail(data.getDestination(), subject, contents);
+
+    sendEmail(person.getEmail(), subject, contents);
+
     logger.info(
       MessageFormat.format(
         "Email {0} has been sent successfully and will be deleted from cache",

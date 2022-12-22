@@ -1,4 +1,4 @@
-package io.github.jmmedina00.adoolting.entity.cache;
+package io.github.jmmedina00.adoolting.entity.cache.simple;
 
 import io.github.jmmedina00.adoolting.entity.person.PrivateMessage;
 import java.io.Serializable;

@@ -82,7 +82,8 @@ public class PasswordRestoreToken implements Emailable {
 
   @Override
   public EmailData getEmailData() {
-    EmailData data = new EmailData(person);
+    EmailData data = new EmailData();
+    data.setPerson(person);
     HashMap<String, String> parameters = new HashMap<>();
     parameters.put("token", token);
 

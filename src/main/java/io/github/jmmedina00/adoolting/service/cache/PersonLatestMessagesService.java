@@ -1,7 +1,7 @@
 package io.github.jmmedina00.adoolting.service.cache;
 
 import io.github.jmmedina00.adoolting.entity.cache.PersonLatestMessages;
-import io.github.jmmedina00.adoolting.entity.cache.SimpleMessage;
+import io.github.jmmedina00.adoolting.entity.cache.simple.SimpleMessage;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PrivateMessage;
 import io.github.jmmedina00.adoolting.repository.cache.PersonLatestMessagesRepository;
