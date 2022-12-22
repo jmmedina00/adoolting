@@ -1,6 +1,8 @@
 package io.github.jmmedina00.adoolting.config;
 
+import io.github.jmmedina00.adoolting.config.handler.LocaleUpdaterSuccessHandler;
 import java.util.HashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,10 +18,14 @@ import org.springframework.security.web.authentication.ExceptionMappingAuthentic
 @Profile("!backoffice")
 @EnableWebSecurity
 public class SecurityConfiguration {
+  @Autowired
+  private LocaleUpdaterSuccessHandler successHandler;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http)
     throws Exception {
+    successHandler.setDefaultTargetUrl("/home");
+
     http
       .authorizeHttpRequests(
         requests ->
@@ -38,7 +44,7 @@ public class SecurityConfiguration {
       .loginPage("/")
       .loginProcessingUrl("/login")
       .failureHandler(authenticationFailureHandler())
-      .defaultSuccessUrl("/home", true);
+      .successHandler(successHandler);
     return http.build();
   }
 

@@ -11,6 +11,7 @@
 
   <span th:text="#{password}">Password:</span>
   <input type="password" name="password" id="password" /><br />
+  <input type="hidden" name="offsetFromUTC" id="offset" />
 
   <input type="submit" />
 </form>
@@ -103,3 +104,7 @@
   </div>
   <button type="submit">Submit</button>
 </form>
+<script>
+  const offsetField = document.querySelector('#offset')
+  offsetField.setAttribute('value', new Date().getTimezoneOffset())
+</script>
