@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.entity.person;
 
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +13,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 public class PersonSettings implements Serializable {
@@ -22,6 +25,13 @@ public class PersonSettings implements Serializable {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
   private Person person;
+
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Date createdAt;
+
+  @UpdateTimestamp
+  private Date updatedAt;
 
   @Column
   private boolean allowStrangersIntoProfile = true;
@@ -70,6 +80,14 @@ public class PersonSettings implements Serializable {
 
   public void setPerson(Person person) {
     this.person = person;
+  }
+
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  public Date getUpdatedAt() {
+    return updatedAt;
   }
 
   public boolean isAllowStrangersIntoProfile() {
