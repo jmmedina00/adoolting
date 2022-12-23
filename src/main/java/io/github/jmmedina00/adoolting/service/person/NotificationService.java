@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
 import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
+import io.github.jmmedina00.adoolting.service.util.EmailService;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +24,9 @@ public class NotificationService {
 
   @Autowired
   private PersonSettingsService settingsService;
+
+  @Autowired
+  private EmailService emailService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     NotificationService.class
@@ -108,6 +112,23 @@ public class NotificationService {
         "Notification {} will also be emailed",
         notification.getId()
       );
+
+      String template;
+
+      switch (code) {
+        case PersonSettingsService.NOTIFY_COMMENT:
+          template = "comment";
+          break;
+        case PersonSettingsService.NOTIFY_PAGE_INTERACTION:
+          template = "page-activity";
+          break;
+        case PersonSettingsService.NOTIFY_POST_FROM_OTHER:
+        default:
+          template = "new-post";
+          break;
+      }
+
+      emailService.setUpEmailJob(notification, template);
     }
   }
 
@@ -149,6 +170,8 @@ public class NotificationService {
       notification.getId(),
       wantedTemplate
     );
+
+    emailService.setUpEmailJob(notification, wantedTemplate);
   }
 
   private Notification createNotification(

@@ -1,0 +1,16 @@
+<div th:with="i=${@interactionService.getInteraction(interaction)}">
+  <p th:object="${i.receiverInteractor}">
+    <span>New post on</span>
+    <span th:if="*{id} == ${person.id}">your profile</span>
+    <span th:unless="*{id} == ${person.id}" th:text="*{getFullName()}"></span>
+  </p>
+
+  <p th:text="${i.getFirstParagraph()}"></p>
+  <p>
+    <a
+      th:href="${@environment.getProperty('SITE_URL') + '/interaction/' + i.id}"
+    >
+      Interaction
+    </a>
+  </p>
+</div>

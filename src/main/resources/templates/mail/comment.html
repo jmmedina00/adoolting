@@ -1,0 +1,21 @@
+<div th:with="i=${@interactionService.getInteraction(interaction)}">
+  <p
+    th:object="${@interactionService.getInteraction(i.receiverInteraction.id).interactor}"
+  >
+    <span>New comment</span>
+    <span th:if="*{id} == ${person.id}">your post</span>
+    <span th:unless="*{id} == ${person.id}">
+      <span>Post of</span>
+      <span th:text="*{getFullName()}"></span>
+    </span>
+  </p>
+
+  <p th:text="${i.getFirstParagraph()}"></p>
+  <p>
+    <a
+      th:href="${@environment.getProperty('SITE_URL') + '/interaction/' + i.receiverInteraction.id + '?comment=' + i.id}"
+    >
+      Comment
+    </a>
+  </p>
+</div>

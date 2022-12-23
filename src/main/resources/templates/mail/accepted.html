@@ -1,0 +1,26 @@
+<div th:with="i=${@interactionService.getInteraction(interaction)}">
+  <p th:object="${i.receiverInteractor}">
+    <span th:text="*{getFullName()}"></span>
+    <span
+      th:unless="${i.class.name == 'io.github.jmmedina00.adoolting.entity.group.JoinRequest'}"
+    >
+      has accepted your friend request
+    </span>
+    <span
+      th:if="${i.class.name == 'io.github.jmmedina00.adoolting.entity.group.JoinRequest'}"
+    >
+      <span th:if="*{id} == ${i.group.interactor.id}">
+        has accepted you into
+      </span>
+      <span th:unless="*{id} == ${i.group.interactor.id}">has joined</span>
+      <span th:text="${i.group.name}"></span>
+    </span>
+  </p>
+  <p>
+    <a
+      th:href="${@environment.getProperty('SITE_URL') + '/interaction/' + i.id}"
+    >
+      Interaction
+    </a>
+  </p>
+</div>

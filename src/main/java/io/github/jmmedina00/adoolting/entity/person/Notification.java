@@ -2,7 +2,10 @@ package io.github.jmmedina00.adoolting.entity.person;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.cache.EmailData;
+import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +19,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-public class Notification {
+public class Notification implements Emailable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -83,5 +86,17 @@ public class Notification {
       cInteraction.getReceiverInteractor().getId(),
       forPerson.getId()
     );
+  }
+
+  @Override
+  public EmailData getEmailData() {
+    EmailData data = new EmailData();
+    data.setPerson(forPerson);
+
+    HashMap<String, String> parameters = new HashMap<>();
+    parameters.put("interaction", interaction.getId().toString());
+    data.setParameters(parameters);
+
+    return data;
   }
 }

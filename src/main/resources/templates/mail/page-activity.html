@@ -1,0 +1,15 @@
+<div th:with="i=${@interactionService.getInteraction(interaction)}">
+  <p>
+    <span>New post from</span>
+    <span th:text="${i.interactor.getFullName()}"></span>
+  </p>
+
+  <p th:text="${i.getFirstParagraph()}"></p>
+  <p>
+    <a
+      th:href="${@environment.getProperty('SITE_URL') + '/interaction/' + i.id}"
+    >
+      Interaction
+    </a>
+  </p>
+</div>

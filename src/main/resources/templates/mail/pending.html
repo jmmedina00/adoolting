@@ -1,0 +1,24 @@
+<div
+  th:with="i=${@confirmableInteractionService.getConfirmableInteraction(interaction)}"
+>
+  <p th:object="${i.interactor}">
+    <span th:text="*{getFullName()}"></span>
+    <span
+      th:unless="${i.class.name == 'io.github.jmmedina00.adoolting.entity.group.JoinRequest'}"
+    >
+      wants to be your friend
+    </span>
+    <span
+      th:if="${i.class.name == 'io.github.jmmedina00.adoolting.entity.group.JoinRequest'}"
+    >
+      <span th:if="*{id} == ${i.group.interactor.id}">has invited you to</span>
+      <span th:unless="*{id} == ${i.group.interactor.id}">wants to join</span>
+      <span th:text="${i.group.name}"></span>
+    </span>
+  </p>
+  <p>
+    <a th:href="${@environment.getProperty('SITE_URL') + '/network'}">
+      Interaction
+    </a>
+  </p>
+</div>
