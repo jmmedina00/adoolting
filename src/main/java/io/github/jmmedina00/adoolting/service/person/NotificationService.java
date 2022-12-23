@@ -2,12 +2,10 @@ package io.github.jmmedina00.adoolting.service.person;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
 import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -22,9 +20,6 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
   @Autowired
   private NotificationRepository notificationRepository;
-
-  @Autowired
-  private PageService pageService;
 
   @Autowired
   private PersonSettingsService settingsService;
@@ -45,27 +40,15 @@ public class NotificationService {
 
   public void createNotifications(
     Interaction interaction,
-    Interactor interactor,
+    Person person,
     int code
   ) {
     logger.debug(
-      "Start notifying interaction id {} to interactor {}",
+      "Start notifying interaction id {} to person {}",
       interaction.getId(),
-      interactor.getId()
+      person.getId()
     );
-
-    if (interactor instanceof Person) {
-      logger.debug(
-        "Interactor {} is a person. Not looping through managers.",
-        interactor.getId()
-      );
-      notifyPersonIfWanted(interaction, (Person) interactor, code);
-      return;
-    }
-
-    for (Person person : pageService.getPageManagers(interactor.getId())) {
-      notifyPersonIfWanted(interaction, person, code);
-    }
+    notifyPersonIfWanted(interaction, person, code);
   }
 
   public Notification deleteNotification(Long notificationId, Long personId) {

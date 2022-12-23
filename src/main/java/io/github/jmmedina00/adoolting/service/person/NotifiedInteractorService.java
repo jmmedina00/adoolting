@@ -6,8 +6,10 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.hibernate.Hibernate;
@@ -21,11 +23,14 @@ public class NotifiedInteractorService {
   @Autowired
   private PersonService personService;
 
+  @Autowired
+  private PageService pageService;
+
   private static final Logger logger = LoggerFactory.getLogger(
     NotifiedInteractorService.class
   );
 
-  public Map<Interactor, Integer> getInteractorsInterestedInInteraction(
+  public Map<Person, Integer> getInteractorsInterestedInInteraction(
     Interaction interaction
   ) {
     Long interactionId = interaction.getId();
@@ -57,11 +62,11 @@ public class NotifiedInteractorService {
       }
 
       return cInteraction.getConfirmedAt() == null
-        ? Map.of(receiver, 0)
-        : Map.of(author, 0);
+        ? getMapOfSingleInteractor(receiver)
+        : getMapOfSingleInteractor(author);
     }
 
-    HashMap<Interactor, Integer> interestedInteractors = new HashMap<>();
+    HashMap<Person, Integer> interestedPersons = new HashMap<>();
 
     if (interaction instanceof Comment) {
       Comment comment = (Comment) interaction;
@@ -86,7 +91,8 @@ public class NotifiedInteractorService {
           originalInteractorId,
           interactionId
         );
-        interestedInteractors.put(
+        addInteractorToNotificationMap(
+          interestedPersons,
           commentedOnInteraction.getInteractor(),
           PersonSettingsService.NOTIFY_COMMENT
         );
@@ -103,7 +109,7 @@ public class NotifiedInteractorService {
       for (Person person : personService.getPersonsWhoLikedPage(
         author.getId()
       )) {
-        interestedInteractors.put(
+        interestedPersons.put(
           person,
           PersonSettingsService.NOTIFY_PAGE_INTERACTION
         );
@@ -116,12 +122,45 @@ public class NotifiedInteractorService {
         interactionId,
         receiver.getId()
       );
-      interestedInteractors.put(
+      addInteractorToNotificationMap(
+        interestedPersons,
         receiver,
         PersonSettingsService.NOTIFY_POST_FROM_OTHER
       );
     }
 
-    return interestedInteractors;
+    return interestedPersons;
+  }
+
+  private Map<Person, Integer> getMapOfSingleInteractor(Interactor interactor) {
+    if (interactor instanceof Person) {
+      return Map.of((Person) interactor, 0);
+    }
+
+    List<Person> pageManagers = pageService.getPageManagers(interactor.getId());
+    HashMap<Person, Integer> map = new HashMap<>();
+
+    for (Person person : pageManagers) {
+      map.put(person, 0);
+    }
+
+    return map;
+  }
+
+  private void addInteractorToNotificationMap(
+    HashMap<Person, Integer> map,
+    Interactor interactor,
+    int code
+  ) {
+    if (interactor instanceof Person) {
+      map.put((Person) interactor, code);
+      return;
+    }
+
+    List<Person> pageManagers = pageService.getPageManagers(interactor.getId());
+
+    for (Person person : pageManagers) {
+      map.put(person, code);
+    }
   }
 }

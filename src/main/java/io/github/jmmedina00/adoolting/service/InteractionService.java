@@ -1,7 +1,7 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import io.github.jmmedina00.adoolting.service.person.NotificationService;
@@ -27,10 +27,10 @@ public class InteractionService {
   public Interaction saveInteraction(Interaction interaction) {
     Interaction saved = interactionRepository.save(interaction);
 
-    Map<Interactor, Integer> interestedInteractors = notifiedInteractorService.getInteractorsInterestedInInteraction(
+    Map<Person, Integer> interestedInteractors = notifiedInteractorService.getInteractorsInterestedInInteraction(
       saved
     );
-    for (Map.Entry<Interactor, Integer> entry : interestedInteractors.entrySet()) {
+    for (Map.Entry<Person, Integer> entry : interestedInteractors.entrySet()) {
       notificationService.createNotifications(
         interaction,
         entry.getKey(),
