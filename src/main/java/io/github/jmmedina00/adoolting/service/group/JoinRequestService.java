@@ -6,6 +6,7 @@ import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class JoinRequestService {
 
   @Autowired
   private InteractorService interactorService;
+
+  @Autowired
+  private InteractionService interactionService;
 
   public JoinRequest getJoinRequestForPersonAndGroup(
     Long personId,
@@ -91,6 +95,6 @@ public class JoinRequestService {
     joinRequest.setInteractor(sender);
     joinRequest.setReceiverInteractor(receiver);
 
-    return joinRequestRepository.save(joinRequest);
+    return (JoinRequest) interactionService.saveInteraction(joinRequest);
   }
 }

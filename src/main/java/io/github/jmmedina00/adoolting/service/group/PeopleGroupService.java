@@ -9,6 +9,7 @@ import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
@@ -29,6 +30,9 @@ public class PeopleGroupService {
   @Autowired
   private PersonService personService;
 
+  @Autowired
+  private InteractionService interactionService;
+
   public PeopleGroup getGroup(Long groupId) {
     return groupRepository.findActiveGroup(groupId).orElseThrow();
   }
@@ -40,7 +44,7 @@ public class PeopleGroupService {
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
     group.setAccessLevel(newGroup.getAccessLevel());
-    return groupRepository.save(group);
+    return (PeopleGroup) interactionService.saveInteraction(group);
   }
 
   public List<PeopleGroup> getGroupsManagedByPerson(Long personId) {
@@ -70,7 +74,7 @@ public class PeopleGroupService {
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setAccessLevel(newGroup.getAccessLevel());
-    return groupRepository.save(group);
+    return (PeopleGroup) interactionService.saveInteraction(group);
   }
 
   public NewGroup getGroupForm(Long groupId) {
@@ -108,7 +112,7 @@ public class PeopleGroupService {
 
     PeopleGroup group = getGroup(groupId);
     group.setDeletedAt(new Date());
-    return groupRepository.save(group);
+    return (PeopleGroup) interactionService.saveInteraction(group);
   }
 
   public boolean isGroupManagedByPerson(Long groupId, Long personId) {

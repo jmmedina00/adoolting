@@ -8,7 +8,6 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
-import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import java.text.MessageFormat;
 import java.util.List;
 import org.slf4j.Logger;
@@ -31,9 +30,6 @@ public class CommentService {
 
   @Autowired
   private InteractionService interactionService;
-
-  @Autowired
-  private NotificationService notificationService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     CommentService.class
@@ -59,7 +55,7 @@ public class CommentService {
     comment.setInteractor(interactor);
     comment.setReceiverInteraction(interaction);
 
-    Comment saved = commentRepository.save(comment);
+    Comment saved = (Comment) interactionService.saveInteraction(interaction);
     logger.info(
       MessageFormat.format(
         "Interactor {0} has successfully commented on interaction {1}, id {2}",
@@ -69,10 +65,6 @@ public class CommentService {
       )
     );
 
-    notificationService.createNotifications(
-      comment,
-      interaction.getInteractor()
-    );
     if (newComment.getFile() == null) {
       return saved;
     }

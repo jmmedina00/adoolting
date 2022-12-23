@@ -5,6 +5,7 @@ import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.EventRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class EventService {
   @Autowired
   private InteractorService interactorService;
 
+  @Autowired
+  private InteractionService interactionService;
+
   public Event createEvent(NewEvent newEvent, Long interactorId) {
     Interactor interactor = interactorService.getInteractor(interactorId);
     Event event = new Event();
@@ -30,7 +34,7 @@ public class EventService {
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
 
-    return eventRepository.save(event);
+    return (Event) interactionService.saveInteraction(event);
   }
 
   public Event updateEvent(Long eventId, Long personId, NewEvent newEvent)
@@ -45,6 +49,6 @@ public class EventService {
     event.setAccessLevel(newEvent.getAccessLevel());
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
-    return eventRepository.save(event);
+    return (Event) interactionService.saveInteraction(event);
   }
 }

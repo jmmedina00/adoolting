@@ -4,7 +4,6 @@ import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
-import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +20,7 @@ public class ConfirmableInteractionService {
   private PersonService personService;
 
   @Autowired
-  private NotificationService notificationService;
+  private InteractionService interactionService;
 
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Long personId
@@ -74,7 +73,9 @@ public class ConfirmableInteractionService {
       interaction.setIgnoredAt(now);
     }
 
-    return cInteractionRepository.save(interaction);
+    return (ConfirmableInteraction) interactionService.saveInteraction(
+      interaction
+    );
   }
 
   public ConfirmableInteraction addPersonAsFriend(
@@ -103,9 +104,8 @@ public class ConfirmableInteractionService {
     interaction.setInteractor(requestingPerson);
     interaction.setReceiverInteractor(addedPerson);
 
-    ConfirmableInteraction saved = cInteractionRepository.save(interaction);
-    notificationService.createNotifications(interaction, requestingPerson);
-    notificationService.createNotifications(interaction, addedPerson);
-    return saved;
+    return (ConfirmableInteraction) interactionService.saveInteraction(
+      interaction
+    );
   }
 }

@@ -7,7 +7,7 @@ import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
-import io.github.jmmedina00.adoolting.repository.interaction.PostRepository;
+import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import java.util.Objects;
@@ -18,13 +18,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostService {
   @Autowired
-  private PostRepository postRepository;
-
-  @Autowired
   private MediumService mediumService;
 
   @Autowired
   private InteractorService interactorService;
+
+  @Autowired
+  private InteractionService interactionService;
 
   public Post postOnPage(NewPostOnPage newPost, Long pageId)
     throws NotAuthorizedException {
@@ -37,7 +37,7 @@ public class PostService {
     Post post = new Post();
     post.setInteractor(interactor);
     post.setContent(newPost.getContent().trim());
-    Post saved = postRepository.save(post);
+    Post saved = (Post) interactionService.saveInteraction(post);
     handleNewPostFiles(newPost, saved);
     return saved;
   }
@@ -65,7 +65,7 @@ public class PostService {
     post.setInteractor(interactor);
     post.setReceiverInteractor(receiverInteractor);
     post.setContent(newPost.getContent().trim());
-    Post saved = postRepository.save(post);
+    Post saved = (Post) interactionService.saveInteraction(post);
     handleNewPostFiles(newPost, saved);
     return saved;
   }
