@@ -1,9 +1,13 @@
 package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
+import io.github.jmmedina00.adoolting.service.person.NotificationService;
+import io.github.jmmedina00.adoolting.service.person.NotifiedInteractorService;
 import java.util.Date;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,8 +18,27 @@ public class InteractionService {
   @Autowired
   private InteractionRepository interactionRepository;
 
+  @Autowired
+  private NotificationService notificationService; // ALL INTERACTIONS GO THROUGH HERE OwO
+
+  @Autowired
+  private NotifiedInteractorService notifiedInteractorService;
+
   public Interaction saveInteraction(Interaction interaction) {
-    return interactionRepository.save(interaction);
+    Interaction saved = interactionRepository.save(interaction);
+
+    Map<Interactor, Integer> interestedInteractors = notifiedInteractorService.getInteractorsInterestedInInteraction(
+      saved
+    );
+    for (Map.Entry<Interactor, Integer> entry : interestedInteractors.entrySet()) {
+      notificationService.createNotifications(
+        interaction,
+        entry.getKey(),
+        entry.getValue()
+      );
+    }
+
+    return saved;
   }
 
   public Interaction getInteraction(Long interactionId) {

@@ -21,4 +21,10 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     "(SELECT c.person.id FROM ConfirmationToken c WHERE c.confirmedAt IS NOT NULL)"
   )
   Optional<Person> findActivePerson(@Param("personId") Long personId);
+
+  @Query(
+    "SELECT p FROM Person p WHERE p.id IN (SELECT l.interactor.id FROM PageLike l WHERE " +
+    "l.receiverInteractor.id=:pageId AND l.deletedAt IS NULL)"
+  )
+  List<Person> findPersonsWhoLikedPage(@Param("pageId") Long pageId);
 }

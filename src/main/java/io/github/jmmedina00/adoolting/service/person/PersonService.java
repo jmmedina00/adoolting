@@ -46,6 +46,10 @@ public class PersonService implements UserDetailsService {
     return personRepository.findConfirmedPersons();
   }
 
+  public List<Person> getPersonsWhoLikedPage(Long pageId) {
+    return personRepository.findPersonsWhoLikedPage(pageId);
+  }
+
   public PersonInfo getPersonInfo(Long personId) {
     Person person = getPerson(personId);
     PersonInfo info = new PersonInfo();

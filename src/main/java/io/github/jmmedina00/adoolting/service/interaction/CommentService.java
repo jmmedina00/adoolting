@@ -55,7 +55,7 @@ public class CommentService {
     comment.setInteractor(interactor);
     comment.setReceiverInteraction(interaction);
 
-    Comment saved = (Comment) interactionService.saveInteraction(interaction);
+    Comment saved = (Comment) interactionService.saveInteraction(comment);
     logger.info(
       MessageFormat.format(
         "Interactor {0} has successfully commented on interaction {1}, id {2}",

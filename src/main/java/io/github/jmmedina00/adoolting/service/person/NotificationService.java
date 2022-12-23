@@ -4,13 +4,13 @@ import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
-import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,8 @@ public class NotificationService {
 
   public void createNotifications(
     Interaction interaction,
-    Interactor interactor
+    Interactor interactor,
+    int code
   ) {
     logger.debug(
       "Start notifying interaction id {} to interactor {}",
@@ -58,12 +59,12 @@ public class NotificationService {
         "Interactor {} is a person. Not looping through managers.",
         interactor.getId()
       );
-      notifyPersonIfWanted(interaction, (Person) interactor);
+      notifyPersonIfWanted(interaction, (Person) interactor, code);
       return;
     }
 
     for (Person person : pageService.getPageManagers(interactor.getId())) {
-      notifyPersonIfWanted(interaction, person);
+      notifyPersonIfWanted(interaction, person, code);
     }
   }
 
@@ -76,26 +77,31 @@ public class NotificationService {
     return notificationRepository.save(notification);
   }
 
-  private void notifyPersonIfWanted(Interaction interaction, Person person) {
+  private void notifyPersonIfWanted(
+    Interaction interaction,
+    Person person,
+    int code
+  ) {
+    Long personId = person.getId();
+    Long interactionId = interaction.getId();
+
     if (interaction instanceof ConfirmableInteraction) {
       logger.debug(
-        "Interaction {} is confirmable, resorting to confirmable flow"
+        "Interaction {} is confirmable, resorting to confirmable flow",
+        interactionId
       );
       notifyConfirmable((ConfirmableInteraction) interaction, person);
       return;
     }
 
-    Long personId = person.getId();
-    int code = (interaction instanceof Comment)
-      ? PersonSettingsService.NOTIFY_COMMENT
-      : (interaction.getInteractor() instanceof Page)
-        ? PersonSettingsService.NOTIFY_PAGE_INTERACTION
-        : PersonSettingsService.NOTIFY_POST_FROM_OTHER;
-    logger.debug(
-      "According to interaction {}, notification setting {} is needed",
-      interaction.toString(),
-      code
-    );
+    if (Objects.equals(personId, interaction.getInteractor().getId())) {
+      logger.debug(
+        "Person {} is author of interaction {}. Skipping notification.",
+        personId,
+        interaction.getId()
+      );
+      return;
+    }
 
     NotificationSetting setting = settingsService.getNotificationSetting(
       personId,
@@ -104,7 +110,11 @@ public class NotificationService {
     logger.debug("Person {}'s code {} set to {}", personId, code, setting);
 
     if (setting == NotificationSetting.NONE) {
-      logger.debug("No notification wanted by {}");
+      logger.debug(
+        "No notification wanted by person {} on interaction {}",
+        personId,
+        interactionId
+      );
       return;
     }
 
