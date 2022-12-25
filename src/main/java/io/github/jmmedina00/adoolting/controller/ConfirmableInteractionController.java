@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.InteractionConfirmation;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
+import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.person.NotificationService;
@@ -89,5 +90,19 @@ public class ConfirmableInteractionController {
       AuthenticatedPerson.getPersonId()
     );
     return "redirect:/network";
+  }
+
+  @RequestMapping(
+    method = RequestMethod.GET,
+    value = "/passthrough/{notificationId}"
+  )
+  public String goToNotificationInteraction(
+    @PathVariable("notificationId") Long notificationId
+  ) {
+    Notification notification = notificationService.markNotificationAsRead(
+      notificationId,
+      AuthenticatedPerson.getPersonId()
+    );
+    return "redirect:/interaction/" + notification.getInteraction().getId();
   }
 }

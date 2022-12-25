@@ -43,6 +43,10 @@ public class Notification implements Emailable {
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column
+  private Date readAt;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column
   private Date deletedAt;
 
   public Long getId() {
@@ -71,6 +75,14 @@ public class Notification implements Emailable {
 
   public Date getCreatedAt() {
     return createdAt;
+  }
+
+  public Date getReadAt() {
+    return readAt;
+  }
+
+  public void setReadAt(Date readAt) {
+    this.readAt = readAt;
   }
 
   public Date getDeletedAt() {

@@ -1,16 +1,22 @@
 <div
   th:each="notification : ${notifications}"
   th:object="${notification.interaction}"
+  class="notification"
+  th:classappend="${notification.readAt == null ? 'unread' : 'read'}"
 >
-  <span th:text="*{id}"></span>
-  -
-  <span th:text="*{class.name}"></span>
-  -
-  <span th:text="*{interactor.getFullName()}"> </span>
-  <span
-    th:if="*{class.name.equals('io.github.jmmedina00.adoolting.entity.group.JoinRequest')}"
-    >- Extended <span th:text="*{group.id}"></span>
-  </span>
+  <a
+    th:href="@{/network/passthrough/{notificationId}(notificationId=${notification.id})}"
+  >
+    <span th:text="*{id}"></span>
+    -
+    <span th:text="*{class.name}"></span>
+    -
+    <span th:text="*{interactor.getFullName()}"> </span>
+    <span
+      th:if="*{class.name.equals('io.github.jmmedina00.adoolting.entity.group.JoinRequest')}"
+      >- Extended <span th:text="*{group.id}"></span>
+    </span>
+  </a>
 
   <form
     th:unless="${notification.isActionable()}"

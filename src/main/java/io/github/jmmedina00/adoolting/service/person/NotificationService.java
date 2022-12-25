@@ -42,6 +42,29 @@ public class NotificationService {
     );
   }
 
+  public Notification markNotificationAsRead(
+    Long notificationId,
+    Long personId
+  ) {
+    Notification notification = notificationRepository
+      .findBelongingNotification(notificationId, personId)
+      .orElseThrow();
+    if (notification.getReadAt() == null) {
+      notification.setReadAt(new Date());
+      logger.info("Notification {} is now read.", notificationId);
+    }
+    return notificationRepository.save(notification);
+  }
+
+  public Notification deleteNotification(Long notificationId, Long personId) {
+    Notification notification = notificationRepository
+      .findBelongingNotification(notificationId, personId)
+      .orElseThrow();
+    notification.setDeletedAt(new Date());
+    logger.info("Deleting notification {}", notificationId);
+    return notificationRepository.save(notification);
+  }
+
   public void createNotifications(
     Interaction interaction,
     Person person,
@@ -53,15 +76,6 @@ public class NotificationService {
       person.getId()
     );
     notifyPersonIfWanted(interaction, person, code);
-  }
-
-  public Notification deleteNotification(Long notificationId, Long personId) {
-    Notification notification = notificationRepository
-      .findDeletableNotification(notificationId, personId)
-      .orElseThrow();
-    notification.setDeletedAt(new Date());
-    logger.info("Deleting notification {}");
-    return notificationRepository.save(notification);
   }
 
   private void notifyPersonIfWanted(

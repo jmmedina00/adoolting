@@ -14,7 +14,7 @@ public interface NotificationRepository
     "SELECT n FROM Notification n WHERE n.id=:notificationId " +
     "AND n.forPerson.id=:personId"
   )
-  Optional<Notification> findDeletableNotification(
+  Optional<Notification> findBelongingNotification(
     @Param("notificationId") Long notificationId,
     @Param("personId") Long personId
   );
