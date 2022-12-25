@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -41,9 +40,6 @@ public class EmailService {
 
   @Autowired
   private TemplateEngine templateEngine;
-
-  @Autowired
-  private MessageSource messageSource;
 
   @Autowired
   private ApplicationContext applicationContext;
@@ -115,10 +111,17 @@ public class EmailService {
     }
 
     String contents = templateEngine.process("mail/" + template, context);
-    String subject = messageSource.getMessage(
-      "email." + template,
-      null,
-      "Email",
+    String subjectCode =
+      "email." +
+      template +
+      (
+        data.getSubjectAddendum().isBlank()
+          ? ""
+          : "." + data.getSubjectAddendum()
+      );
+    String subject = applicationContext.getMessage(
+      subjectCode,
+      data.getSubjectArguments().toArray(),
       locale
     );
     logger.debug(

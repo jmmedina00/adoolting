@@ -3,7 +3,12 @@ package io.github.jmmedina00.adoolting.entity.person;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
+import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
+import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
@@ -96,6 +101,55 @@ public class Notification implements Emailable {
     HashMap<String, String> parameters = new HashMap<>();
     parameters.put("interaction", interaction.getId().toString());
     data.setParameters(parameters);
+
+    ArrayList<String> arguments = new ArrayList<>();
+    arguments.add(interaction.getInteractor().getFullName());
+
+    if (interaction instanceof Comment) {
+      arguments.add(
+        ((Comment) interaction).getReceiverInteraction()
+          .getInteractor()
+          .getFullName()
+      );
+    } else if (interaction.getReceiverInteractor() != null) {
+      arguments.add(interaction.getReceiverInteractor().getFullName());
+    }
+
+    if (
+      arguments.size() > 1 && !forPerson.getFullName().equals(arguments.get(1))
+    ) {
+      data.setSubjectAddendum("page");
+    } else if (!(interaction.getInteractor() instanceof Page)) {
+      data.setSubjectAddendum("profile");
+    }
+
+    if (interaction instanceof ConfirmableInteraction) {
+      ConfirmableInteraction cInteraction = (ConfirmableInteraction) interaction;
+
+      if (cInteraction.getConfirmedAt() != null) {
+        Collections.reverse(arguments);
+      }
+      data.setSubjectAddendum("friend");
+    }
+
+    if (interaction instanceof JoinRequest) {
+      JoinRequest joinRequest = (JoinRequest) interaction;
+      arguments.add(joinRequest.getGroup().getName());
+      String subjectAdd =
+        "group" +
+        (
+          Objects.equals(
+              interaction.getInteractor().getId(),
+              joinRequest.getGroup().getInteractor().getId()
+            )
+            ? ".invite"
+            : ".request"
+        );
+
+      data.setSubjectAddendum(subjectAdd);
+    }
+
+    data.setSubjectArguments(arguments);
 
     return data;
   }
