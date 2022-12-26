@@ -18,37 +18,25 @@
     </span>
     <span th:unless="${friendship.receiverInteractor.id == person.id}">
       <form
-        th:action="@{/network/{friendship}(friendship=${friendship.id})}"
+        th:action="@{/confirmable/{friendship}(friendship=${friendship.id})}"
         method="post"
       >
         <input
           type="text"
           name="isAccepted"
-          value="true"
-          style="display: none"
-        />
-        <input
-          type="text"
-          name="goToProfile"
           value="true"
           style="display: none"
         />
         <button type="submit">Accept</button>
       </form>
       <form
-        th:action="@{/network/{friendship}(friendship=${friendship.id})}"
+        th:action="@{/confirmable/{friendship}(friendship=${friendship.id})}"
         method="post"
       >
         <input
           type="text"
           name="isAccepted"
           value="false"
-          style="display: none"
-        />
-        <input
-          type="text"
-          name="goToProfile"
-          value="true"
           style="display: none"
         />
         <button type="submit">Ignore</button>
@@ -62,7 +50,7 @@
   <li th:each="group : ${groups}">
     <span th:text="${group.name}"></span>
     <form
-      th:action="@{/group/{groupId}/invite/{personId}(groupId=${group.id},personId=${person.id})}"
+      th:action="@{/confirmable/group/{groupId}/{personId}(groupId=${group.id},personId=${person.id})}"
       method="post"
     >
       <button type="submit">Invite</button>
@@ -73,7 +61,7 @@
 <form
   th:if="${(friendship == null && cInteraction.personId != 0) || friendship?.ignoredAt != null}"
   th:object="${cInteraction}"
-  th:action="@{/network}"
+  th:action="@{/confirmable}"
   method="post"
 >
   <input type="text" th:field="*{personId}" style="display: none" />

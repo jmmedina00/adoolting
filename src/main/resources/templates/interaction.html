@@ -9,7 +9,7 @@
 <form
   th:unless="${groupPfp == null}"
   th:if="${joinRequest == null || joinRequest.ignoredAt != null}"
-  th:action="@{/group/{id}/join(id=${interaction.id})}"
+  th:action="@{/confirmable/group/{id}/join(id=${interaction.id})}"
   method="post"
 >
   <button type="submit">Join</button>
@@ -25,31 +25,19 @@
     th:if="*{receiverInteractor.id} == ${#authentication.principal.person.id}"
   >
     <form
-      th:action="@{/network/{interaction}(interaction=*{id})}"
+      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
       method="post"
     >
       <input type="text" name="isAccepted" value="true" style="display: none" />
-      <input
-        type="text"
-        name="goToProfile"
-        value="false"
-        style="display: none"
-      />
       <button type="submit">Accept</button>
     </form>
     <form
-      th:action="@{/network/{interaction}(interaction=*{id})}"
+      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
       method="post"
     >
       <input
         type="text"
         name="isAccepted"
-        value="false"
-        style="display: none"
-      />
-      <input
-        type="text"
-        name="goToProfile"
         value="false"
         style="display: none"
       />

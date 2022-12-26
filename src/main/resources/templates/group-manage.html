@@ -16,7 +16,7 @@
     <span th:if="*{receiverInteractor.id} == ${group.interactor.id}">
       <span th:text="*{interactor.getFullName()}"></span>
       <form
-        th:action="@{/network/{interaction}(interaction=*{id})}"
+        th:action="@{/confirmable/{interaction}(interaction=*{id})}"
         method="post"
       >
         <input
@@ -25,27 +25,15 @@
           value="true"
           style="display: none"
         />
-        <input
-          type="text"
-          name="goToProfile"
-          value="false"
-          style="display: none"
-        />
         <button type="submit">Accept</button>
       </form>
       <form
-        th:action="@{/network/{interaction}(interaction=*{id})}"
+        th:action="@{/confirmable/{interaction}(interaction=*{id})}"
         method="post"
       >
         <input
           type="text"
           name="isAccepted"
-          value="false"
-          style="display: none"
-        />
-        <input
-          type="text"
-          name="goToProfile"
           value="false"
           style="display: none"
         />

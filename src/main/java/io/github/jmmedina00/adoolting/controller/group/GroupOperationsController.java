@@ -57,28 +57,6 @@ public class GroupOperationsController {
     return "redirect:/interaction/" + groupId;
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/join")
-  public String requestToJoinGroup(@PathVariable("id") Long groupId)
-    throws NotAuthorizedException {
-    joinRequestService.joinGroup(AuthenticatedPerson.getPersonId(), groupId);
-    return "redirect:/interaction/" + groupId;
-  }
-
-  @RequestMapping(method = RequestMethod.POST, value = "/invite/{personId}")
-  public String invitePersonToGroup(
-    @PathVariable("id") Long groupId,
-    @PathVariable("personId") Long personId
-  )
-    throws NotAuthorizedException {
-    joinRequestService.inviteToGroup(
-      AuthenticatedPerson.getPersonId(),
-      personId,
-      groupId
-    );
-
-    return "redirect:/profile/" + personId;
-  }
-
   @RequestMapping(method = RequestMethod.GET, value = "/delete")
   public String showDeleteForm(@PathVariable("id") Long groupId, Model model)
     throws NotAuthorizedException {
