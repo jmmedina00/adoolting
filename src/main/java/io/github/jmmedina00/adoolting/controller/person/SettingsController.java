@@ -32,7 +32,7 @@ public class SettingsController {
         settingsService.getSettingsFormForPerson(person)
       );
     }
-    return "form/settings";
+    return "person/settings";
   }
 
   @RequestMapping(method = RequestMethod.POST)

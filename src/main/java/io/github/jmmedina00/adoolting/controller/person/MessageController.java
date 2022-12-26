@@ -37,7 +37,7 @@ public class MessageController {
         AuthenticatedPerson.getPersonId()
       )
     );
-    return "message/list";
+    return "person/message/list";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{personId}")
@@ -61,7 +61,7 @@ public class MessageController {
       )
     );
     model.addAttribute("newMessage", new NewMessage());
-    return "message/conversation";
+    return "person/message/conversation";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")

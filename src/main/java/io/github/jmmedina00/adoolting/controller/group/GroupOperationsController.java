@@ -39,7 +39,7 @@ public class GroupOperationsController {
     if (!model.containsAttribute("form")) {
       model.addAttribute("form", groupService.getGroupForm(groupId));
     }
-    return "group-manage";
+    return "group/manage";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -65,7 +65,7 @@ public class GroupOperationsController {
     if (!model.containsAttribute("confirm")) {
       model.addAttribute("confirm", new SecureDeletion());
     }
-    return "group-delete";
+    return "group/delete";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/delete")

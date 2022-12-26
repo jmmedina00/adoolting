@@ -49,7 +49,7 @@ public class GroupController {
     }
     model.addAttribute("interactors", controlledInteractors);
 
-    return "form/group";
+    return "group/new";
   }
 
   @RequestMapping(method = RequestMethod.POST)

@@ -42,6 +42,6 @@ public class PictureController {
     model.addAttribute("media", media);
     model.addAttribute("previous", previous);
     model.addAttribute("next", next);
-    return "picture";
+    return "interaction/picture";
   }
 }

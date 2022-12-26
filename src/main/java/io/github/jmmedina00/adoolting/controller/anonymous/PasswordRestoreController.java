@@ -27,7 +27,7 @@ public class PasswordRestoreController {
       model.addAttribute("forgotPassword", forgotPassword);
     }
 
-    return "password/forgot-password";
+    return "anonymous/password/mailsend";
   }
 
   @RequestMapping(method = RequestMethod.POST)
@@ -40,7 +40,7 @@ public class PasswordRestoreController {
       System.out.println(e.getMessage());
     }
 
-    return "password/email-sent";
+    return "anonymous/password/confirm";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{token}")
@@ -55,7 +55,7 @@ public class PasswordRestoreController {
     }
 
     model.addAttribute("token", restoreService.getToken(token));
-    return "password/restore-password";
+    return "anonymous/password/restore";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{token}")

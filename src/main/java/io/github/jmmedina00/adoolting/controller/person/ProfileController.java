@@ -86,7 +86,7 @@ public class ProfileController {
         PersonSettingsService.ENTER_PROFILE
       )
     ) {
-      return "profile-locked";
+      return "person/profile/locked";
     }
 
     model.addAttribute("status", statusService.getPersonStatus(personId));
@@ -104,7 +104,7 @@ public class ProfileController {
     );
     model.addAttribute("newPost", new NewPost());
 
-    return "profile";
+    return "person/profile/show";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")

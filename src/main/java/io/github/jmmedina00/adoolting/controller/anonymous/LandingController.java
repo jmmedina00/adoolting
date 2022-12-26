@@ -54,7 +54,7 @@ public class LandingController {
       model.addAttribute("user", userDto);
     }
 
-    return "hello";
+    return "anonymous/landing";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/confirm/{token}")
@@ -68,6 +68,6 @@ public class LandingController {
   public String registerNewPerson(@ModelAttribute("user") @Valid User user)
     throws BindException {
     personService.createPersonFromUser(user);
-    return "valid";
+    return "anonymous/success";
   }
 }

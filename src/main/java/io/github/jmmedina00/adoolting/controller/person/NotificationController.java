@@ -30,7 +30,7 @@ public class NotificationController {
         pageable
       )
     );
-    return "network";
+    return "person/notification";
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")

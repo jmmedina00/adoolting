@@ -103,7 +103,7 @@ public class InteractionController {
       );
     }
 
-    return "interaction";
+    return "interaction/display";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{id}/comment")

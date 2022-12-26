@@ -28,7 +28,7 @@ public class ProfileEditController {
       );
     }
 
-    return "profile-edit";
+    return "person/profile/edit";
   }
 
   @RequestMapping(method = RequestMethod.POST)
