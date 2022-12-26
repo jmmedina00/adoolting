@@ -22,7 +22,8 @@ public class EventController {
   @RequestMapping(method = RequestMethod.POST)
   public String createNewEvent(
     @ModelAttribute("newGroup") @Valid NewEvent newEvent
-  ) {
+  )
+    throws NotAuthorizedException {
     Event event = eventService.createEvent(
       newEvent,
       AuthenticatedPerson.getPersonId()

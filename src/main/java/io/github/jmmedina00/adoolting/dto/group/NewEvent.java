@@ -16,6 +16,9 @@ public class NewEvent extends NewGroup {
   private String location; // temporary
 
   @NotNull
+  private Long createAs;
+
+  @NotNull
   @DateTimeFormat(iso = ISO.DATE)
   private Date date;
 
@@ -32,6 +35,14 @@ public class NewEvent extends NewGroup {
 
   public void setLocation(String location) {
     this.location = location;
+  }
+
+  public Long getCreateAs() {
+    return createAs;
+  }
+
+  public void setCreateAs(Long createAs) {
+    this.createAs = createAs;
   }
 
   public Date getDate() {

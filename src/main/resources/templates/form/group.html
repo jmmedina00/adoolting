@@ -54,6 +54,19 @@
   <div
     th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
   >
+    <select th:field="*{createAs}">
+      <option
+        th:each="interactor : ${interactors}"
+        th:value="${interactor.id}"
+        th:text="${interactor.getFullName()}"
+      >
+        Visible name
+      </option>
+    </select>
+  </div>
+  <div
+    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
+  >
     <label>Date:</label>
     <input type="date" th:field="*{date}" />
     <p

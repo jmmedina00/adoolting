@@ -7,6 +7,8 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.EventRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
+import io.github.jmmedina00.adoolting.service.page.PageService;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,22 @@ public class EventService {
   @Autowired
   private InteractionService interactionService;
 
-  public Event createEvent(NewEvent newEvent, Long interactorId) {
+  @Autowired
+  private PageService pageService;
+
+  public Event createEvent(NewEvent newEvent, Long personId)
+    throws NotAuthorizedException {
+    Long interactorId = newEvent.getCreateAs();
+
+    if (
+      !(
+        Objects.equals(personId, interactorId) ||
+        pageService.isPageManagedByPerson(interactorId, personId)
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
+
     Interactor interactor = interactorService.getInteractor(interactorId);
     Event event = new Event();
     event.setName(newEvent.getName());
