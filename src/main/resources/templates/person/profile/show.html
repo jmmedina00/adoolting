@@ -67,33 +67,5 @@
   <button type="submit">Send</button>
 </form>
 <div th:each="post : ${posts}">
-  <h3>
-    <span th:text="${post.interactor.getFullName()}"> </span>
-
-    <span th:if="${post.receiverInteractor}">
-      ->
-      <span th:text="${post.receiverInteractor.getFullName()}"></span>
-    </span>
-  </h3>
-  <p th:text="${post.getFirstParagraph()}"></p>
-  <p th:if="${#arrays.length(post.getParagraphs()) > 1}">...</p>
-  <div th:each="medium : ${post.media}">
-    <img
-      th:if="${medium.isInCDN()}"
-      th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}"
-    />
-    <a
-      th:unless="${medium.isInCDN()}"
-      th:with="info=${@linkInformationService.getLinkInfo(medium.id)}"
-      th:href="${#strings.defaultString(info.actualLink, medium.reference)}"
-    >
-      <span th:text="${#strings.defaultString(info.title, medium.reference)}">
-      </span>
-      <span th:text="${info.getPage()}"></span>
-      <img th:src="@{/media/thumbnail/256/{id}(id=${medium.id})}" />
-    </a>
-  </div>
-
-  <p th:text="${post.class.name}"></p>
-  <p><span th:text="${post.comments.size()}"></span> comments</p>
+  <div th:replace="common/interaction :: card (interaction=${post})"></div>
 </div>
