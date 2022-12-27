@@ -1,0 +1,33 @@
+<div th:fragment="common (label, name, input)">
+  <label th:text="${label}"></label>
+  <span th:replace="${input}"></span>
+  <p th:if="${#fields.hasErrors(name)}" th:text="${#fields.errors(name)[0]}">
+    Validation error
+  </p>
+</div>
+
+<div
+  th:fragment="field (label, name)"
+  th:with="type=${type} ?: 'text'"
+  th:include=":: common (label=${label}, name=${name}, input=~{:: input})"
+>
+  <input th:field="*{__${name}__}" th:type="${type}" />
+</div>
+
+<div
+  th:fragment="bigfield (label, name)"
+  th:include=":: common (label=${label}, name=${name}, input=~{:: textarea})"
+>
+  <textarea th:field="*{__${name}__}"></textarea>
+</div>
+
+<div
+  th:fragment="notification (label, name)"
+  th:include=":: common (label=${label}, name=${name}, input=~{:: select})"
+>
+  <select th:field="*{__${name}__}" class="test">
+    <option th:value="'EMAIL'">Email</option>
+    <option th:value="'IN_APP'">In app</option>
+    <option th:value="'NONE'">None</option>
+  </select>
+</div>

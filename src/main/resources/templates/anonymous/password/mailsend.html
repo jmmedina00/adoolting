@@ -5,15 +5,6 @@
   th:action="@{/restore-password}"
   enctype="utf8"
 >
-  <div>
-    <label>Email</label>
-    <input th:field="*{email}" />
-    <p
-      th:if="${#fields.hasErrors('email')}"
-      th:text="${#fields.errors('email')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
+  <div th:replace="common/form :: field (label='Email', name='email')"></div>
   <button type="submit">Submit</button>
 </form>

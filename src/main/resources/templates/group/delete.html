@@ -7,25 +7,11 @@
   th:action="@{/group/{id}/delete(id=${group.id})}"
   enctype="utf8"
 >
-  <div>
-    <label>Password</label>
-    <input th:field="*{password}" type="password" />
-    <p
-      th:if="${#fields.hasErrors('password')}"
-      th:text="${#fields.errors('password')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Confirm password</label>
-    <input th:field="*{confirmPassword}" type="password" />
-    <p
-      th:if="${#fields.hasErrors('global')}"
-      th:text="${#fields.errors('global')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
+  <div
+    th:replace="common/form :: field (label='Password', name='password', type='password')"
+  ></div>
+  <div
+    th:replace="common/form :: field (label='Confirm password', name='confirmPassword', type='password')"
+  ></div>
   <button type="submit">Submit</button>
 </form>

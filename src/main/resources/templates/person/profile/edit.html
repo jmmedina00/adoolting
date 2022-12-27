@@ -15,60 +15,23 @@
   </p>
 </form>
 <form th:action="@{/profile/edit}" method="post" th:object="${info}">
-  <div>
-    <label>First</label>
-    <input th:field="*{firstName}" />
-    <p
-      th:if="${#fields.hasErrors('firstName')}"
-      th:text="${#fields.errors('firstName')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Last</label>
-    <input th:field="*{lastName}" />
-    <p
-      th:if="${#fields.hasErrors('lastName')}"
-      th:text="${#fields.errors('lastName')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Gender</label>
-    <select th:field="*{gender}">
+  <div
+    th:replace="common/form :: field (label='First', name='firstName')"
+  ></div>
+  <div th:replace="common/form :: field (label='Last', name='lastName')"></div>
+  <div
+    th:include="common/form :: common (label='Gender', name='gender', input=~{:: .gender})"
+  >
+    <select th:field="*{gender}" class="gender">
       <option th:value="''">Select gender</option>
       <option th:value="'HE'">Male</option>
       <option th:value="'SHE'">Female</option>
       <option th:value="'THEY'">Other</option>
     </select>
-    <p
-      th:if="${#fields.hasErrors('gender')}"
-      th:text="${#fields.errors('gender')[0]}"
-    >
-      Validation error
-    </p>
   </div>
-  <div>
-    <label>About</label>
-    <textarea th:field="*{about}"></textarea>
-    <p
-      th:if="${#fields.hasErrors('about')}"
-      th:text="${#fields.errors('about')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Current status</label>
-    <textarea th:field="*{status}"></textarea>
-    <p
-      th:if="${#fields.hasErrors('status')}"
-      th:text="${#fields.errors('status')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
+  <div th:replace="common/form :: bigfield (label='About', name='about')"></div>
+  <div
+    th:replace="common/form :: bigfield (label='Current status', name='status')"
+  ></div>
   <button type="submit">Update</button>
 </form>

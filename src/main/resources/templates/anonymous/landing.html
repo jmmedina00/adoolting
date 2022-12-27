@@ -17,90 +17,32 @@
 </form>
 
 <form th:action="@{/register}" th:object="${user}" method="post" enctype="utf8">
-  <div>
-    <label>First</label>
-    <input th:field="*{firstName}" />
-    <p
-      th:if="${#fields.hasErrors('firstName')}"
-      th:text="${#fields.errors('firstName')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Last</label>
-    <input th:field="*{lastName}" />
-    <p
-      th:if="${#fields.hasErrors('lastName')}"
-      th:text="${#fields.errors('lastName')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Email</label>
-    <input th:field="*{email}" />
-    <p
-      th:if="${#fields.hasErrors('email')}"
-      th:text="${#fields.errors('email')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Confirm email</label>
-    <input th:field="*{confirmEmail}" />
-    <p
-      th:if="${#fields.hasErrors('confirmEmail')}"
-      th:text="${#fields.errors('confirmEmail')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Password</label>
-    <input th:field="*{password}" type="password" />
-    <p
-      th:if="${#fields.hasErrors('password')}"
-      th:text="${#fields.errors('password')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Confirm password</label>
-    <input th:field="*{confirmPassword}" type="password" />
-    <p
-      th:if="${#fields.hasErrors('confirmPassword')}"
-      th:text="${#fields.errors('confirmPassword')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Birthday</label>
-    <input th:field="*{birthday}" type="date" />
-    <p
-      th:if="${#fields.hasErrors('birthday')}"
-      th:text="${#fields.errors('birthday')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Gender</label>
-    <select th:field="*{gender}">
+  <div
+    th:replace="common/form :: field (label='First', name='firstName')"
+  ></div>
+  <div th:replace="common/form :: field (label='Last', name='lastName')"></div>
+  <div th:replace="common/form :: field (label='Email', name='email')"></div>
+  <div
+    th:replace="common/form :: field (label='Confirm email', name='confirmEmail')"
+  ></div>
+  <div
+    th:replace="common/form :: field (label='Password', name='password', isa='password')"
+  ></div>
+  <div
+    th:replace="common/form :: field (label='Confirm password', name='confirmPassword', type='password')"
+  ></div>
+  <div
+    th:replace="common/form :: field (label='Birthday', name='birthday', type='date')"
+  ></div>
+  <div
+    th:include="common/form :: common (label='Gender', name='gender', input=~{:: .gender})"
+  >
+    <select th:field="*{gender}" class="gender">
       <option th:value="''">Select gender</option>
       <option th:value="'HE'">Male</option>
       <option th:value="'SHE'">Female</option>
       <option th:value="'THEY'">Other</option>
     </select>
-    <p
-      th:if="${#fields.hasErrors('gender')}"
-      th:text="${#fields.errors('gender')[0]}"
-    >
-      Validation error
-    </p>
   </div>
   <button type="submit">Submit</button>
 </form>

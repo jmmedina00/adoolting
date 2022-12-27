@@ -4,101 +4,47 @@
   th:action="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'} ? @{/event} : @{/group}"
   th:method="post"
 >
-  <div>
-    <label>Name:</label>
-    <input type="text" th:field="*{name}" />
-    <p
-      th:if="${#fields.hasErrors('name')}"
-      th:text="${#fields.errors('name')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Description:</label>
-    <textarea th:field="*{description}"></textarea>
-    <p
-      th:if="${#fields.hasErrors('description')}"
-      th:text="${#fields.errors('description')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div>
-    <label>Access level</label>
-    <select th:field="*{accessLevel}">
+  <div th:replace="common/form :: field (label='Name', name='name')"></div>
+  <div
+    th:replace="common/form :: bigfield (label='Description', name='description')"
+  ></div>
+  <div
+    th:include="common/form :: common (label='Access level', name='accessLevel', input=~{:: .accessLevel})"
+  >
+    <select th:field="*{accessLevel}" class="accessLevel">
       <option th:value="'OPEN'">Open</option>
       <option th:value="'WATCH_ONLY'">Watch only</option>
       <option th:value="'CLOSED'">Closed</option>
     </select>
-    <p
-      th:if="${#fields.hasErrors('accessLevel')}"
-      th:text="${#fields.errors('accessLevel')[0]}"
-    >
-      Validation error
-    </p>
   </div>
   <div
     th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
   >
-    <!-- To be updated with proper map -->
-    <label>Location:</label>
-    <input type="text" th:field="*{location}" />
-    <p
-      th:if="${#fields.hasErrors('location')}"
-      th:text="${#fields.errors('location')[0]}"
+    <div
+      th:replace="common/form :: field (label='Location', name='location')"
+    ></div>
+    <div
+      th:include="common/form :: common (label='Create as', name='createAs', input=~{:: .createAs})"
     >
-      Validation error
-    </p>
-  </div>
-  <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
-  >
-    <select th:field="*{createAs}">
-      <option
-        th:each="interactor : ${interactors}"
-        th:value="${interactor.id}"
-        th:text="${interactor.getFullName()}"
-      >
-        Visible name
-      </option>
-    </select>
-  </div>
-  <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
-  >
-    <label>Date:</label>
-    <input type="date" th:field="*{date}" />
-    <p
-      th:if="${#fields.hasErrors('date')}"
-      th:text="${#fields.errors('date')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
-  >
-    <label>Time:</label>
-    <input type="time" th:field="*{time}" />
-    <p
-      th:if="${#fields.hasErrors('time')}"
-      th:text="${#fields.errors('time')[0]}"
-    >
-      Validation error
-    </p>
-  </div>
-  <div
-    th:if="${newGroup.class.name == 'io.github.jmmedina00.adoolting.dto.group.NewEvent'}"
-    style="display: none"
-  >
-    <input type="hidden" th:field="*{offsetFromUTC}" id="offset" />
-    <p
-      th:if="${#fields.hasErrors('offsetFromUTC')}"
-      th:text="${#fields.errors('offsetFromUTC')[0]}"
-    >
-      Validation error
-    </p>
+      <select th:field="*{createAs}" class="createAs">
+        <option
+          th:each="interactor : ${interactors}"
+          th:value="${interactor.id}"
+          th:text="${interactor.getFullName()}"
+        >
+          Visible name
+        </option>
+      </select>
+    </div>
+    <div
+      th:replace="common/form :: field (label='Date', name='date', type='date')"
+    ></div>
+    <div
+      th:replace="common/form :: field (label='Time', name='time', type='time')"
+    ></div>
+    <div style="display: none">
+      <input type="hidden" th:field="*{offsetFromUTC}" id="offset" />
+    </div>
   </div>
   <button type="submit">Create</button>
 </form>
