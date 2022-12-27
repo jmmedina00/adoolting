@@ -77,18 +77,15 @@ public class ProfileController {
     model.addAttribute("person", person);
     model.addAttribute("friendship", friendship);
     model.addAttribute("cInteraction", cInteraction);
-
-    if (
+    model.addAttribute(
+      "notAllowedByPerson",
       !Objects.equals(personId, authenticatedPersonId) &&
       (friendship == null || friendship.getConfirmedAt() == null) &&
       !settingsService.isAllowedByPerson(
         personId,
         PersonSettingsService.ENTER_PROFILE
       )
-    ) {
-      return "person/profile/locked";
-    }
-
+    );
     model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "groups",
