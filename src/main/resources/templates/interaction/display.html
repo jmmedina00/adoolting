@@ -23,27 +23,8 @@
   </span>
   <div
     th:if="*{receiverInteractor.id} == ${#authentication.principal.person.id}"
-  >
-    <form
-      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-      method="post"
-    >
-      <input type="text" name="isAccepted" value="true" style="display: none" />
-      <button type="submit">Accept</button>
-    </form>
-    <form
-      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-      method="post"
-    >
-      <input
-        type="text"
-        name="isAccepted"
-        value="false"
-        style="display: none"
-      />
-      <button type="submit">Ignore</button>
-    </form>
-  </div>
+    th:include="common/confirmable :: decision (confirmable=${joinRequest})"
+  ></div>
 </div>
 <div
   th:if="${interaction.interactor.id == #authentication.principal.person.id}"

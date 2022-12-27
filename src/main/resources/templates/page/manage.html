@@ -21,7 +21,7 @@
   <li th:each="friend : ${friends}">
     <span th:text="${friend.getFullName()}"> </span>
     <form
-      th:action="@{/page/{pageId}/manage/{personId}(pageId=${page.id},personId=${friend.id)}"
+      th:action="@{/page/{pageId}/manage/{personId}(pageId=${page.id},personId=${friend.id})}"
       method="post"
     >
       <button type="submit">Add</button>

@@ -15,30 +15,9 @@
     </span>
     <span th:if="*{receiverInteractor.id} == ${group.interactor.id}">
       <span th:text="*{interactor.getFullName()}"></span>
-      <form
-        th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-        method="post"
-      >
-        <input
-          type="text"
-          name="isAccepted"
-          value="true"
-          style="display: none"
-        />
-        <button type="submit">Accept</button>
-      </form>
-      <form
-        th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-        method="post"
-      >
-        <input
-          type="text"
-          name="isAccepted"
-          value="false"
-          style="display: none"
-        />
-        <button type="submit">Ignore</button>
-      </form>
+      <span
+        th:include="common/confirmable :: decision (confirmable=${interaction})"
+      ></span>
     </span>
     <span th:text="${group.interactor.id}"></span>
   </li>

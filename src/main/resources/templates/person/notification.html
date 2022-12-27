@@ -26,25 +26,8 @@
     <button type="submit">Delete</button>
   </form>
 
-  <div th:if="${notification.isActionable()}">
-    <form
-      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-      method="post"
-    >
-      <input type="text" name="isAccepted" value="true" style="display: none" />
-      <button type="submit">Accept</button>
-    </form>
-    <form
-      th:action="@{/confirmable/{interaction}(interaction=*{id})}"
-      method="post"
-    >
-      <input
-        type="text"
-        name="isAccepted"
-        value="false"
-        style="display: none"
-      />
-      <button type="submit">Ignore</button>
-    </form>
-  </div>
+  <div
+    th:if="${notification.isActionable()}"
+    th:include="common/confirmable :: decision (confirmable=${notification.interaction})"
+  ></div>
 </div>

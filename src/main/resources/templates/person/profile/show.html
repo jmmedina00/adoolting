@@ -16,31 +16,10 @@
     <span th:if="${friendship.receiverInteractor.id == person.id}">
       Pending
     </span>
-    <span th:unless="${friendship.receiverInteractor.id == person.id}">
-      <form
-        th:action="@{/confirmable/{friendship}(friendship=${friendship.id})}"
-        method="post"
-      >
-        <input
-          type="text"
-          name="isAccepted"
-          value="true"
-          style="display: none"
-        />
-        <button type="submit">Accept</button>
-      </form>
-      <form
-        th:action="@{/confirmable/{friendship}(friendship=${friendship.id})}"
-        method="post"
-      >
-        <input
-          type="text"
-          name="isAccepted"
-          value="false"
-          style="display: none"
-        />
-        <button type="submit">Ignore</button>
-      </form>
+    <span
+      th:unless="${friendship.receiverInteractor.id == person.id}"
+      th:include="common/confirmable :: decision (confirmable=${friendship})"
+    >
     </span>
   </span>
   <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>

@@ -1,0 +1,10 @@
+<div th:fragment="decision (confirmable)">
+  <form th:action="@{/confirmable/{id}(id=${confirmable.id})}" method="post">
+    <input type="text" name="isAccepted" value="true" style="display: none" />
+    <button type="submit">Accept</button>
+  </form>
+  <form th:action="@{/confirmable/{id}(id=${confirmable.id})}" method="post">
+    <input type="text" name="isAccepted" value="false" style="display: none" />
+    <button type="submit">Ignore</button>
+  </form>
+</div>
