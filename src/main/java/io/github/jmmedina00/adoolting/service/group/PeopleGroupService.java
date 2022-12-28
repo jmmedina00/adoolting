@@ -74,7 +74,7 @@ public class PeopleGroupService {
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setAccessLevel(newGroup.getAccessLevel());
-    return (PeopleGroup) interactionService.saveInteraction(group);
+    return groupRepository.save(group); // No need to go through default notif flow
   }
 
   public NewGroup getGroupForm(Long groupId) {
@@ -84,6 +84,7 @@ public class PeopleGroupService {
     if (group instanceof Event) {
       NewEvent eventForm = new NewEvent();
       eventForm.setLocation(((Event) group).getLocation());
+      eventForm.setCreateAs(group.getInteractor().getId());
       // Datetime: only when view supports it
       form = eventForm;
     }

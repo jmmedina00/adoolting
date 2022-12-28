@@ -66,6 +66,6 @@ public class EventService {
     event.setAccessLevel(newEvent.getAccessLevel());
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
-    return (Event) interactionService.saveInteraction(event);
+    return eventRepository.save(event); // No need to go through default notif flow
   }
 }

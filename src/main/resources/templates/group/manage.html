@@ -78,6 +78,7 @@
       th:replace="common/form :: field (label='Time', name='time', type='time')"
     ></div>
     <div style="display: none">
+      <input type="hidden" th:field="*{createAs}" />
       <input type="hidden" th:field="*{offsetFromUTC}" id="offset" />
     </div>
   </div>
