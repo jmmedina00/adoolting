@@ -16,6 +16,15 @@ public abstract class NewInteractionWithMedia {
   @URL
   private String url;
 
+  @NotNull
+  private Long postAs;
+
+  public NewInteractionWithMedia() {}
+
+  public NewInteractionWithMedia(Long personId) {
+    setPostAs(personId);
+  }
+
   public String getContent() {
     return content;
   }
@@ -30,6 +39,14 @@ public abstract class NewInteractionWithMedia {
 
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  public Long getPostAs() {
+    return postAs;
+  }
+
+  public void setPostAs(Long postAs) {
+    this.postAs = postAs;
   }
 
   public abstract List<MultipartFile> getMedia();

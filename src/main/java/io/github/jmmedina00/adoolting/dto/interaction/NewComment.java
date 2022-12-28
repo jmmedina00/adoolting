@@ -8,6 +8,12 @@ public class NewComment extends NewInteractionWithMedia {
   @OnlyImage
   private MultipartFile file;
 
+  public NewComment() {}
+
+  public NewComment(Long personId) {
+    super(personId);
+  }
+
   public MultipartFile getFile() {
     return file;
   }

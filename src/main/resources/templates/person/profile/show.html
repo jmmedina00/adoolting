@@ -54,16 +54,16 @@
   th:remove="${notAllowedByPerson} ? all : none"
   enctype="multipart/form-data"
 >
-  <div>
-    <label>New post</label>
-    <textarea th:field="*{content}"></textarea>
+  <h6>New post</h6>
+  <div
+    th:include="common/interaction :: create(canPagePost=false, additional=~{:: input[@type='file']})"
+  >
     <input
       type="file"
       th:field="*{media}"
       accept="image/png, image/jpeg"
       multiple
     />
-    <input type="text" th:field="*{url}" />
   </div>
   <button type="submit">Send</button>
 </form>

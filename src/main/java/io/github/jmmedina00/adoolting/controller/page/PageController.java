@@ -1,18 +1,16 @@
 package io.github.jmmedina00.adoolting.controller.page;
 
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
-import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
-import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
 import io.github.jmmedina00.adoolting.service.page.PageLikeService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +35,9 @@ public class PageController {
   private InteractionService interactionService;
 
   @Autowired
+  private InteractorService interactorService;
+
+  @Autowired
   private PostService postService;
 
   @RequestMapping(method = RequestMethod.GET)
@@ -49,28 +50,22 @@ public class PageController {
     Person person = AuthenticatedPerson.getPerson();
     Long personId = person.getId();
 
-    List<Interactor> controlledInteractors;
-    if (pageService.isPageManagedByPerson(pageId, personId)) {
-      controlledInteractors = List.of(person, page);
-    } else {
-      controlledInteractors =
-        new ArrayList<>(pageService.getAllPersonPages(personId));
-      controlledInteractors.add(0, person);
-    }
-
     model.addAttribute("page", page);
     model.addAttribute("likeCount", likeService.getPageLikes(pageId));
     model.addAttribute(
       "givenLike",
       likeService.getLikeToPageFromPerson(person.getId(), pageId)
     );
-    model.addAttribute("interactors", controlledInteractors);
+    model.addAttribute(
+      "interactors",
+      interactorService.getRepresentableInteractorsByPerson(personId, pageId)
+    );
     model.addAttribute(
       "posts",
       interactionService.getInteractions(pageId, pageable)
     );
     if (!model.containsAttribute("newPost")) {
-      model.addAttribute("newPost", new NewPostOnPage());
+      model.addAttribute("newPost", new NewPost(personId));
     }
 
     return "page/existing";
@@ -79,10 +74,14 @@ public class PageController {
   @RequestMapping(method = RequestMethod.POST)
   public String createPostOnPage(
     @PathVariable("id") Long pageId,
-    @ModelAttribute("newPost") @Valid NewPostOnPage newPost
+    @ModelAttribute("newPost") @Valid NewPost newPost
   )
     throws NotAuthorizedException {
-    Post post = postService.postOnPage(newPost, pageId);
+    Post post = postService.postOnProfile(
+      AuthenticatedPerson.getPersonId(),
+      pageId,
+      newPost
+    );
     return "redirect:/page/" + pageId + "?post=" + post.getId();
   }
 

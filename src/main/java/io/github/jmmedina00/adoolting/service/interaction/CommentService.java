@@ -4,12 +4,16 @@ import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,9 @@ public class CommentService {
   @Autowired
   private InteractionService interactionService;
 
+  @Autowired
+  private PageService pageService;
+
   private static final Logger logger = LoggerFactory.getLogger(
     CommentService.class
   );
@@ -44,11 +51,29 @@ public class CommentService {
 
   public Comment createComment(
     NewComment newComment,
-    Long interactorId,
+    Long personId,
     Long interactionId
-  ) {
+  )
+    throws NotAuthorizedException {
+    Long interactorId = newComment.getPostAs();
+
+    if (
+      !(
+        Objects.equals(personId, interactorId) ||
+        pageService.isPageManagedByPerson(interactorId, personId)
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
+
     Interactor interactor = interactorService.getInteractor(interactorId);
     Interaction interaction = interactionService.getInteraction(interactionId);
+
+    Interactor author = interaction.getInteractor();
+
+    if ((interactor instanceof Page) && (author instanceof Person)) {
+      throw new NotAuthorizedException();
+    }
 
     Comment comment = new Comment();
     comment.setContent(newComment.getContent());

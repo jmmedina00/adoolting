@@ -19,26 +19,16 @@
   th:action="@{/page/{pageId}(pageId=${page.id})}"
   enctype="multipart/form-data"
 >
-  <div>
-    <label>New post</label>
-    <textarea th:field="*{content}"></textarea>
+  <h6>New post</h6>
+  <div
+    th:include="common/interaction :: create(canPagePost=true, additional=~{:: input[@type='file']})"
+  >
     <input
       type="file"
       th:field="*{media}"
       accept="image/png, image/jpeg"
       multiple
     />
-  </div>
-  <div>
-    <select th:field="*{postAs}">
-      <option
-        th:each="interactor : ${interactors}"
-        th:value="${interactor.id}"
-        th:text="${interactor.getFullName()}"
-      >
-        Visible name
-      </option>
-    </select>
   </div>
   <button type="submit">Send</button>
 </form>

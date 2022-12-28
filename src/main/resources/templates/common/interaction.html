@@ -29,3 +29,22 @@
   <p th:text="${interaction.class.name}"></p>
   <p><span th:text="${interaction.comments.size()}"></span> comments</p>
 </div>
+
+<div th:fragment="create (canPagePost, additional)">
+  <textarea th:field="*{content}"></textarea>
+  <div th:replace="common/form :: field (label='URL', name='url')"></div>
+  <span th:replace="${additional}"></span>
+  <select th:field="*{postAs}" th:if="${canPagePost}">
+    <option
+      th:each="interactor : ${interactors}"
+      th:value="${interactor.id}"
+      th:text="${interactor.getFullName()}"
+    >
+      Visible name
+    </option>
+  </select>
+  <div
+    th:unless="${canPagePost}"
+    th:replace="common/form :: field (label='', name='postAs', type='hidden')"
+  ></div>
+</div>

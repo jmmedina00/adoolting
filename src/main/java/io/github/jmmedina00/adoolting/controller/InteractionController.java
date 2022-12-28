@@ -46,6 +46,7 @@ public class InteractionController {
     @PageableDefault(value = 10, page = 0) Pageable pageable,
     Model model
   ) {
+    Long personId = AuthenticatedPerson.getPersonId();
     Interaction interaction = interactionService.getInteraction(interactionId);
 
     if (interaction instanceof Comment) {
@@ -80,12 +81,19 @@ public class InteractionController {
       }
     }
 
+    model.addAttribute(
+      "interactors",
+      interactionService.getAppropriateInteractorListForPerson(
+        personId,
+        interactionId
+      )
+    );
     model.addAttribute("interaction", interaction);
     model.addAttribute(
       "comments",
       commentService.getCommentsFromInteraction(interactionId, pageable)
     );
-    model.addAttribute("newComment", new NewComment());
+    model.addAttribute("newComment", new NewComment(personId));
     if (interaction instanceof PeopleGroup) {
       logger.debug(
         MessageFormat.format(
@@ -110,7 +118,8 @@ public class InteractionController {
   public String commentOnInteraction(
     @PathVariable("id") Long interactionId,
     @ModelAttribute("newComment") @Valid NewComment newComment
-  ) {
+  )
+    throws NotAuthorizedException {
     Comment comment = commentService.createComment(
       newComment,
       AuthenticatedPerson.getPersonId(),

@@ -8,6 +8,12 @@ public class NewPost extends NewInteractionWithMedia {
   @OnlyImages
   private List<MultipartFile> media;
 
+  public NewPost() {}
+
+  public NewPost(Long personId) {
+    super(personId);
+  }
+
   public List<MultipartFile> getMedia() {
     return media;
   }

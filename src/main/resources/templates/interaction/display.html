@@ -50,10 +50,13 @@
   method="post"
   enctype="multipart/form-data"
 >
-  <span>New comment:</span><textarea th:field="*{content}"></textarea>
-  <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
+  <h6>New comment:</h6>
+  <div
+    th:include="common/interaction :: create(canPagePost=${interactors.size() > 1}, additional=~{:: input[@type='file']})"
+  >
+    <input type="file" th:field="*{file}" accept="image/png, image/jpeg" />
+  </div>
   <button type="submit">Send</button>
-  <input type="text" th:field="*{url}" />
 </form>
 <h3>Comments</h3>
 <div th:each="comment : ${comments}">

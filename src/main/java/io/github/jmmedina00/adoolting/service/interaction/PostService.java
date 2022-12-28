@@ -1,7 +1,6 @@
 package io.github.jmmedina00.adoolting.service.interaction;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
-import io.github.jmmedina00.adoolting.dto.interaction.NewPostOnPage;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
@@ -10,6 +9,7 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +26,8 @@ public class PostService {
   @Autowired
   private InteractionService interactionService;
 
-  public Post postOnPage(NewPostOnPage newPost, Long pageId)
-    throws NotAuthorizedException {
-    return postOnProfile(newPost.getPostAs(), pageId, newPost);
-  }
+  @Autowired
+  private PageService pageService;
 
   public Post createPost(Long interactorId, NewPost newPost) {
     Interactor interactor = interactorService.getInteractor(interactorId);
@@ -43,11 +41,22 @@ public class PostService {
   }
 
   public Post postOnProfile(
-    Long interactorId,
+    Long personId,
     Long receiverInteractorId,
     NewPost newPost
   )
     throws NotAuthorizedException {
+    Long interactorId = newPost.getPostAs();
+
+    if (
+      !(
+        Objects.equals(personId, interactorId) ||
+        pageService.isPageManagedByPerson(interactorId, personId)
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
+
     if (Objects.equals(interactorId, receiverInteractorId)) {
       return createPost(interactorId, newPost);
     }

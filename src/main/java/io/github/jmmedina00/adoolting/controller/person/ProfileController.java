@@ -99,7 +99,7 @@ public class ProfileController {
       "posts",
       interactionService.getInteractions(person.getId(), pageable)
     );
-    model.addAttribute("newPost", new NewPost());
+    model.addAttribute("newPost", new NewPost(authenticatedPersonId));
 
     return "person/profile/show";
   }
