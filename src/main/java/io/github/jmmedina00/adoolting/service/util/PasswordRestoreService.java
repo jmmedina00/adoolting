@@ -9,7 +9,6 @@ import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,19 +61,15 @@ public class PasswordRestoreService {
     }
 
     Person person = personDetails.getPerson();
-    List<PasswordRestoreToken> stillValidTokens = person
-      .getRestoreTokens()
-      .stream()
-      .filter(
-        token ->
-          token.getExpiresAt().after(new Date()) && token.getUsedAt() == null
-      )
-      .toList();
+    PasswordRestoreToken token = restoreTokenRepository
+      .findTokenForPerson(person.getId())
+      .orElseGet(() -> createNewToken(person));
+    localeConfigService.refreshForPerson(person.getId());
+    emailService.setUpEmailJob(token, "restore");
+    return token;
+  }
 
-    if (stillValidTokens.size() > 0) {
-      return null;
-    }
-
+  private PasswordRestoreToken createNewToken(Person person) {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.HOUR, expireInHours);
     Date expiresAt = calendar.getTime();
@@ -82,10 +77,6 @@ public class PasswordRestoreService {
     token.setPerson(person);
     token.setToken(UUID.randomUUID().toString());
     token.setExpiresAt(expiresAt);
-
-    PasswordRestoreToken saved = restoreTokenRepository.save(token);
-    localeConfigService.refreshForPerson(person.getId());
-    emailService.setUpEmailJob(saved, "restore");
-    return saved;
+    return restoreTokenRepository.save(token);
   }
 }

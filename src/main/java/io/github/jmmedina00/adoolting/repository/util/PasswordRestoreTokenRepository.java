@@ -13,4 +13,13 @@ public interface PasswordRestoreTokenRepository
     "AND t.usedAt IS NULL AND t.expiresAt > CURRENT_TIMESTAMP"
   )
   Optional<PasswordRestoreToken> findToken(@Param("token") String token);
+
+  @Query(
+    "SELECT t FROM PasswordRestoreToken t WHERE t.usedAt IS NULL AND " +
+    "t.expiresAt > CURRENT_TIMESTAMP AND t.person.id=:personId AND " +
+    "t.person.id IN (SELECT c.person.id FROM ConfirmationToken c WHERE c.confirmedAt IS NOT NULL)"
+  )
+  Optional<PasswordRestoreToken> findTokenForPerson(
+    @Param("personId") Long personId
+  );
 }
