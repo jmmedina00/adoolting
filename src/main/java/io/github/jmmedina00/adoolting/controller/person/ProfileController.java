@@ -97,7 +97,7 @@ public class ProfileController {
     );
     model.addAttribute(
       "posts",
-      interactionService.getInteractions(person.getId(), pageable)
+      interactionService.getInteractionsFromInteractor(person.getId(), pageable)
     );
     model.addAttribute("newPost", new NewPost(authenticatedPersonId));
 

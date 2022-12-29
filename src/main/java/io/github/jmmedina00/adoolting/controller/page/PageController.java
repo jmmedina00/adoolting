@@ -62,7 +62,7 @@ public class PageController {
     );
     model.addAttribute(
       "posts",
-      interactionService.getInteractions(pageId, pageable)
+      interactionService.getInteractionsFromInteractor(pageId, pageable)
     );
     if (!model.containsAttribute("newPost")) {
       model.addAttribute("newPost", new NewPost(personId));

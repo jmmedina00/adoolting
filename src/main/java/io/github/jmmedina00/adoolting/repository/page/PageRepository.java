@@ -14,6 +14,12 @@ public interface PageRepository extends JpaRepository<Page, Long> {
   )
   List<Page> findPagesCreatedByPerson(@Param("personId") Long personId);
 
+  @Query(
+    "SELECT p FROM Page p WHERE p.id IN (SELECT l.receiverInteractor.id " +
+    "FROM PageLike l WHERE l.interactor.id=:personId AND l.deletedAt IS NULL)"
+  )
+  List<Page> findPagesLikedByPerson(@Param("personId") Long personId);
+
   @Query("SELECT p FROM Page p WHERE p.id=:pageId AND p.deletedAt IS NULL")
   Optional<Page> findActivePage(@Param("pageId") Long pageId);
 }

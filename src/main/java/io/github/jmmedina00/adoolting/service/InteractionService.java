@@ -63,12 +63,22 @@ public class InteractionService {
       .orElseThrow();
   }
 
-  public Page<Interaction> getInteractions(
+  public Page<Interaction> getInteractionsFromInteractor(
     Long interactorId,
     Pageable pageable
   ) {
-    return interactionRepository.findInteractionsByInteractorId(
-      interactorId,
+    return interactionRepository.findInteractionsByInteractorIds(
+      List.of(interactorId),
+      pageable
+    );
+  }
+
+  public Page<Interaction> getInteractionsFromInteractors(
+    List<Long> interactorIds,
+    Pageable pageable
+  ) {
+    return interactionRepository.findInteractionsByInteractorIds(
+      interactorIds,
       pageable
     );
   }

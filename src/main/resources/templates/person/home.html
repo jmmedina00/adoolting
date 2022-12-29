@@ -5,3 +5,7 @@
 <img
   th:src="@{/pfp/interactor/{id}(id=${#authentication.principal.person.id})}"
 />
+
+<div th:each="post : ${interactions}">
+  <div th:replace="common/interaction :: card (interaction=${post})"></div>
+</div>

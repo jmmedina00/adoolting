@@ -32,6 +32,10 @@ public class PageService {
     return pageRepository.findActivePage(pageId).orElseThrow();
   }
 
+  public List<Page> getPagesLikedByPerson(Long personId) {
+    return pageRepository.findPagesLikedByPerson(personId);
+  }
+
   public boolean isPageManagedByPerson(Long pageId, Long personId) {
     Optional<Person> found = getPageManagers(pageId)
       .stream()
