@@ -6,6 +6,14 @@
   th:src="@{/pfp/interactor/{id}(id=${#authentication.principal.person.id})}"
 />
 
+<ul>
+  <li th:each="entry : ${commonfriends}">
+    <span th:text="${entry.getKey().getFullName()}"></span>
+    -
+    <span th:text="${entry.getValue()}"></span>
+  </li>
+</ul>
+
 <div th:each="post : ${interactions}">
   <div th:replace="common/interaction :: card (interaction=${post})"></div>
 </div>

@@ -55,6 +55,10 @@ public class HomeController {
     );
 
     model.addAttribute("interactions", interactions);
+    model.addAttribute(
+      "commonfriends",
+      cInteractionService.getPersonFriendsOfFriends(person.getId())
+    );
 
     return "person/home";
   }

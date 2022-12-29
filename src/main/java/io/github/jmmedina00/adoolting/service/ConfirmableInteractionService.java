@@ -6,8 +6,13 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -111,5 +116,40 @@ public class ConfirmableInteractionService {
     return (ConfirmableInteraction) interactionService.saveInteraction(
       interaction
     );
+  }
+
+  public Map<Person, Long> getPersonFriendsOfFriends(Long personId) {
+    List<Person> friends = getPersonFriends(personId);
+
+    List<Person> friendsOfFriends = friends
+      .stream()
+      .flatMap(person -> getPersonFriends(person.getId()).stream())
+      .filter(
+        person ->
+          !(
+            Objects.equals(personId, person.getId()) ||
+            friends.indexOf(person) >= 0
+          )
+      )
+      .toList();
+
+    HashMap<Person, Long> personOccurrences = new HashMap<>();
+
+    for (Person person : friendsOfFriends) {
+      personOccurrences.merge(person, 1L, Long::sum);
+    }
+
+    return personOccurrences
+      .entrySet()
+      .stream()
+      .sorted(Entry.comparingByValue((a, b) -> -Long.compare(a, b)))
+      .collect(
+        Collectors.toMap(
+          Entry::getKey,
+          Entry::getValue,
+          (a, b) -> a,
+          LinkedHashMap::new
+        )
+      );
   }
 }
