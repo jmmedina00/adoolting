@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.dto.validator;
 
 import io.github.jmmedina00.adoolting.dto.annotation.OnlyImageRequired;
+import io.github.jmmedina00.adoolting.dto.validator.common.Image;
 import java.util.Optional;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -14,8 +15,6 @@ public class OnlyImageRequiredValidator
     MultipartFile file,
     ConstraintValidatorContext context
   ) {
-    return (
-      Optional.of(file.getContentType()).orElse("").matches("^image/.+$")
-    );
+    return (Image.isValidImage(Optional.of(file.getContentType())));
   }
 }

@@ -1,6 +1,7 @@
 package io.github.jmmedina00.adoolting.dto.validator;
 
 import io.github.jmmedina00.adoolting.dto.annotation.OnlyImage;
+import io.github.jmmedina00.adoolting.dto.validator.common.Image;
 import java.util.Optional;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -16,7 +17,7 @@ public class OnlyImageValidator
   ) {
     return (
       Optional.of(file.getOriginalFilename()).orElse("").isEmpty() ||
-      Optional.of(file.getContentType()).orElse("").matches("^image/.+$")
+      Image.isValidImage(Optional.of(file.getContentType()))
     );
   }
 }
