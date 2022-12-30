@@ -15,6 +15,7 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -39,11 +40,19 @@ public class CommentServiceTest {
   @MockBean
   private InteractionService interactionService;
 
+  @MockBean
+  private PageService pageService;
+
   @Autowired
   private CommentService commentService;
 
   @Test
   public void createCommentCreatesCommentWithPayloadData() throws Exception {
+    // Authorization checks to be implemented somewhere else, skipping testing
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
     Mockito
       .when(commentRepository.save(any()))
       .thenAnswer(
@@ -59,6 +68,7 @@ public class CommentServiceTest {
           Long id = invocation.getArgument(0);
           Interaction interaction = new Interaction();
           interaction.setId(id);
+          interaction.setInteractor(new Person());
           return interaction;
         }
       );
@@ -76,6 +86,7 @@ public class CommentServiceTest {
 
     NewComment newComment = new NewComment();
     MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(2L);
     newComment.setContent("Test");
     newComment.setFile(file);
 
@@ -91,12 +102,29 @@ public class CommentServiceTest {
   public void createCommentNotDisruptedByMediumServiceException()
     throws Exception {
     Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Mockito
+      .when(interactionService.getInteraction(any()))
+      .thenAnswer(
+        invocation -> {
+          Long id = invocation.getArgument(0);
+          Interaction interaction = new Interaction();
+          interaction.setId(id);
+          interaction.setInteractor(new Person());
+          return interaction;
+        }
+      );
+
+    Mockito
       .doThrow(Exception.class)
       .when(mediumService)
       .saveAllFiles(any(), any());
 
     NewComment newComment = new NewComment();
     MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(2L);
     newComment.setContent("Test");
     newComment.setFile(file);
 
