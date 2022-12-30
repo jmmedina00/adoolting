@@ -80,7 +80,7 @@ public class PostService {
   }
 
   private void handleNewPostFiles(NewPost post, Post savedPost) {
-    if (!Optional.of(post.getUrl()).orElse("").isEmpty()) {
+    if (!Optional.ofNullable(post.getUrl()).orElse("").isEmpty()) {
       mediumService.saveLinkMedium(post.getUrl(), savedPost);
       return;
     }
