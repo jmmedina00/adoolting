@@ -61,7 +61,7 @@ public class PageService {
   }
 
   public List<Person> getPageManagers(Long pageId) {
-    Page page = pageRepository.findById(pageId).get();
+    Page page = getPage(pageId);
     List<Person> managers = pageManagerService.getPeopleManagingPage(pageId);
 
     ArrayList<Person> finalized = new ArrayList<>(managers);
