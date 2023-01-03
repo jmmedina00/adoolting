@@ -132,6 +132,9 @@ public class PersonLatestMessagesServiceTest {
     Mockito
       .when(latestMessagesRepository.findById(4L))
       .thenReturn(Optional.empty());
+    Mockito
+      .when(latestMessagesRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
 
     latestMessagesService.verifyPersonCache(4L, List.of(c));
 

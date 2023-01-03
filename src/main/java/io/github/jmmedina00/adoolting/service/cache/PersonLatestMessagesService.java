@@ -30,7 +30,7 @@ public class PersonLatestMessagesService {
   public void verifyPersonCache(Long personId, List<PrivateMessage> messages) {
     PersonLatestMessages latestCache = latestMessagesRepository
       .findById(personId)
-      .orElse(initializePersonCache(personId, messages));
+      .orElseGet(() -> initializePersonCache(personId, messages));
     PrivateMessage latestMessage = messages.get(0);
 
     if (latestCache.getUpdatedAt().equals(latestMessage.getCreatedAt())) {
