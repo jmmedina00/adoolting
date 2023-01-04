@@ -87,7 +87,7 @@ public class InteractionService {
     throws NotAuthorizedException {
     Interaction interaction = interactionRepository
       .findDeletableInteractionForInteractor(interactionId, interactorId)
-      .orElseThrow();
+      .orElseThrow(NotAuthorizedException::new);
 
     interaction.setDeletedAt(new Date());
     interactionRepository.save(interaction);

@@ -120,4 +120,19 @@ public class InteractorServiceTest {
     );
     assertEquals(List.of(person, foo, bar, baz), result);
   }
+
+  @Test
+  public void getRepresentableInteractorsByPersonOnlyAdmitsPersonAsFirstParameter() {
+    Page page = new Page();
+    Mockito
+      .when(interactorRepository.findById(4L))
+      .thenReturn(Optional.of(page));
+
+    assertThrows(
+      ClassCastException.class,
+      () -> {
+        interactorService.getRepresentableInteractorsByPerson(4L, 5L);
+      }
+    );
+  }
 }
