@@ -109,7 +109,7 @@ public class NotifiedInteractorService {
       for (Person person : personService.getPersonsWhoLikedPage(
         author.getId()
       )) {
-        interestedPersons.put(
+        interestedPersons.putIfAbsent(
           person,
           PersonSettingsService.NOTIFY_PAGE_INTERACTION
         );
