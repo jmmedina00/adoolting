@@ -27,10 +27,6 @@ public class ConfirmableInteractionService {
   @Autowired
   private InteractionService interactionService;
 
-  public ConfirmableInteraction getConfirmableInteraction(Long interactionId) {
-    return cInteractionRepository.findById(interactionId).orElseThrow();
-  }
-
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Long personId
   ) {
