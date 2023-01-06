@@ -15,6 +15,7 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -318,6 +319,11 @@ public class ConfirmableInteractionServiceTest {
     Map<Person, Long> result = cInteractionService.getPersonFriendsOfFriends(
       5L
     );
-    assertEquals(Map.of(bar, 3, foo, 2, baz, 1).toString(), result.toString()); // Seems like this piggy backs on the map types if not converted to String
+    LinkedHashMap<Person, Long> expected = new LinkedHashMap<>();
+    expected.put(bar, 3L);
+    expected.put(foo, 2L);
+    expected.put(baz, 1L);
+
+    assertEquals(expected.toString(), result.toString()); // Seems like this piggy backs on the map types if not converted to String
   }
 }
