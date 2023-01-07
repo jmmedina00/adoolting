@@ -15,6 +15,8 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class JoinRequestServiceTest {
   @MockBean
   private JoinRequestRepository joinRequestRepository;

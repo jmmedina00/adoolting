@@ -18,8 +18,10 @@ import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -32,6 +34,7 @@ import org.springframework.validation.BindException;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PageServiceTest {
   @MockBean
   private PageRepository pageRepository;
@@ -82,7 +85,7 @@ public class PageServiceTest {
   }
 
   @Test
-  public void getPageMangersReturnsPageManagersPlusPageCreator() {
+  public void getPageManagersReturnsPageManagersPlusPageCreator() {
     Page page = new Page();
     Person creator = new Person();
     page.setCreatedByPerson(creator);

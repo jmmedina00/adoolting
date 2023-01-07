@@ -16,9 +16,11 @@ import io.github.jmmedina00.adoolting.repository.group.EventRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class EventServiceTest {
   @MockBean
   private EventRepository eventRepository;

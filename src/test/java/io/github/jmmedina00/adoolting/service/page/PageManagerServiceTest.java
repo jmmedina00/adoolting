@@ -10,7 +10,9 @@ import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.page.PageManagerRepository;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PageManagerServiceTest {
   @MockBean
   private PageManagerRepository pageManagerRepository;

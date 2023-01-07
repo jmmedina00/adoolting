@@ -18,10 +18,12 @@ import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.repository.util.PasswordRestoreTokenRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -33,6 +35,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PasswordRestoreServiceTest {
   @MockBean
   private PasswordRestoreTokenRepository restoreTokenRepository;
@@ -192,7 +195,7 @@ public class PasswordRestoreServiceTest {
   }
 
   @Test
-  public void createTokenForEmailReturnsNullIfPersonLoadedIsNotEnabled() {
+  public void createTokenFromEmailReturnsNullIfPersonLoadedIsNotEnabled() {
     PersonDetails details = Mockito.mock(PersonDetails.class);
     Mockito.when(details.isEnabled()).thenReturn(false);
 

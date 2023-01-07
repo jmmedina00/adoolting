@@ -12,6 +12,7 @@ import io.github.jmmedina00.adoolting.entity.cache.LinkInformation;
 import io.github.jmmedina00.adoolting.repository.cache.LinkInformationRepository;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.util.FileService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import io.github.jmmedina00.adoolting.util.SelfReturningAnswer;
 import java.io.File;
 import java.util.Calendar;
@@ -23,6 +24,7 @@ import org.jobrunr.scheduling.JobScheduler;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -35,6 +37,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class LinkInformationServiceTest {
   @MockBean
   private LinkInformationRepository infoRepository;

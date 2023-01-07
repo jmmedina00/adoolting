@@ -16,11 +16,13 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PrivateMessage;
 import io.github.jmmedina00.adoolting.repository.cache.PersonLatestMessagesRepository;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -32,6 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PersonLatestMessagesServiceTest {
   @MockBean
   private PersonLatestMessagesRepository latestMessagesRepository;
@@ -302,7 +305,7 @@ public class PersonLatestMessagesServiceTest {
   }
 
   @Test
-  public void getLatestMessagesFromPersonPlacesCorrectPersonsFromServiceIntoNewMap() {
+  public void getLatestMessagesForPersonPlacesCorrectPersonsFromServiceIntoNewMap() {
     Person foo = new Person();
     Person bar = new Person();
 
@@ -336,7 +339,7 @@ public class PersonLatestMessagesServiceTest {
   }
 
   @Test
-  public void getLatestMessagesFromPersonReturnsEmptyMapWhenNoCacheFound() {
+  public void getLatestMessagesForPersonReturnsEmptyMapWhenNoCacheFound() {
     Map<Person, SimpleMessage> actual = latestMessagesService.getLatestMessagesForPerson(
       4L
     );

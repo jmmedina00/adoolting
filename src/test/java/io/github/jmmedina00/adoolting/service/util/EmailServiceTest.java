@@ -15,6 +15,7 @@ import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
 import io.github.jmmedina00.adoolting.entity.cache.simple.SimplePerson;
 import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,7 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import org.jobrunr.scheduling.JobScheduler;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -44,6 +46,7 @@ import org.thymeleaf.spring5.expression.ThymeleafEvaluationContext;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class EmailServiceTest {
   @MockBean
   private EmailDataRepository dataRepository;

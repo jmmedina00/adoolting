@@ -17,8 +17,10 @@ import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ import org.springframework.validation.FieldError;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PersonServiceTest {
   @MockBean
   private PersonRepository personRepository;
@@ -220,7 +223,8 @@ public class PersonServiceTest {
   }
 
   @Test
-  public void createPersonCreatesPersonFromUserData() throws BindException {
+  public void createPersonFromUserCreatesPersonFromUserData()
+    throws BindException {
     String unusedEmail = "juanmi@juanmi.com";
     User user = new User(); // Service expects valid payload from controller
     user.setFirstName("Juanmi");
@@ -255,7 +259,8 @@ public class PersonServiceTest {
   }
 
   @Test
-  public void createPersonCallsAuxiliaryServices() throws BindException {
+  public void createPersonFromUserCallsAuxiliaryServices()
+    throws BindException {
     Mockito
       .when(personRepository.save(any()))
       .thenAnswer(
@@ -272,7 +277,7 @@ public class PersonServiceTest {
   }
 
   @Test
-  public void createPersonWithUsedEmailResultsinException() {
+  public void createPersonFromUserWithUsedEmailResultsinException() {
     String usedEmail = "juanmi@juanmi.com";
     User user = new User(); // Service expects valid payload from controller
     user.setEmail(usedEmail);

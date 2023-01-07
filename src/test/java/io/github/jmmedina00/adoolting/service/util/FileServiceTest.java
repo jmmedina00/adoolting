@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 import org.jobrunr.jobs.lambdas.JobLambda;
 import org.jobrunr.scheduling.JobScheduler;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class FileServiceTest {
   @MockBean
   private JobScheduler jobScheduler;
@@ -131,7 +134,7 @@ public class FileServiceTest {
 
   @ParameterizedTest
   @MethodSource("firstAvailableAndDesiredSizeCombinations")
-  public void getExistingPathForProfileGetsSmallestFileAvailableStartingFromDesiredSize(
+  public void getExistingPathForFileGetsSmallestFileAvailableStartingFromDesiredSize(
     int firstAvailable,
     int desiredSize
   )

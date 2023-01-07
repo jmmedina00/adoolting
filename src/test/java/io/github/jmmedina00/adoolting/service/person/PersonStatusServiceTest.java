@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PersonStatus;
 import io.github.jmmedina00.adoolting.repository.person.PersonStatusRepository;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PersonStatusServiceTest {
   @MockBean
   private PersonStatusRepository statusRepository;

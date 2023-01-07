@@ -6,8 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 
 import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
 import io.github.jmmedina00.adoolting.repository.cache.PersonLocaleConfigRepository;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Locale;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -19,6 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PersonLocaleConfigServiceTest {
   @MockBean
   private PersonLocaleConfigRepository configRepository;

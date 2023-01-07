@@ -18,10 +18,10 @@ import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-@DisplayNameGeneration(DisplayNameGenerator.IndicativeSentences.class)
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PostServiceTest {
   @MockBean
   private MediumService mediumService;
@@ -96,7 +96,7 @@ public class PostServiceTest {
   }
 
   @Test
-  public void postOnProfileCallsLinkHandlingWhenURLIsPopulated()
+  public void postOnProfileCallsLinkHandlingWhenUrlIsPopulated()
     throws Exception {
     String url = "http://test.local";
     NewPost newPost = new NewPost();

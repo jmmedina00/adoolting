@@ -13,9 +13,11 @@ import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
 import io.github.jmmedina00.adoolting.repository.MediumRepository;
 import io.github.jmmedina00.adoolting.service.util.FileService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class MediumServiceTest {
   @MockBean
   private MediumRepository mediumRepository;

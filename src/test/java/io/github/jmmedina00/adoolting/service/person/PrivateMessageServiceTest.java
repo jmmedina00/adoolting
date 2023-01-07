@@ -13,7 +13,9 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PrivateMessage;
 import io.github.jmmedina00.adoolting.repository.person.PrivateMessageRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLatestMessagesService;
+import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
+@DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class PrivateMessageServiceTest {
   @MockBean
   private PrivateMessageRepository messageRepository;
@@ -80,7 +83,7 @@ public class PrivateMessageServiceTest {
   }
 
   @Test
-  public void getMesssagesBetweenPersonsSetsCacheOfSenderAsReadForReceiever() {
+  public void getMessagesBetweenPersonsSetsCacheOfSenderAsReadForReceiever() {
     PageRequest request = PageRequest.of(5, 12);
 
     messageService.getMessagesBetweenPersons(4L, 5L, request);
