@@ -182,5 +182,89 @@ public class MediumServiceTest {
       );
     }
   }
-  // TODO: test getPicturesForPictureViewer
+
+  private static Stream<Arguments> selectedIdAndExpectedSlice() {
+    return Stream.of(
+      Arguments.of(12L, List.of(12L, 15L, 18L, 31L, 39L, 47L, 55L)),
+      Arguments.of(15L, List.of(12L, 15L, 18L, 31L, 39L, 47L, 55L)),
+      Arguments.of(15L, List.of(12L, 15L, 18L, 31L, 39L, 47L, 55L)),
+      Arguments.of(18L, List.of(12L, 15L, 18L, 31L, 39L, 47L, 55L)),
+      Arguments.of(31L, List.of(12L, 15L, 18L, 31L, 39L, 47L, 55L)),
+      Arguments.of(39L, List.of(15L, 18L, 31L, 39L, 47L, 55L, 85L)),
+      Arguments.of(47L, List.of(18L, 31L, 39L, 47L, 55L, 85L, 94L)),
+      Arguments.of(55L, List.of(31L, 39L, 47L, 55L, 85L, 94L, 102L)),
+      Arguments.of(85L, List.of(39L, 47L, 55L, 85L, 94L, 102L, 112L)),
+      Arguments.of(94L, List.of(47L, 55L, 85L, 94L, 102L, 112L, 223L)),
+      Arguments.of(102L, List.of(55L, 85L, 94L, 102L, 112L, 223L, 290L)),
+      Arguments.of(112L, List.of(55L, 85L, 94L, 102L, 112L, 223L, 290L)),
+      Arguments.of(223L, List.of(55L, 85L, 94L, 102L, 112L, 223L, 290L)),
+      Arguments.of(290L, List.of(55L, 85L, 94L, 102L, 112L, 223L, 290L))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("selectedIdAndExpectedSlice")
+  public void getPicturesForPictureViewerReturnsCorrectSliceOfMediumList(
+    Long mediumId,
+    List<Long> expectedReturnedIds
+  ) {
+    Medium a = new Medium();
+    a.setId(12L);
+    Medium b = new Medium();
+    b.setId(15L);
+    Medium c = new Medium();
+    c.setId(18L);
+    Medium d = new Medium();
+    d.setId(31L);
+    Medium e = new Medium();
+    e.setId(39L);
+    Medium f = new Medium();
+    f.setId(47L);
+    Medium g = new Medium();
+    g.setId(55L);
+    Medium h = new Medium();
+    h.setId(85L);
+    Medium i = new Medium();
+    i.setId(94L);
+    Medium j = new Medium();
+    j.setId(102L);
+    Medium k = new Medium();
+    k.setId(112L);
+    Medium l = new Medium();
+    l.setId(223L);
+    Medium m = new Medium();
+    m.setId(290L);
+
+    Mockito
+      .when(mediumRepository.findAllPicturesFromTheSameInteractor(mediumId))
+      .thenReturn(List.of(a, b, c, d, e, f, g, h, i, j, k, l, m));
+
+    List<Medium> result = mediumService.getPicturesForPictureViewer(mediumId);
+    List<Long> resultingIds = result
+      .stream()
+      .map(medium -> medium.getId())
+      .toList();
+
+    assertEquals(expectedReturnedIds, resultingIds);
+  }
+
+  public void getPicturesForPictureViewerReturnsTheWholeListIfItIsSmallEnough() {
+    Medium a = new Medium();
+    a.setId(12L);
+    Medium b = new Medium();
+    b.setId(15L);
+    Medium c = new Medium();
+    c.setId(18L);
+    Medium d = new Medium();
+    d.setId(31L);
+
+    List<Medium> media = List.of(a, b, c, d);
+
+    Mockito
+      .when(mediumRepository.findAllPicturesFromTheSameInteractor(15L))
+      .thenReturn(media);
+
+    List<Medium> result = mediumService.getPicturesForPictureViewer(15L);
+    assertEquals(media, result);
+  }
 }
