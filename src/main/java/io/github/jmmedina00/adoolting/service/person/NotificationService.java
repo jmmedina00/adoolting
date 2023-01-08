@@ -51,7 +51,11 @@ public class NotificationService {
       .orElseThrow();
     if (notification.getReadAt() == null) {
       notification.setReadAt(new Date());
-      logger.info("Notification {} is now read.", notificationId);
+      logger.info(
+        "Notification {} is now read by person {}.",
+        notificationId,
+        personId
+      );
     }
     return notificationRepository.save(notification);
   }
@@ -61,7 +65,11 @@ public class NotificationService {
       .findBelongingNotification(notificationId, personId)
       .orElseThrow();
     notification.setDeletedAt(new Date());
-    logger.info("Deleting notification {}", notificationId);
+    logger.info(
+      "Person {} is now deleting notification {}",
+      personId,
+      notificationId
+    );
     return notificationRepository.save(notification);
   }
 

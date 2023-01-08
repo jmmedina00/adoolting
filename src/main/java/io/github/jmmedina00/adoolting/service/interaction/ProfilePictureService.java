@@ -14,6 +14,8 @@ import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,10 @@ public class ProfilePictureService {
 
   @Autowired
   private PeopleGroupService groupService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    ProfilePictureService.class
+  );
 
   public ProfilePicture getProfilePictureOfInteractor(Long interactorId)
     throws MediumNotFoundException {
@@ -79,6 +85,24 @@ public class ProfilePictureService {
     profilePicture.setInteraction(post);
 
     mediumService.saveImageMedium(profilePicture, file);
+
+    if (Objects.equals(interactorId, attemptingPersonId)) {
+      logger.info(
+        "Person {} has updated their profile picture. Post id={}, pfp id={}",
+        interactorId,
+        post.getId(),
+        profilePicture.getId()
+      );
+    } else {
+      logger.info(
+        "Person {} has updated interactor {}'s profile picture. Post id={}, pfp id={}",
+        attemptingPersonId,
+        interactorId,
+        post.getId(),
+        profilePicture.getId()
+      );
+    }
+
     return profilePicture;
   }
 
@@ -105,6 +129,14 @@ public class ProfilePictureService {
     profilePicture.setInteraction(comment);
 
     mediumService.saveImageMedium(profilePicture, file);
+
+    logger.info(
+      "Person {} has updated group {}'s profile picture. Comment id={}, pfp id={}",
+      attemptingPersonId,
+      groupId,
+      comment.getId(),
+      profilePicture.getId()
+    );
     return profilePicture;
   }
 

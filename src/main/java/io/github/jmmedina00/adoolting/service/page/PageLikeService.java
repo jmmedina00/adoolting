@@ -6,6 +6,8 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.page.PageLikeRepository;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,10 @@ public class PageLikeService {
 
   @Autowired
   private InteractorService interactorService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PageLikeService.class
+  );
 
   public Long getPageLikes(Long pageId) {
     return likeRepository.countPageLikes(pageId);
@@ -30,6 +36,12 @@ public class PageLikeService {
 
     if (existing != null) {
       existing.setDeletedAt(new Date());
+      logger.info(
+        "Person {} has removed their like from page {}; id={}",
+        personId,
+        pageId,
+        existing.getId()
+      );
       return likeRepository.save(existing);
     }
 
@@ -39,6 +51,13 @@ public class PageLikeService {
     like.setInteractor(person);
     like.setReceiverInteractor(page);
 
-    return likeRepository.save(like);
+    PageLike saved = likeRepository.save(like);
+    logger.info(
+      "Person {} has liked page {}; id={}",
+      personId,
+      pageId,
+      saved.getId()
+    );
+    return saved;
   }
 }

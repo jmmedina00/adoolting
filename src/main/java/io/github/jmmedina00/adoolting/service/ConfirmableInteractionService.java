@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,10 @@ public class ConfirmableInteractionService {
 
   @Autowired
   private InteractionService interactionService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    ConfirmableInteractionService.class
+  );
 
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Long personId
@@ -73,8 +79,18 @@ public class ConfirmableInteractionService {
 
     Date now = new Date();
     if (isAccepted) {
+      logger.info(
+        "Person {} has confirmed interaction {}",
+        personId,
+        interactionId
+      );
       interaction.setConfirmedAt(now);
     } else {
+      logger.info(
+        "Person {} has ignored interaction {}",
+        personId,
+        interactionId
+      );
       interaction.setIgnoredAt(now);
     }
 
@@ -102,16 +118,29 @@ public class ConfirmableInteractionService {
       throw new NotAuthorizedException();
     }
 
+    logger.debug(
+      "No confirmed nor pending interaction between persons {} and {} found. We can proceed",
+      requestingPersonId,
+      addedPersonId
+    );
+
     Person requestingPerson = personService.getPerson(requestingPersonId);
     Person addedPerson = personService.getPerson(addedPersonId);
 
     ConfirmableInteraction interaction = new ConfirmableInteraction();
     interaction.setInteractor(requestingPerson);
     interaction.setReceiverInteractor(addedPerson);
-
-    return (ConfirmableInteraction) interactionService.saveInteraction(
+    ConfirmableInteraction saved = (ConfirmableInteraction) interactionService.saveInteraction(
       interaction
     );
+
+    logger.info(
+      "New friendship request created between {} and {}, id is {}",
+      requestingPersonId,
+      addedPersonId,
+      saved.getId()
+    );
+    return saved;
   }
 
   public Map<Person, Long> getPersonFriendsOfFriends(Long personId) {

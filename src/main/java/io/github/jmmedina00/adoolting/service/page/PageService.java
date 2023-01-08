@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,10 @@ public class PageService {
 
   @Autowired
   private PersonService personService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PageService.class
+  );
 
   public Page getPage(Long pageId) {
     return pageRepository.findActivePage(pageId).orElseThrow();
@@ -77,7 +83,13 @@ public class PageService {
     page.setUrl(newPage.getUrl());
     page.setCreatedByPerson(person);
 
-    return pageRepository.save(page);
+    Page saved = pageRepository.save(page);
+    logger.info(
+      "New page (id={}) created by person {}",
+      saved.getId(),
+      personId
+    );
+    return saved;
   }
 
   public Page deletePage(
@@ -98,6 +110,11 @@ public class PageService {
     }
 
     page.setDeletedAt(new Date());
+    logger.info(
+      "Page {} has been deleted by person {}",
+      pageId,
+      attemptingPersonId
+    );
     return pageRepository.save(page);
   }
 
@@ -117,6 +134,13 @@ public class PageService {
     if (isPageManagedByPerson(pageId, addedPersonId)) {
       throw new AlreadyInPlaceException(pageId);
     }
+
+    logger.debug(
+      "Person {} is the creator of page {} and can thus add person {} as manager",
+      attemptingPersonId,
+      pageId,
+      addedPersonId
+    );
 
     Person person = personService.getPerson(addedPersonId);
     return pageManagerService.addManagerForPage(person, page);

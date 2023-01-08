@@ -8,6 +8,8 @@ import io.github.jmmedina00.adoolting.service.util.FileService;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,10 @@ public class MediumService {
 
   private static int WANTED_ELEMENTS = 7;
   private static int LIMIT_COUNT = WANTED_ELEMENTS / 2;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    MediumService.class
+  );
 
   public Page<Medium> getPicturePage(Long interactorId, Pageable pageable) {
     return mediumRepository.findPicturePageByInteractorId(
@@ -53,6 +59,10 @@ public class MediumService {
     for (MultipartFile file : files) {
       String extension = FilenameUtils.getExtension(file.getOriginalFilename());
       if (extension.isEmpty()) {
+        logger.debug(
+          "Skipping empty file while saving interaction {}",
+          interaction.getId()
+        );
         continue;
       }
 
@@ -66,7 +76,15 @@ public class MediumService {
     Medium medium = new Medium();
     medium.setReference(link);
     medium.setInteraction(interaction);
-    return mediumRepository.save(medium);
+
+    Medium saved = mediumRepository.save(medium);
+    logger.info(
+      "Saved link medium {} for interaction {}, id is {}",
+      link,
+      interaction.getId(),
+      saved.getId()
+    );
+    return saved;
   }
 
   public Medium saveImageMedium(Medium medium, MultipartFile uploaded)
@@ -78,6 +96,7 @@ public class MediumService {
     mediumRepository.save(medium);
 
     String filename = getFilename(medium);
+    logger.info("Saved file medium {}", filename);
     fileService.saveImage(uploaded, filename);
     return medium;
   }
@@ -93,6 +112,10 @@ public class MediumService {
       .get();
 
     if (interestingMedia.size() <= WANTED_ELEMENTS) {
+      logger.debug(
+        "Whole list containing medium {} is small enough for picture viewer",
+        mediumId
+      );
       return interestingMedia;
     }
 
@@ -104,6 +127,12 @@ public class MediumService {
     int firstSliceIndex = hittingTheStart
       ? 0
       : hittingTheEnd ? maximumCenter - LIMIT_COUNT : mediumIndex - LIMIT_COUNT;
+
+    logger.debug(
+      "Returning slice from medium {} to medium {}",
+      interestingMedia.get(firstSliceIndex).getId(),
+      interestingMedia.get(firstSliceIndex + WANTED_ELEMENTS - 1).getId()
+    );
 
     return interestingMedia.subList(
       firstSliceIndex,

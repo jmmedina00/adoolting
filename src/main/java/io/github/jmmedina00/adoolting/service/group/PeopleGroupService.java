@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,10 @@ public class PeopleGroupService {
   @Autowired
   private InteractionService interactionService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    PeopleGroupService.class
+  );
+
   public PeopleGroup getGroup(Long groupId) {
     return groupRepository.findActiveGroup(groupId).orElseThrow();
   }
@@ -44,7 +50,14 @@ public class PeopleGroupService {
     group.setDescription(newGroup.getDescription());
     group.setInteractor(person);
     group.setAccessLevel(newGroup.getAccessLevel());
-    return (PeopleGroup) interactionService.saveInteraction(group);
+
+    PeopleGroup saved = (PeopleGroup) interactionService.saveInteraction(group);
+    logger.info(
+      "New group (id={}) created by person {}.",
+      saved.getId(),
+      personId
+    );
+    return saved;
   }
 
   public List<PeopleGroup> getGroupsManagedByPerson(Long personId) {
@@ -74,6 +87,8 @@ public class PeopleGroupService {
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setAccessLevel(newGroup.getAccessLevel());
+
+    logger.info("Group {} has been updated by person {}", groupId, personId);
     return groupRepository.save(group); // No need to go through default notif flow
   }
 
@@ -113,9 +128,15 @@ public class PeopleGroupService {
 
     PeopleGroup group = getGroup(groupId);
     group.setDeletedAt(new Date());
+    logger.info(
+      "Group {} has been deleted by person {}",
+      groupId,
+      attemptingPersonId
+    );
     return (PeopleGroup) interactionService.saveInteraction(group);
   }
 
+  // Not logging this yet. Potentially to be refactored.
   public boolean isGroupManagedByPerson(Long groupId, Long personId) {
     try {
       PeopleGroup group = getGroup(groupId);

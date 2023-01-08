@@ -90,6 +90,8 @@ public class InteractionService {
       .orElseThrow(NotAuthorizedException::new);
 
     interaction.setDeletedAt(new Date());
+
+    logger.info("Interactor {} has deleted interaction {}");
     interactionRepository.save(interaction);
   }
 

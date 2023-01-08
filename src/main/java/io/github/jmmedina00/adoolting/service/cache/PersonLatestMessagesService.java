@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,10 @@ public class PersonLatestMessagesService {
 
   @Autowired
   private PersonService personService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PersonLatestMessagesService.class
+  );
 
   public void verifyPersonCache(Long personId, List<PrivateMessage> messages) {
     PersonLatestMessages latestCache = latestMessagesRepository
@@ -65,6 +71,11 @@ public class PersonLatestMessagesService {
 
     messages.put(senderId, latest);
     cache.setMessages(messages);
+    logger.info(
+      "Set conversation with person {} in person {} cache as read",
+      senderId,
+      receiverId
+    );
     latestMessagesRepository.save(cache);
   }
 
@@ -111,6 +122,11 @@ public class PersonLatestMessagesService {
     messages.put(barId, message);
     cache.setMessages(messages);
     cache.setUpdatedAt(message.getCreatedAt());
+    logger.info(
+      "Saved new message in person {} conversation to person {} cache",
+      barId,
+      fooId
+    );
     return latestMessagesRepository.save(cache);
   }
 
@@ -141,6 +157,7 @@ public class PersonLatestMessagesService {
     ArrayList<SimpleMessage> values = new ArrayList<>(firsts.values());
     Collections.sort(values);
     cache.setUpdatedAt(values.get(0).getCreatedAt());
+    logger.info("Initialized message cache for person {}", personId);
     return latestMessagesRepository.save(cache);
   }
 }

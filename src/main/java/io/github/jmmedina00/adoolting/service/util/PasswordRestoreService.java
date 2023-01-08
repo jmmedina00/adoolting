@@ -10,6 +10,8 @@ import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,6 +34,10 @@ public class PasswordRestoreService {
   @Value("${restoretoken.expires.hours}")
   private int expireInHours;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    PasswordRestoreService.class
+  );
+
   public PasswordRestoreToken getToken(String token)
     throws TokenExpiredException {
     return restoreTokenRepository
@@ -49,6 +55,10 @@ public class PasswordRestoreService {
 
     tokenObj.setUsedAt(new Date());
     restoreTokenRepository.save(tokenObj);
+    logger.info(
+      "Token with id {} has been confirmed successfully",
+      tokenObj.getId()
+    );
   }
 
   public PasswordRestoreToken createTokenFromEmail(String email)
@@ -56,11 +66,16 @@ public class PasswordRestoreService {
     PersonDetails personDetails = (PersonDetails) personService.loadUserByUsername(
       email
     );
+    Person person = personDetails.getPerson();
+
     if (!personDetails.isEnabled()) {
+      logger.debug(
+        "Person {} is not enabled yet, not sending restore token",
+        person == null ? 0 : person.getId()
+      );
       return null;
     }
 
-    Person person = personDetails.getPerson();
     PasswordRestoreToken token = restoreTokenRepository
       .findTokenForPerson(person.getId())
       .orElseGet(() -> createNewToken(person));
@@ -77,6 +92,14 @@ public class PasswordRestoreService {
     token.setPerson(person);
     token.setToken(UUID.randomUUID().toString());
     token.setExpiresAt(expiresAt);
-    return restoreTokenRepository.save(token);
+
+    PasswordRestoreToken saved = restoreTokenRepository.save(token);
+    logger.info(
+      "Confirmation token has been created for person {}, id {}",
+      person.getId(),
+      saved.getId()
+    );
+    logger.debug("Token id {} value is {}", saved.getId(), saved.getToken());
+    return saved;
   }
 }

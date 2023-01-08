@@ -11,7 +11,6 @@ import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -82,22 +81,28 @@ public class CommentService {
 
     Comment saved = (Comment) interactionService.saveInteraction(comment);
     logger.info(
-      MessageFormat.format(
-        "Interactor {0} has successfully commented on interaction {1}, id {2}",
-        interactorId,
-        interactionId,
-        comment.getId()
-      )
+      "New comment (id={}) created by interactor {} on interaction {}.",
+      comment.getId(),
+      interactorId,
+      interactionId
     );
 
     if (newComment.getFile() == null) {
+      logger.debug(
+        "No file for comment {}. Skipping medium service call.",
+        saved.getId()
+      );
       return saved;
     }
 
     try {
       mediumService.saveAllFiles(List.of(newComment.getFile()), comment);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(
+        "An exception occurred while saving file from comment {}",
+        saved.getId(),
+        e
+      );
     }
     return saved;
   }

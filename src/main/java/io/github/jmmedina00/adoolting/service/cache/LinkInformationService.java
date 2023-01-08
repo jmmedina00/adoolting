@@ -16,6 +16,8 @@ import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,10 +39,15 @@ public class LinkInformationService {
   @Value("${DEFAULT_IMAGE}")
   private String defaultImageFile;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    LinkInformationService.class
+  );
+
   public LinkInformation getLinkInfo(Long mediumId) {
     LinkInformation info = infoRepository.findById(mediumId).orElse(null);
 
     if (info != null) {
+      logger.debug("Fetched info for medium {} correctly", mediumId);
       return info;
     }
 
@@ -49,6 +56,12 @@ public class LinkInformationService {
       mediumId +
       " @ " +
       Calendar.getInstance().get(Calendar.DAY_OF_MONTH); // Jobs are deleted at least a few days after done
+
+    logger.info(
+      "Info not found for medium {}. Scheduling fetch job {}.",
+      mediumId,
+      uuidSeed
+    );
 
     jobScheduler.enqueue(
       UUID.nameUUIDFromBytes(uuidSeed.getBytes()),
@@ -68,6 +81,13 @@ public class LinkInformationService {
       .referrer("https://www.google.com/")
       .get();
     Elements metaTags = document.getElementsByTag("meta");
+
+    logger.debug(
+      "<meta> tags for medium {} fetched successfully. {} in total",
+      mediumId,
+      metaTags.size()
+    );
+
     HashMap<String, String> tagInfo = new HashMap<>();
     for (Element element : metaTags) {
       Attributes attributes = element.attributes();
@@ -78,8 +98,20 @@ public class LinkInformationService {
       }
 
       String value = attributes.get("content");
+      logger.debug(
+        "Medium {} reference has attribute {} with value {}",
+        mediumId,
+        key,
+        value
+      );
       tagInfo.put(key, value);
     }
+
+    logger.debug(
+      "Finished cycling medium {} reference meta tags. {} interesting properties",
+      mediumId,
+      tagInfo.size()
+    );
 
     String title = Optional
       .ofNullable(tagInfo.get("og:title"))
@@ -90,6 +122,10 @@ public class LinkInformationService {
     Optional<String> image = Optional.ofNullable(tagInfo.get("og:image"));
 
     if (image.isPresent()) {
+      logger.debug(
+        "Image is present for medium {} reference. Sending to cache.",
+        mediumId
+      );
       fileService.cacheImageForLinkMedium(image.get(), mediumId);
     }
 
@@ -98,6 +134,11 @@ public class LinkInformationService {
     info.setActualLink(actualLink);
     info.setTitle(title);
     infoRepository.save(info);
+
+    logger.info(
+      "Link information for medium {} has been saved successfully",
+      mediumId
+    );
   }
 
   private LinkInformation getBlankInfo() {

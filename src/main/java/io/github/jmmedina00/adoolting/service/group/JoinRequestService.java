@@ -9,6 +9,8 @@ import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,10 @@ public class JoinRequestService {
 
   @Autowired
   private InteractionService interactionService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    JoinRequestService.class
+  );
 
   public JoinRequest getJoinRequestForPersonAndGroup(
     Long personId,
@@ -48,11 +54,17 @@ public class JoinRequestService {
 
     JoinRequest existing = getJoinRequestForPersonAndGroup(personId, groupId);
     if (existing != null) {
+      logger.debug(
+        "A join request for person {} and group {} already exists.",
+        personId,
+        groupId
+      );
       return existing;
     }
 
     Interactor person = interactorService.getInteractor(personId);
     PeopleGroup group = groupService.getGroup(groupId);
+    logger.info("Person {} wants to join group {}", personId, groupId);
     return createJoinRequest(person, group.getInteractor(), group);
   }
 
@@ -74,6 +86,11 @@ public class JoinRequestService {
       groupId
     );
     if (existing != null) {
+      logger.debug(
+        "A join request for person {} and group {} already exists.",
+        invitedPersonId,
+        groupId
+      );
       return existing;
     }
 
@@ -82,6 +99,12 @@ public class JoinRequestService {
     }
 
     PeopleGroup group = groupService.getGroup(groupId);
+    logger.info(
+      "Person {} is inviting person {} to group {}",
+      hostPersonId,
+      invitedPersonId,
+      groupId
+    );
     return createJoinRequest(host, invited, group);
   }
 
@@ -95,6 +118,17 @@ public class JoinRequestService {
     joinRequest.setInteractor(sender);
     joinRequest.setReceiverInteractor(receiver);
 
-    return (JoinRequest) interactionService.saveInteraction(joinRequest);
+    JoinRequest saved = (JoinRequest) interactionService.saveInteraction(
+      joinRequest
+    );
+
+    logger.info(
+      "Join request created from interactor {} to interactor {} with group {} involved",
+      sender.getId(),
+      receiver.getId(),
+      group.getId()
+    );
+
+    return saved;
   }
 }

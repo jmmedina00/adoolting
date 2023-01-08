@@ -12,10 +12,15 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import org.jobrunr.jobs.annotations.Job;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GraphicsService {
+  private static final Logger logger = LoggerFactory.getLogger(
+    GraphicsService.class
+  );
 
   public int getImageMinimumDimension(String path) throws Exception {
     BufferedImage sourceImage = ImageIO.read(new File(path));
@@ -30,6 +35,12 @@ public class GraphicsService {
     FileImageOutputStream stream = new FileImageOutputStream(file);
     ImageWriter writer = ImageIO.getImageWritersByMIMEType("image/png").next();
 
+    logger.info(
+      "Saving image fetched from {} as file {}",
+      url,
+      file.getAbsolutePath()
+    );
+
     writer.setOutput(stream);
     writer.write(image);
     stream.close();
@@ -41,6 +52,7 @@ public class GraphicsService {
     File destination = new File(destPath);
 
     if (!source.exists() || destination.exists()) {
+      logger.debug("Unable to continue with snip of {}", sourcePath);
       return;
     }
 
@@ -52,6 +64,13 @@ public class GraphicsService {
     drawOnToGraphics(graphics, sourceImage);
     graphics.dispose();
     writeImageToTargetFile(source, destination, square);
+
+    logger.info(
+      "Image {} snipped to {}, size is {} pixels",
+      sourcePath,
+      destPath,
+      minDimension
+    );
   }
 
   @Job(name = "Scale squared image")
@@ -61,6 +80,7 @@ public class GraphicsService {
     File destination = new File(destPath);
 
     if (!square.exists() || destination.exists()) {
+      logger.debug("Unable to continue scaling {} to {}", sourcePath, destPath);
       return;
     }
 
@@ -74,6 +94,13 @@ public class GraphicsService {
     graphics.drawImage(sourceImage, 0, 0, size, size, null);
     graphics.dispose();
     writeImageToTargetFile(square, destination, target);
+
+    logger.info(
+      "Image {} has been scaled to {} pixels and saved to {}",
+      sourcePath,
+      size,
+      destPath
+    );
   }
 
   private int getProperImageType(BufferedImage img) {

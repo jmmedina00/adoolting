@@ -5,6 +5,8 @@ import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.entity.person.PersonSettings;
 import io.github.jmmedina00.adoolting.repository.person.PersonSettingsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,10 @@ public class PersonSettingsService {
   public static final int NOTIFY_COMMENT = 20;
   public static final int NOTIFY_POST_FROM_OTHER = 21;
   public static final int NOTIFY_PAGE_INTERACTION = 22;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PersonSettingsService.class
+  );
 
   public PersonSettings createSettingsForPerson(Person person) {
     PersonSettings settings = new PersonSettings();
@@ -48,6 +54,8 @@ public class PersonSettingsService {
     form.setNotifyActivityFromPages(settings.getNotifyActivityFromPages());
     form.setNotifyPeoplesBirthdays(settings.getNotifyPeoplesBirthdays());
 
+    logger.info("Fetched settings form for person {}", person.getId());
+
     return form;
   }
 
@@ -69,6 +77,8 @@ public class PersonSettingsService {
     settings.setNotifyActivityFromPages(form.getNotifyActivityFromPages());
     settings.setNotifyPeoplesBirthdays(form.getNotifyPeoplesBirthdays());
 
+    logger.info("Updated settings for person {}", personId);
+
     return settingsRepository.save(settings);
   }
 
@@ -76,7 +86,13 @@ public class PersonSettingsService {
     PersonSettings settings = settingsRepository
       .findByPersonId(personId)
       .orElse(null);
-    if (settings == null) return NotificationSetting.NONE;
+    if (settings == null) {
+      logger.debug(
+        "No settings found for person {}, defaulting to NONE",
+        personId
+      );
+      return NotificationSetting.NONE;
+    }
     NotificationSetting setting;
 
     switch (code) {
@@ -90,6 +106,7 @@ public class PersonSettingsService {
         setting = settings.getNotifyActivityFromPages();
         break;
       default:
+        logger.debug("Unrecognized code, defaulting to NONE");
         setting = NotificationSetting.NONE;
     }
 
@@ -100,7 +117,13 @@ public class PersonSettingsService {
     PersonSettings settings = settingsRepository
       .findByPersonId(personId)
       .orElse(null);
-    if (settings == null) return false;
+    if (settings == null) {
+      logger.debug(
+        "No settings found for person {}, defaulting to false",
+        personId
+      );
+      return false;
+    }
     boolean permission;
 
     switch (desiredAction) {
@@ -120,6 +143,7 @@ public class PersonSettingsService {
         permission = settings.isEmailOnConfirmables();
         break;
       default:
+        logger.debug("Unrecognized code, defaulting to false");
         permission = false;
     }
 

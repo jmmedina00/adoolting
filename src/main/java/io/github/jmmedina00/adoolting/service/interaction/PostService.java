@@ -12,6 +12,8 @@ import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,10 @@ public class PostService {
   @Autowired
   private PageService pageService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    PostService.class
+  );
+
   public Post createPost(Long interactorId, NewPost newPost) {
     Interactor interactor = interactorService.getInteractor(interactorId);
 
@@ -36,6 +42,13 @@ public class PostService {
     post.setInteractor(interactor);
     post.setContent(newPost.getContent().trim());
     Post saved = (Post) interactionService.saveInteraction(post);
+
+    logger.info(
+      "New post (id={}) created by interactor {}",
+      saved.getId(),
+      interactorId
+    );
+
     handleNewPostFiles(newPost, saved);
     return saved;
   }
@@ -75,20 +88,34 @@ public class PostService {
     post.setReceiverInteractor(receiverInteractor);
     post.setContent(newPost.getContent().trim());
     Post saved = (Post) interactionService.saveInteraction(post);
+
+    logger.info(
+      "New post (id={}) created by interactor {} on interactor {}'s profile.",
+      saved.getId(),
+      interactorId,
+      receiverInteractorId
+    );
+
     handleNewPostFiles(newPost, saved);
     return saved;
   }
 
   private void handleNewPostFiles(NewPost post, Post savedPost) {
     if (!Optional.ofNullable(post.getUrl()).orElse("").isEmpty()) {
+      logger.debug("Saving saved post {} link to cache", savedPost.getId());
       mediumService.saveLinkMedium(post.getUrl(), savedPost);
       return;
     }
 
     try {
+      logger.debug("Saving saved post {} files to CDN.", savedPost.getId());
       mediumService.saveAllFiles(post.getMedia(), savedPost);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(
+        "An exception occurred while saving files from post {}",
+        savedPost.getId(),
+        e
+      );
     }
   }
 }

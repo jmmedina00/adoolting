@@ -6,6 +6,8 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.JobScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +24,22 @@ public class FileService {
   private String dataFolder, cdnDir, mediaDir, mediaFullDir, mediaSquareDir;
   private int[] expectedSizes = { 64, 128, 256, 512 };
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    FileService.class
+  );
+
   public FileService(@Value("${user.dir}") String workDirectory) {
     dataFolder = workDirectory + File.separator + "data";
     cdnDir = dataFolder + File.separator + "cdn" + File.separator;
     mediaDir = cdnDir + "media" + File.separator;
     mediaFullDir = mediaDir + "full" + File.separator;
     mediaSquareDir = mediaDir + "square" + File.separator;
+
+    logger.debug("Data folder: {}", dataFolder);
+    logger.debug("CDN folder: {}", cdnDir);
+    logger.debug("Media folder: {}", mediaDir);
+    logger.debug("Full media folder: {}", mediaFullDir);
+    logger.debug("Square media folder: {}", mediaSquareDir);
   }
 
   @PostConstruct
@@ -37,21 +49,38 @@ public class FileService {
     fullDir.mkdirs();
     squareDir.mkdirs();
 
+    logger.info("Initialized main folders");
+
     for (int size : expectedSizes) {
+      String dirPath = mediaDir + size + "/";
+
       File dir = new File(mediaDir + size + "/");
       dir.mkdirs();
+
+      logger.debug("Initialized folder {}", dirPath);
     }
   }
 
   public void saveImage(MultipartFile file, String filename) throws Exception {
     File writingTo = new File(mediaFullDir + filename);
     file.transferTo(writingTo);
+
+    logger.info(
+      "Transferring full file {} to full dir and setting up all scaling",
+      filename
+    );
     jobScheduler.enqueue(() -> setupImageScaling(filename));
   }
 
   public void cacheImageForLinkMedium(String url, Long mediumId)
     throws Exception {
     String filename = mediumId + ".png";
+
+    logger.info(
+      "Fetching url {} as {} and saving to full dir. Will setup all scaling",
+      url,
+      filename
+    );
     graphicsService.saveImageFromNetwork(
       url,
       new File(mediaFullDir + filename)
@@ -68,8 +97,18 @@ public class FileService {
       .findFirst();
 
     if (goodFile.isPresent()) {
+      logger.debug(
+        "Found thumbnail for file {}: {}",
+        filename,
+        goodFile.get().getAbsolutePath()
+      );
       return getFileUrl(goodFile.get());
     }
+
+    logger.debug(
+      "No thumbnail found for file {}. Trying square of full images instead.",
+      filename
+    );
 
     File defaultSquareFile = new File(mediaSquareDir + filename);
 
@@ -87,8 +126,15 @@ public class FileService {
     );
     graphicsService.snipImageToSquare(fullPath, squaredPath);
 
+    logger.info("Preparing convenient resizes for file {}", filename);
+
     for (int size : expectedSizes) {
       if (minDimension < size) {
+        logger.debug(
+          "Skipping resize setup for file {} to size {}.",
+          filename,
+          size
+        );
         continue;
       }
 

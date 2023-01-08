@@ -5,6 +5,8 @@ import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.page.PageManagerRepository;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,10 @@ import org.springframework.stereotype.Service;
 public class PageManagerService {
   @Autowired
   private PageManagerRepository pageManagerRepository;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PageManagerService.class
+  );
 
   public List<Page> getPagesManagedByPerson(Long personId) {
     return pageManagerRepository
@@ -35,6 +41,13 @@ public class PageManagerService {
     manager.setPage(page);
     manager.setPerson(person);
 
-    return pageManagerRepository.save(manager);
+    PageManager saved = pageManagerRepository.save(manager);
+    logger.info(
+      "Person {} has been added as manager of page {}; id={}",
+      person.getId(),
+      page.getId(),
+      saved.getId()
+    );
+    return saved;
   }
 }

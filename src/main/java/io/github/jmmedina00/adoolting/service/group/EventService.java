@@ -9,6 +9,8 @@ import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,10 @@ public class EventService {
 
   @Autowired
   private PageService pageService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    EventService.class
+  );
 
   public Event createEvent(NewEvent newEvent, Long personId)
     throws NotAuthorizedException {
@@ -51,7 +57,24 @@ public class EventService {
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
 
-    return (Event) interactionService.saveInteraction(event);
+    Event saved = (Event) interactionService.saveInteraction(event);
+
+    if (Objects.equals(personId, interactorId)) {
+      logger.info(
+        "New event (id={}) created by person {}.",
+        saved.getId(),
+        personId
+      );
+    } else {
+      logger.info(
+        "New event (id={}) created by person {} for interactor {}.",
+        saved.getId(),
+        personId,
+        interactorId
+      );
+    }
+
+    return saved;
   }
 
   public Event updateEvent(Long eventId, Long personId, NewEvent newEvent)
@@ -66,6 +89,9 @@ public class EventService {
     event.setAccessLevel(newEvent.getAccessLevel());
     event.setLocation(newEvent.getLocation());
     event.setHappeningAt(newEvent.getFinalizedDate());
+
+    logger.info("Event {} has been updated by person {}", eventId, personId);
+
     return eventRepository.save(event); // No need to go through default notif flow
   }
 }

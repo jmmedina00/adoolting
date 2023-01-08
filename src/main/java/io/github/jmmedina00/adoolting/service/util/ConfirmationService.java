@@ -7,6 +7,8 @@ import io.github.jmmedina00.adoolting.repository.util.ConfirmationTokenRepositor
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,10 @@ public class ConfirmationService {
   @Value("${confirmtoken.expires.hours}")
   private int expireInHours;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    ConfirmationService.class
+  );
+
   public ConfirmationToken createTokenforPerson(Person person) {
     ConfirmationToken token = new ConfirmationToken();
     String actualToken = UUID.randomUUID().toString();
@@ -34,6 +40,12 @@ public class ConfirmationService {
     token.setExpiresAt(expiresAt);
 
     ConfirmationToken saved = tokenRepository.save(token);
+    logger.info(
+      "Confirmation token has been created for person {}, id {}",
+      person.getId(),
+      saved.getId()
+    );
+    logger.debug("Token id {} value is {}", saved.getId(), saved.getToken());
     emailService.setUpEmailJob(saved, "confirm");
     return saved;
   }
@@ -44,6 +56,12 @@ public class ConfirmationService {
       .findToken(tokenStr)
       .orElseThrow(TokenExpiredException::new);
     token.setConfirmedAt(new Date());
+
+    logger.info(
+      "Token with id {} has been confirmed successfully",
+      token.getId()
+    );
+
     return tokenRepository.save(token);
   }
 }

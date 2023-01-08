@@ -9,6 +9,8 @@ import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,6 +40,10 @@ public class PersonService implements UserDetailsService {
   @Autowired
   private PersonStatusService statusService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    PersonService.class
+  );
+
   public Person getPerson(Long personId) {
     return personRepository.findActivePerson(personId).orElseThrow();
   }
@@ -57,6 +63,8 @@ public class PersonService implements UserDetailsService {
     info.setLastName(person.getLastName());
     info.setGender(person.getGender());
     info.setAbout(person.getAbout());
+
+    logger.info("Fetched person {} form info", personId);
     return info;
   }
 
@@ -70,6 +78,12 @@ public class PersonService implements UserDetailsService {
     if (
       passwordEncoder.matches(confirmation.getPassword(), encodedPassword)
     ) return person;
+
+    logger.debug(
+      "Supplied password for person {} is not correct. Preparing rejected value Exception",
+      personId
+    );
+
     DirectFieldBindingResult result = new DirectFieldBindingResult(
       confirmation,
       "confirm"
@@ -87,6 +101,7 @@ public class PersonService implements UserDetailsService {
     person.setAbout(info.getAbout());
 
     Person saved = personRepository.save(person);
+    logger.info("Updated person {} information", personId);
     statusService.updatePersonStatus(person, info.getStatus());
     return saved;
   }
@@ -94,11 +109,17 @@ public class PersonService implements UserDetailsService {
   public Person changePersonPassword(Long personId, String newPassword) {
     Person person = getPerson(personId);
     person.setPassword(passwordEncoder.encode(newPassword));
+
+    logger.info("Password for person {} has been updated", personId);
     return personRepository.save(person);
   }
 
   public Person createPersonFromUser(User userDto) throws BindException {
     if (isEmailAlreadyUsed(userDto.getEmail())) {
+      logger.debug(
+        "Email {} is used, preparing rejected value exception",
+        userDto.getEmail()
+      );
       DirectFieldBindingResult result = new DirectFieldBindingResult(
         userDto,
         "user"
@@ -106,6 +127,11 @@ public class PersonService implements UserDetailsService {
       result.rejectValue("email", "error.email.used");
       throw new BindException(result);
     }
+
+    logger.debug(
+      "Email {} is correct, proceeding with creation",
+      userDto.getEmail()
+    );
 
     Person person = new Person();
     person.setFirstName(userDto.getFirstName());
@@ -116,6 +142,7 @@ public class PersonService implements UserDetailsService {
     person.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
     Person saved = personRepository.save(person);
+    logger.info("New person has registered, id is {}", saved.getId());
     confirmationService.createTokenforPerson(saved);
     settingsService.createSettingsForPerson(saved);
     localeConfigService.refreshForPerson(saved.getId());
@@ -129,11 +156,14 @@ public class PersonService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String email)
     throws UsernameNotFoundException {
+    logger.debug("Loading details for person with email {}", email);
     Person person = personRepository.findByEmail(email);
     if (person == null) {
+      logger.debug("Email {} not found", email);
       throw new UsernameNotFoundException(email);
     }
 
+    logger.debug("Email {} found. Providing details", email);
     PersonDetails details = new PersonDetails(person);
     return details;
   }

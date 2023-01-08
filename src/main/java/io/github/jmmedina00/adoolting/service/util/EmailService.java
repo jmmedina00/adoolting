@@ -6,7 +6,6 @@ import io.github.jmmedina00.adoolting.entity.cache.simple.SimplePerson;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import io.github.jmmedina00.adoolting.repository.cache.EmailDataRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -65,12 +64,10 @@ public class EmailService {
     dataRepository.save(data);
     jobScheduler.enqueue(() -> prepareEmail(id, template));
     logger.info(
-      MessageFormat.format(
-        "New email set up to person {0} with template {1}, data id: {2}",
-        data.getPerson().getId(),
-        template,
-        id
-      )
+      "New email set up to person {} with template {}, data id: {}",
+      data.getPerson().getId(),
+      template,
+      id
     );
   }
 
@@ -79,10 +76,8 @@ public class EmailService {
     EmailData data = dataRepository.findById(dataId).orElse(null);
     if (data == null) {
       logger.info(
-        MessageFormat.format(
-          "Email with data {0} not found. Assuming already sent",
-          dataId
-        )
+        "Email with data {} not found. Assuming already sent",
+        dataId
       );
       return;
     }
@@ -95,11 +90,9 @@ public class EmailService {
       Optional.ofNullable(localeConfig.getLocale()).orElse("en")
     );
     logger.debug(
-      MessageFormat.format(
-        "Will send email {0} with locale {1}",
-        dataId,
-        locale.toString()
-      )
+      "Will send email {} with locale {}",
+      dataId,
+      locale.toString()
     );
 
     Context context = generateContext(locale);
@@ -125,21 +118,17 @@ public class EmailService {
       locale
     );
     logger.debug(
-      MessageFormat.format(
-        "Email {0} subject is {1}. Sending to {2}",
-        data.getId(),
-        subject,
-        person.getEmail()
-      )
+      "Email {} subject is {}. Sending to {}",
+      data.getId(),
+      subject,
+      person.getEmail()
     );
 
     sendEmail(person.getEmail(), subject, contents);
 
     logger.info(
-      MessageFormat.format(
-        "Email {0} has been sent successfully and will be deleted from cache",
-        data.getId()
-      )
+      "Email {} has been sent successfully and will be deleted from cache",
+      data.getId()
     );
     dataRepository.deleteById(dataId);
   }
