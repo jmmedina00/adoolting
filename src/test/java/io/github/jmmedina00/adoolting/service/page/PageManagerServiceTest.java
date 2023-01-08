@@ -52,6 +52,7 @@ public class PageManagerServiceTest {
     );
   }
 
+  @Test
   public void getPeopleManagingPageExtractPersonsFromRecords() {
     Page page = new Page();
     Person personFoo = new Person();
@@ -73,6 +74,7 @@ public class PageManagerServiceTest {
     );
   }
 
+  @Test
   public void addManagerForPageCreatesManagerWithSpecifiedEntities() {
     Person person = new Person();
     Page page = new Page();
@@ -84,6 +86,6 @@ public class PageManagerServiceTest {
     PageManager manager = pageManagerService.addManagerForPage(person, page);
     assertEquals(person, manager.getPerson());
     assertEquals(page, manager.getPage());
-    verify(pageManagerRepository, times(0)).save(manager);
+    verify(pageManagerRepository, times(1)).save(manager);
   }
 }
