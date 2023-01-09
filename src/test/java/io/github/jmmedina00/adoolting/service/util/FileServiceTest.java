@@ -68,7 +68,7 @@ public class FileServiceTest {
   public static void resetTestFolder() {
     FileSystemUtils.deleteRecursively(baseFolder);
     baseFolder.mkdir();
-    System.setProperty("user.dir", baseFolderPath);
+    System.setProperty("user.dir", baseFolder.getAbsolutePath());
   }
 
   @Test
@@ -242,8 +242,14 @@ public class FileServiceTest {
   )
     throws Exception {
     String filename = "saved.png";
-    String expectedFull = mediaDir + "full" + File.separator + filename;
-    String expectedSquare = mediaDir + "square" + File.separator + filename;
+    String expectedFull = new File(
+      mediaDir + "full" + File.separator + filename
+    )
+    .getAbsolutePath();
+    String expectedSquare = new File(
+      mediaDir + "square" + File.separator + filename
+    )
+    .getAbsolutePath();
 
     Mockito
       .when(graphicsService.getImageMinimumDimension(expectedFull))
@@ -262,7 +268,10 @@ public class FileServiceTest {
     }
 
     for (int size : expectedSizes) {
-      String expectedSized = mediaDir + size + File.separator + filename;
+      String expectedSized = new File(
+        mediaDir + size + File.separator + filename
+      )
+      .getAbsolutePath();
       verify(graphicsService, minDimension < size ? never() : times(1))
         .resizeSquare(expectedSquare, expectedSized, size);
     }

@@ -52,9 +52,9 @@ public class FileService {
     logger.info("Initialized main folders");
 
     for (int size : expectedSizes) {
-      String dirPath = mediaDir + size + "/";
+      String dirPath = mediaDir + size + File.separator;
 
-      File dir = new File(mediaDir + size + "/");
+      File dir = new File(mediaDir + size + File.separator);
       dir.mkdirs();
 
       logger.debug("Initialized folder {}", dirPath);
@@ -92,7 +92,7 @@ public class FileService {
     Optional<File> goodFile = Arrays
       .stream(expectedSizes)
       .filter(size -> size >= desiredSize)
-      .mapToObj(size -> new File(mediaDir + size + "/" + filename))
+      .mapToObj(size -> new File(mediaDir + size + File.separator + filename))
       .filter(file -> file.exists())
       .findFirst();
 
@@ -138,7 +138,7 @@ public class FileService {
         continue;
       }
 
-      String path = mediaDir + size + "/" + filename;
+      String path = mediaDir + size + File.separator + filename;
       jobScheduler.enqueue(
         () -> graphicsService.resizeSquare(squaredPath, path, size)
       );
