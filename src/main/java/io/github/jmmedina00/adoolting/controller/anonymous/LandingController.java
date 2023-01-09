@@ -5,6 +5,8 @@ import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -28,6 +30,10 @@ public class LandingController {
   @Autowired
   private ConfirmationService confirmationService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    LandingController.class
+  );
+
   private boolean isAuthenticated() {
     Authentication auth = SecurityContextHolder
       .getContext()
@@ -45,6 +51,7 @@ public class LandingController {
   @RequestMapping(method = RequestMethod.GET)
   public String hello(Model model) {
     if (isAuthenticated()) {
+      logger.debug("Current session is authenticated, redirecting to home.");
       return "redirect:/home";
     }
 

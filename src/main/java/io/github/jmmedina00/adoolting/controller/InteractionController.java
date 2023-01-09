@@ -9,7 +9,6 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
-import java.text.MessageFormat;
 import javax.validation.Valid;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -52,12 +51,7 @@ public class InteractionController {
     if (interaction instanceof Comment) {
       Comment comment = (Comment) interaction;
 
-      logger.debug(
-        MessageFormat.format(
-          "Fetched interaction {0} is a comment",
-          interactionId
-        )
-      );
+      logger.debug("Fetched interaction {} is a comment", interactionId);
 
       if (
         !(
@@ -67,10 +61,8 @@ public class InteractionController {
         )
       ) {
         logger.debug(
-          MessageFormat.format(
-            "{0} is not a group. Redirecting to parent interaction.",
-            comment.getReceiverInteraction().getId()
-          )
+          "{} is not a group. Redirecting to parent interaction.",
+          comment.getReceiverInteraction().getId()
         );
         return (
           "redirect:/interaction/" +
@@ -95,12 +87,7 @@ public class InteractionController {
     );
     model.addAttribute("newComment", new NewComment(personId));
     if (interaction instanceof PeopleGroup) {
-      logger.debug(
-        MessageFormat.format(
-          "{0} is a group. Fetching additional info",
-          interactionId
-        )
-      );
+      logger.debug("{} is a group. Fetching additional info", interactionId);
       model.addAttribute("groupPfp", "/pfp/group/" + interactionId);
       model.addAttribute(
         "joinRequest",

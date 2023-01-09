@@ -5,6 +5,8 @@ import io.github.jmmedina00.adoolting.dto.util.RestorePassword;
 import io.github.jmmedina00.adoolting.exception.TokenExpiredException;
 import io.github.jmmedina00.adoolting.service.util.PasswordRestoreService;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class PasswordRestoreController {
   @Autowired
   PasswordRestoreService restoreService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    PasswordRestoreController.class
+  );
 
   @RequestMapping(method = RequestMethod.GET)
   public String getSendLinkForm(Model model) {
@@ -37,7 +43,10 @@ public class PasswordRestoreController {
     try {
       restoreService.createTokenFromEmail(forgotPassword.getEmail());
     } catch (UsernameNotFoundException e) {
-      System.out.println(e.getMessage());
+      logger.error(
+        "Unable to create token, assuming provided user does not exist",
+        e
+      );
     }
 
     return "anonymous/password/confirm";

@@ -6,7 +6,10 @@ import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
+import java.util.Optional;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +27,10 @@ public class GroupOperationsController {
   @Autowired
   private JoinRequestService joinRequestService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    GroupOperationsController.class
+  );
+
   @RequestMapping(method = RequestMethod.GET)
   public String getGroupManagementForm(
     @PathVariable("id") Long groupId,
@@ -39,6 +46,14 @@ public class GroupOperationsController {
     if (!model.containsAttribute("form")) {
       model.addAttribute("form", groupService.getGroupForm(groupId));
     }
+
+    logger.debug(
+      "Current group form class: {}",
+      Optional
+        .ofNullable(model.getAttribute("form"))
+        .orElse(new NewGroup())
+        .getClass()
+    );
     return "group/manage";
   }
 

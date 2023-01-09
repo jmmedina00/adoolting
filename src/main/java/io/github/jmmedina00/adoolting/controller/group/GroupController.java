@@ -9,7 +9,10 @@ import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
+import java.util.Optional;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +33,10 @@ public class GroupController {
   @Autowired
   private PersonService personService;
 
+  private static final Logger logger = LoggerFactory.getLogger(
+    GroupController.class
+  );
+
   @RequestMapping(method = RequestMethod.GET)
   public String getNewGroupForm(
     @RequestParam(required = false, name = "event") String eventStr,
@@ -47,6 +54,14 @@ public class GroupController {
         eventStr == null ? new NewGroup() : new NewEvent()
       );
     }
+
+    logger.debug(
+      "Current group form class: {}",
+      Optional
+        .ofNullable(model.getAttribute("newGroup"))
+        .orElse(new NewGroup())
+        .getClass()
+    );
     model.addAttribute("interactors", controlledInteractors);
 
     return "group/new";
