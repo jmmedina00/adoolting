@@ -21,6 +21,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
@@ -51,6 +52,9 @@ public class PeopleGroupServiceTest {
   @MockBean
   private InteractionService interactionService;
 
+  @MockBean
+  private InteractorService interactorService;
+
   @Autowired
   private PeopleGroupService groupService;
 
@@ -77,6 +81,51 @@ public class PeopleGroupServiceTest {
       Exception.class,
       () -> {
         groupService.getGroup(1L);
+      }
+    );
+  }
+
+  @Test
+  public void getGroupManagedByPersonChecksInInteractorServiceBeforeReturningGroup()
+    throws NotAuthorizedException {
+    PeopleGroup group = new PeopleGroup();
+    Person person = new Person();
+    person.setId(3L);
+    group.setInteractor(person);
+
+    Mockito
+      .when(groupRepository.findActiveGroup(1L))
+      .thenReturn(Optional.of(group));
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(3L, 3L))
+      .thenReturn(person);
+
+    PeopleGroup returned = groupService.getGroupManagedByPerson(1L, 3L);
+    assertEquals(group, returned);
+
+    verify(interactorService, times(1))
+      .getRepresentableInteractorByPerson(3L, 3L);
+  }
+
+  @Test
+  public void getGroupManagedByPersonThrowsIfPersonNotAllowedToRepresentGroupsInteractor()
+    throws NotAuthorizedException {
+    PeopleGroup group = new PeopleGroup();
+    Person person = new Person();
+    person.setId(3L);
+    group.setInteractor(person);
+
+    Mockito
+      .when(groupRepository.findActiveGroup(1L))
+      .thenReturn(Optional.of(group));
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(3L, 3L))
+      .thenThrow(NotAuthorizedException.class);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        groupService.getGroupManagedByPerson(1L, 3L);
       }
     );
   }
@@ -129,7 +178,6 @@ public class PeopleGroupServiceTest {
       .findActiveGroupsByInteractorList(List.of(98L, 125L, 200L));
   }
 
-  // TODO: test when permission check fails
   @Test
   public void updateGroupUpdatesGroupWithSpecifiedDetailsAndSavesThroughRepository()
     throws NotAuthorizedException {
@@ -149,6 +197,9 @@ public class PeopleGroupServiceTest {
     Mockito
       .when(groupRepository.save(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(1L, 1L))
+      .thenReturn(person);
 
     PeopleGroup updated = groupService.updateGroup(2L, 1L, newGroup);
 
@@ -215,6 +266,9 @@ public class PeopleGroupServiceTest {
       .when(personService.getPersonWithMatchingPassword(eq(5L), any()))
       .thenReturn(person);
     Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(5L, 5L))
+      .thenReturn(person);
+    Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -229,7 +283,6 @@ public class PeopleGroupServiceTest {
     verify(groupRepository, never()).save(group);
   }
 
-  // TODO: test when permission check fails
   @Test
   public void deleteGroupThrowsExceptionCreatedByPersonService()
     throws Exception {

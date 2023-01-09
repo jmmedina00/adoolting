@@ -7,7 +7,6 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.EventRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +27,6 @@ public class EventService {
   @Autowired
   private InteractionService interactionService;
 
-  @Autowired
-  private PageService pageService;
-
   private static final Logger logger = LoggerFactory.getLogger(
     EventService.class
   );
@@ -39,16 +35,10 @@ public class EventService {
     throws NotAuthorizedException {
     Long interactorId = newEvent.getCreateAs();
 
-    if (
-      !(
-        Objects.equals(personId, interactorId) ||
-        pageService.isPageManagedByPerson(interactorId, personId)
-      )
-    ) {
-      throw new NotAuthorizedException();
-    }
-
-    Interactor interactor = interactorService.getInteractor(interactorId);
+    Interactor interactor = interactorService.getRepresentableInteractorByPerson(
+      interactorId,
+      personId
+    );
     Event event = new Event();
     event.setName(newEvent.getName());
     event.setDescription(newEvent.getDescription());
@@ -79,11 +69,10 @@ public class EventService {
 
   public Event updateEvent(Long eventId, Long personId, NewEvent newEvent)
     throws NotAuthorizedException {
-    if (!groupService.isGroupManagedByPerson(eventId, personId)) {
-      throw new NotAuthorizedException();
-    }
-
-    Event event = eventRepository.findById(eventId).orElseThrow();
+    Event event = (Event) groupService.getGroupManagedByPerson(
+      eventId,
+      personId
+    );
     event.setName(newEvent.getName());
     event.setDescription(newEvent.getDescription());
     event.setAccessLevel(newEvent.getAccessLevel());

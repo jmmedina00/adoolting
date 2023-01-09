@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.service.interaction;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,22 +52,35 @@ public class PostServiceTest {
   @Autowired
   private PostService postService;
 
+  private Answer<Interactor> generateInteractor() {
+    return new Answer<Interactor>() {
+
+      public Interactor answer(InvocationOnMock invocation) throws Throwable {
+        Long id = invocation.getArgument(0);
+        Interactor interactor = new Person();
+        interactor.setId(id);
+        return interactor;
+      }
+    };
+  }
+
   @BeforeEach
-  public void setUpMocks() {
+  public void setUpMocks() throws NotAuthorizedException {
     Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
 
     Mockito
       .when(interactorService.getInteractor(anyLong()))
-      .thenAnswer(
-        invocation -> {
-          Long id = invocation.getArgument(0);
-          Interactor interactor = new Person();
-          interactor.setId(id);
-          return interactor;
-        }
-      );
+      .thenAnswer(generateInteractor());
+    Mockito
+      .when(
+        interactorService.getRepresentableInteractorByPerson(
+          anyLong(),
+          anyLong()
+        )
+      )
+      .thenAnswer(generateInteractor());
   }
 
   @Test
@@ -79,6 +95,26 @@ public class PostServiceTest {
     assertEquals(1L, post.getInteractor().getId());
     assertEquals(2L, post.getReceiverInteractor().getId());
     assertEquals(content, post.getContent());
+  }
+
+  @Test
+  public void postOnProfileThrowsIfTargetedInteractorIsNotRepresentableByPerson()
+    throws NotAuthorizedException {
+    String content = "This is content";
+    NewPost newPost = new NewPost();
+    newPost.setPostAs(10L);
+    newPost.setContent(content);
+
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(10L, 1L))
+      .thenThrow(NotAuthorizedException.class);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        postService.postOnProfile(1L, 2L, newPost);
+      }
+    );
   }
 
   @Test

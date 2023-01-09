@@ -10,12 +10,12 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +35,26 @@ public class PeopleGroupService {
   @Autowired
   private InteractionService interactionService;
 
+  @Autowired
+  private InteractorService interactorService;
+
   private static final Logger logger = LoggerFactory.getLogger(
     PeopleGroupService.class
   );
 
   public PeopleGroup getGroup(Long groupId) {
     return groupRepository.findActiveGroup(groupId).orElseThrow();
+  }
+
+  public PeopleGroup getGroupManagedByPerson(Long groupId, Long personId)
+    throws NotAuthorizedException {
+    PeopleGroup group = getGroup(groupId);
+    interactorService.getRepresentableInteractorByPerson(
+      group.getInteractor().getId(),
+      personId
+    );
+
+    return group;
   }
 
   public PeopleGroup createGroup(NewGroup newGroup, Long personId) {
@@ -79,11 +93,7 @@ public class PeopleGroupService {
     NewGroup newGroup
   )
     throws NotAuthorizedException {
-    if (!isGroupManagedByPerson(groupId, personId)) {
-      throw new NotAuthorizedException();
-    }
-
-    PeopleGroup group = getGroup(groupId);
+    PeopleGroup group = getGroupManagedByPerson(groupId, personId);
     group.setName(newGroup.getName());
     group.setDescription(newGroup.getDescription());
     group.setAccessLevel(newGroup.getAccessLevel());
@@ -122,11 +132,7 @@ public class PeopleGroupService {
       confirmation
     );
 
-    if (!isGroupManagedByPerson(groupId, person.getId())) {
-      throw new NotAuthorizedException();
-    }
-
-    PeopleGroup group = getGroup(groupId);
+    PeopleGroup group = getGroupManagedByPerson(groupId, person.getId());
     group.setDeletedAt(new Date());
     logger.info(
       "Group {} has been deleted by person {}",
@@ -134,21 +140,5 @@ public class PeopleGroupService {
       attemptingPersonId
     );
     return (PeopleGroup) interactionService.saveInteraction(group);
-  }
-
-  // Not logging this yet. Potentially to be refactored.
-  public boolean isGroupManagedByPerson(Long groupId, Long personId) {
-    try {
-      PeopleGroup group = getGroup(groupId);
-      Interactor interactor = group.getInteractor();
-
-      if (interactor instanceof Person) {
-        return Objects.equals(interactor.getId(), personId);
-      }
-
-      return pageService.isPageManagedByPerson(interactor.getId(), personId);
-    } catch (Exception e) {
-      return false;
-    }
   }
 }

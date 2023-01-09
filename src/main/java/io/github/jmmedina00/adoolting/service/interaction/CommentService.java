@@ -10,9 +10,7 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +32,6 @@ public class CommentService {
   @Autowired
   private InteractionService interactionService;
 
-  @Autowired
-  private PageService pageService;
-
   private static final Logger logger = LoggerFactory.getLogger(
     CommentService.class
   );
@@ -55,17 +50,10 @@ public class CommentService {
   )
     throws NotAuthorizedException {
     Long interactorId = newComment.getPostAs();
-
-    if (
-      !(
-        Objects.equals(personId, interactorId) ||
-        pageService.isPageManagedByPerson(interactorId, personId)
-      )
-    ) {
-      throw new NotAuthorizedException();
-    }
-
-    Interactor interactor = interactorService.getInteractor(interactorId);
+    Interactor interactor = interactorService.getRepresentableInteractorByPerson(
+      interactorId,
+      personId
+    );
     Interaction interaction = interactionService.getInteraction(interactionId);
 
     Interactor author = interaction.getInteractor();

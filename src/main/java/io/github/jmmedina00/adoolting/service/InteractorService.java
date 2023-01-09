@@ -2,10 +2,12 @@ package io.github.jmmedina00.adoolting.service;
 
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractorRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,33 @@ public class InteractorService {
 
   public Interactor getInteractor(Long interactorId) {
     return interactorRepository.findById(interactorId).orElseThrow();
+  }
+
+  public Interactor getRepresentableInteractorByPerson(
+    Long interactorId,
+    Long personId
+  )
+    throws NotAuthorizedException {
+    Person person;
+    Interactor interactor;
+
+    try {
+      person = (Person) getInteractor(personId);
+      interactor = getInteractor(interactorId);
+    } catch (Exception e) {
+      throw new NotAuthorizedException();
+    }
+
+    if (interactor instanceof Person) {
+      if (Objects.equals(person.getId(), interactor.getId())) return interactor;
+      throw new NotAuthorizedException();
+    }
+
+    if (!pageService.isPageManagedByPerson(interactorId, personId)) {
+      throw new NotAuthorizedException();
+    }
+
+    return interactor;
   }
 
   public List<Interactor> getRepresentableInteractorsByPerson(

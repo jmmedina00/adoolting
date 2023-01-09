@@ -9,7 +9,6 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -27,9 +26,6 @@ public class PostService {
 
   @Autowired
   private InteractionService interactionService;
-
-  @Autowired
-  private PageService pageService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     PostService.class
@@ -60,21 +56,15 @@ public class PostService {
   )
     throws NotAuthorizedException {
     Long interactorId = newPost.getPostAs();
-
-    if (
-      !(
-        Objects.equals(personId, interactorId) ||
-        pageService.isPageManagedByPerson(interactorId, personId)
-      )
-    ) {
-      throw new NotAuthorizedException();
-    }
+    Interactor interactor = interactorService.getRepresentableInteractorByPerson(
+      interactorId,
+      personId
+    );
 
     if (Objects.equals(interactorId, receiverInteractorId)) {
       return createPost(interactorId, newPost);
     }
 
-    Interactor interactor = interactorService.getInteractor(interactorId);
     Interactor receiverInteractor = interactorService.getInteractor(
       receiverInteractorId
     );

@@ -105,7 +105,9 @@ public class ProfilePictureServiceTest {
   public void setProfilePictureOfInteractorCreatesEmptyPostForPfp()
     throws Exception {
     Person person = new Person();
-    Mockito.when(interactorService.getInteractor(anyLong())).thenReturn(person);
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(1L, 1L))
+      .thenReturn(person);
 
     ProfilePictureFile pfpFile = new ProfilePictureFile();
     pfpFile.setFile(new MockMultipartFile("test", new byte[] {  }));
@@ -125,14 +127,29 @@ public class ProfilePictureServiceTest {
   }
 
   @Test
+  public void setProfilePictureOfInteractorThrowsWhenPersonIsUnauthorized()
+    throws NotAuthorizedException {
+    ProfilePictureFile pfpFile = new ProfilePictureFile();
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(1L, 1L))
+      .thenThrow(NotAuthorizedException.class);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        pfpService.setProfilePictureOfInteractor(1L, 1L, pfpFile);
+      }
+    );
+  }
+
+  @Test
   public void setProfilePictureOfGroupCreatesEmptyCommentForPfp()
     throws Exception {
     PeopleGroup group = new PeopleGroup();
     group.setInteractor(new Person());
-    Mockito.when(groupService.getGroup(anyLong())).thenReturn(group);
     Mockito
-      .when(groupService.isGroupManagedByPerson(anyLong(), anyLong()))
-      .thenReturn(true);
+      .when(groupService.getGroupManagedByPerson(1L, 1L))
+      .thenReturn(group);
 
     ProfilePictureFile pfpFile = new ProfilePictureFile();
     pfpFile.setFile(new MockMultipartFile("test", new byte[] {  }));
@@ -149,10 +166,11 @@ public class ProfilePictureServiceTest {
   }
 
   @Test
-  public void setProfilePictureOfGroupThrowsWhenPersonIsUnauthorized() {
+  public void setProfilePictureOfGroupThrowsWhenPersonIsUnauthorized()
+    throws NotAuthorizedException {
     Mockito
-      .when(groupService.isGroupManagedByPerson(anyLong(), anyLong()))
-      .thenReturn(false); // TODO: do this test for interactor pfp too
+      .when(groupService.getGroupManagedByPerson(1L, 1L))
+      .thenThrow(NotAuthorizedException.class);
 
     ProfilePictureFile pfpFile = new ProfilePictureFile();
 

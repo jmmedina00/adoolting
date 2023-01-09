@@ -15,7 +15,6 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -43,15 +42,13 @@ public class CommentServiceTest {
   @MockBean
   private InteractionService interactionService;
 
-  @MockBean
-  private PageService pageService;
-
   @Autowired
   private CommentService commentService;
 
+  // TODO: properly test this service
+
   @Test
   public void createCommentCreatesCommentWithPayloadData() throws Exception {
-    // Authorization checks to be implemented somewhere else, skipping testing
     Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
@@ -77,7 +74,7 @@ public class CommentServiceTest {
       );
 
     Mockito
-      .when(interactorService.getInteractor(any()))
+      .when(interactorService.getRepresentableInteractorByPerson(any(), any()))
       .thenAnswer(
         invocation -> {
           Long id = invocation.getArgument(0);

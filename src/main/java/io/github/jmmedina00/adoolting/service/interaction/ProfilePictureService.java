@@ -6,13 +6,11 @@ import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.interaction.ProfilePicture;
 import io.github.jmmedina00.adoolting.exception.MediumNotFoundException;
-import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.ProfilePictureRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +31,6 @@ public class ProfilePictureService {
 
   @Autowired
   private InteractionService interactionService;
-
-  @Autowired
-  private PageService pageService;
 
   @Autowired
   private PeopleGroupService groupService;
@@ -68,17 +63,16 @@ public class ProfilePictureService {
     ProfilePictureFile pfpFile
   )
     throws Exception {
-    if (
-      !isPersonAuthorizedToChangeInteractor(interactorId, attemptingPersonId)
-    ) {
-      throw new NotAuthorizedException();
-    }
-
     MultipartFile file = pfpFile.getFile();
 
     Post post = new Post();
     post.setContent("");
-    post.setInteractor(interactorService.getInteractor(interactorId));
+    post.setInteractor(
+      interactorService.getRepresentableInteractorByPerson(
+        interactorId,
+        attemptingPersonId
+      )
+    );
     interactionService.saveInteraction(post);
 
     ProfilePicture profilePicture = new ProfilePicture();
@@ -112,11 +106,10 @@ public class ProfilePictureService {
     ProfilePictureFile pfpFile
   )
     throws Exception {
-    if (!groupService.isGroupManagedByPerson(groupId, attemptingPersonId)) {
-      throw new NotAuthorizedException();
-    }
-
-    PeopleGroup group = groupService.getGroup(groupId);
+    PeopleGroup group = groupService.getGroupManagedByPerson(
+      groupId,
+      attemptingPersonId
+    );
     MultipartFile file = pfpFile.getFile();
 
     Comment comment = new Comment();
@@ -138,15 +131,5 @@ public class ProfilePictureService {
       profilePicture.getId()
     );
     return profilePicture;
-  }
-
-  private boolean isPersonAuthorizedToChangeInteractor(
-    Long interactorId,
-    Long personId
-  ) {
-    return (
-      Objects.equals(interactorId, personId) ||
-      pageService.isPageManagedByPerson(interactorId, personId)
-    );
   }
 }

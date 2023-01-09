@@ -48,12 +48,12 @@ public class JoinRequestServiceTest {
     throws NotAuthorizedException {
     PeopleGroup group = new PeopleGroup();
     Person creator = new Person();
+    creator.setId(20L);
+
     group.setInteractor(creator);
     Person requester = new Person();
+    requester.setId(24L);
 
-    Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 24L))
-      .thenReturn(false);
     Mockito.when(groupService.getGroup(12L)).thenReturn(group);
     Mockito.when(interactorService.getInteractor(24L)).thenReturn(requester);
     Mockito
@@ -75,9 +75,6 @@ public class JoinRequestServiceTest {
     JoinRequest existingRequest = new JoinRequest();
 
     Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 24L))
-      .thenReturn(false);
-    Mockito
       .when(joinRequestRepository.findExistingForInteractorsAndGroup(24L, 12L))
       .thenReturn(existingRequest);
 
@@ -91,15 +88,20 @@ public class JoinRequestServiceTest {
   }
 
   @Test
-  public void joinGroupThrowsIfCreatorOrManagerTriesToJoinGroup() {
-    Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 24L))
-      .thenReturn(true);
+  public void joinGroupThrowsIfCreatorTriesToJoinGroup() {
+    Person creator = new Person();
+    creator.setId(20L);
+
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(creator);
+
+    Mockito.when(interactorService.getInteractor(20L)).thenReturn(creator);
+    Mockito.when(groupService.getGroup(12L)).thenReturn(group);
 
     assertThrows(
       NotAuthorizedException.class,
       () -> {
-        joinRequestService.joinGroup(24L, 12L);
+        joinRequestService.joinGroup(20L, 12L);
       }
     );
   }
@@ -111,12 +113,11 @@ public class JoinRequestServiceTest {
     Person invited = new Person();
     PeopleGroup group = new PeopleGroup();
 
-    Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 35L))
-      .thenReturn(true);
     Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
     Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
-    Mockito.when(groupService.getGroup(12L)).thenReturn(group);
+    Mockito
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
     Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
@@ -136,10 +137,11 @@ public class JoinRequestServiceTest {
     Person host = new Person();
     Person invited = new Person();
     JoinRequest existing = new JoinRequest();
+    PeopleGroup group = new PeopleGroup();
 
     Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 35L))
-      .thenReturn(true);
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
     Mockito
       .when(joinRequestRepository.findExistingForInteractorsAndGroup(24L, 12L))
       .thenReturn(existing);
@@ -153,13 +155,15 @@ public class JoinRequestServiceTest {
   }
 
   @Test
-  public void inviteToGroupCanOnlyInvitePersonToGroup() {
+  public void inviteToGroupCanOnlyInvitePersonToGroup()
+    throws NotAuthorizedException {
     Person host = new Person();
     Page invited = new Page();
+    PeopleGroup group = new PeopleGroup();
 
     Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 35L))
-      .thenReturn(true);
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
     Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
     Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
 
@@ -172,10 +176,11 @@ public class JoinRequestServiceTest {
   }
 
   @Test
-  public void inviteToGroupMayOnlyBeUsedByGroupManager() {
+  public void inviteToGroupMayOnlyBeUsedByGroupManager()
+    throws NotAuthorizedException {
     Mockito
-      .when(groupService.isGroupManagedByPerson(12L, 35L))
-      .thenReturn(true);
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenThrow(NotAuthorizedException.class);
 
     assertThrows(
       NotAuthorizedException.class,

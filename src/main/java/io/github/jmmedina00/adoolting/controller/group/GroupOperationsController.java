@@ -37,8 +37,13 @@ public class GroupOperationsController {
     Model model
   )
     throws NotAuthorizedException {
-    precheckFormAccess(groupId);
-    model.addAttribute("group", groupService.getGroup(groupId));
+    model.addAttribute(
+      "group",
+      groupService.getGroupManagedByPerson(
+        groupId,
+        AuthenticatedPerson.getPersonId()
+      )
+    );
     model.addAttribute(
       "cInteractions",
       joinRequestService.getExistingForGroup(groupId)
@@ -75,8 +80,13 @@ public class GroupOperationsController {
   @RequestMapping(method = RequestMethod.GET, value = "/delete")
   public String showDeleteForm(@PathVariable("id") Long groupId, Model model)
     throws NotAuthorizedException {
-    precheckFormAccess(groupId);
-    model.addAttribute("group", groupService.getGroup(groupId));
+    model.addAttribute(
+      "group",
+      groupService.getGroupManagedByPerson(
+        groupId,
+        AuthenticatedPerson.getPersonId()
+      )
+    );
     if (!model.containsAttribute("confirm")) {
       model.addAttribute("confirm", new SecureDeletion());
     }
@@ -95,16 +105,5 @@ public class GroupOperationsController {
       confirmation
     );
     return "redirect:/profile";
-  }
-
-  private void precheckFormAccess(Long groupId) throws NotAuthorizedException {
-    if (
-      !groupService.isGroupManagedByPerson(
-        groupId,
-        AuthenticatedPerson.getPersonId()
-      )
-    ) {
-      throw new NotAuthorizedException();
-    }
   }
 }

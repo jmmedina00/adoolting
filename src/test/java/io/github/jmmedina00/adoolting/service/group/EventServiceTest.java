@@ -18,7 +18,6 @@ import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
@@ -50,8 +49,6 @@ public class EventServiceTest {
   @Autowired
   private EventService eventService;
 
-  // TODO: test when permission check fails
-
   NewEvent newEvent = new NewEvent();
 
   @BeforeEach
@@ -70,7 +67,9 @@ public class EventServiceTest {
   public void createEventPopulatesEventWithSpecifiedDetailsAndSavesThroughInteractionService()
     throws NotAuthorizedException {
     Person person = new Person();
-    Mockito.when(interactorService.getInteractor(1L)).thenReturn(person);
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(1L, 1L))
+      .thenReturn(person);
     Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
@@ -88,13 +87,29 @@ public class EventServiceTest {
   }
 
   @Test
+  public void createEventThrowsWhenPersonIsNotAuthorizedToRepresentInteractorCreatingIt()
+    throws NotAuthorizedException {
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(1L, 2L))
+      .thenThrow(NotAuthorizedException.class);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        eventService.createEvent(newEvent, 2L);
+      }
+    );
+  }
+
+  @Test
   public void updateEventSavesEventToEventRepository()
     throws NotAuthorizedException {
     Event event = new Event();
     event.setName("null");
 
-    Mockito.when(groupService.isGroupManagedByPerson(1L, 10L)).thenReturn(true);
-    Mockito.when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+    Mockito
+      .when(groupService.getGroupManagedByPerson(1L, 10L))
+      .thenReturn(event);
     Mockito
       .when(eventRepository.save(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
@@ -112,10 +127,11 @@ public class EventServiceTest {
   }
 
   @Test
-  public void updateEventThrowsIfNotManagedByAttemptingPerson() {
+  public void updateEventThrowsIfNotManagedByAttemptingPerson()
+    throws NotAuthorizedException {
     Mockito
-      .when(groupService.isGroupManagedByPerson(1L, 24L))
-      .thenReturn(false);
+      .when(groupService.getGroupManagedByPerson(1L, 24L))
+      .thenThrow(NotAuthorizedException.class);
 
     assertThrows(
       NotAuthorizedException.class,

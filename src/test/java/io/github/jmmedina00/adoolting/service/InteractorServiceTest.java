@@ -2,10 +2,13 @@ package io.github.jmmedina00.adoolting.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractorRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
@@ -54,6 +57,93 @@ public class InteractorServiceTest {
       NoSuchElementException.class,
       () -> {
         interactorService.getInteractor(4L);
+      }
+    );
+  }
+
+  @Test
+  public void getRepresentableInteractorByPersonGetsPersonIfIdsMatch()
+    throws NotAuthorizedException {
+    Person person = new Person();
+    person.setId(3L);
+
+    Mockito
+      .when(interactorRepository.findById(3L))
+      .thenReturn(Optional.of(person));
+
+    Interactor interactor = interactorService.getRepresentableInteractorByPerson(
+      3L,
+      3L
+    );
+    assertEquals(person, interactor);
+  }
+
+  @Test
+  public void getRepresentableInteractorByPersonThrowsIfPersonAttemptedToRepresentDoesNotMatchPersonAttempting() {
+    Person foo = new Person();
+    foo.setId(3L);
+    Person bar = new Person();
+    bar.setId(4L);
+
+    Mockito
+      .when(interactorRepository.findById(3L))
+      .thenReturn(Optional.of(foo));
+    Mockito
+      .when(interactorRepository.findById(4L))
+      .thenReturn(Optional.of(bar));
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        interactorService.getRepresentableInteractorByPerson(4L, 3L);
+      }
+    );
+  }
+
+  @Test
+  public void getRepresentableInteractorByPersonChecksInPageServiceBeforeLettingPersonRepresentIt()
+    throws NotAuthorizedException {
+    Person person = new Person();
+    person.setId(3L);
+    Page page = new Page();
+    page.setId(4L);
+
+    Mockito
+      .when(interactorRepository.findById(3L))
+      .thenReturn(Optional.of(person));
+    Mockito
+      .when(interactorRepository.findById(4L))
+      .thenReturn(Optional.of(page));
+    Mockito.when(pageService.isPageManagedByPerson(4L, 3L)).thenReturn(true);
+
+    Interactor interactor = interactorService.getRepresentableInteractorByPerson(
+      4L,
+      3L
+    );
+    assertEquals(page, interactor);
+
+    verify(pageService, times(1)).isPageManagedByPerson(4L, 3L);
+  }
+
+  @Test
+  public void getRepresentableInteractorByPersonThrowsIfPageIsNotRepresentableByPerson() {
+    Person person = new Person();
+    person.setId(3L);
+    Page page = new Page();
+    page.setId(4L);
+
+    Mockito
+      .when(interactorRepository.findById(3L))
+      .thenReturn(Optional.of(person));
+    Mockito
+      .when(interactorRepository.findById(4L))
+      .thenReturn(Optional.of(page));
+    Mockito.when(pageService.isPageManagedByPerson(4L, 3L)).thenReturn(false);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        interactorService.getRepresentableInteractorByPerson(4L, 3L);
       }
     );
   }
