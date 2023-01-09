@@ -1,7 +1,9 @@
 package io.github.jmmedina00.adoolting.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -76,6 +78,7 @@ public class InteractorServiceTest {
       3L
     );
     assertEquals(person, interactor);
+    assertTrue(interactorService.isInteractorRepresentableByPerson(3L, 3L));
   }
 
   @Test
@@ -98,6 +101,7 @@ public class InteractorServiceTest {
         interactorService.getRepresentableInteractorByPerson(4L, 3L);
       }
     );
+    assertFalse(interactorService.isInteractorRepresentableByPerson(4L, 3L));
   }
 
   @Test
@@ -123,6 +127,7 @@ public class InteractorServiceTest {
     assertEquals(page, interactor);
 
     verify(pageService, times(1)).isPageManagedByPerson(4L, 3L);
+    assertTrue(interactorService.isInteractorRepresentableByPerson(4L, 3L));
   }
 
   @Test
@@ -146,6 +151,7 @@ public class InteractorServiceTest {
         interactorService.getRepresentableInteractorByPerson(4L, 3L);
       }
     );
+    assertFalse(interactorService.isInteractorRepresentableByPerson(4L, 3L));
   }
 
   @Test

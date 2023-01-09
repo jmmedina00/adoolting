@@ -27,7 +27,7 @@
   ></div>
 </div>
 <div
-  th:if="${interaction.interactor.id == #authentication.principal.person.id}"
+  th:if="${@interactionService.isInteractionDeletableByPerson(interaction.id, #authentication.principal.person.id)}"
 >
   <form
     th:action="@{/interaction/{id}/delete(id=${interaction.id})}"

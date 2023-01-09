@@ -23,6 +23,18 @@ public class InteractorService {
     return interactorRepository.findById(interactorId).orElseThrow();
   }
 
+  public boolean isInteractorRepresentableByPerson(
+    Long interactorId,
+    Long personId
+  ) {
+    try {
+      getRepresentableInteractorByPerson(interactorId, personId);
+      return true;
+    } catch (NotAuthorizedException e) {
+      return false;
+    }
+  }
+
   public Interactor getRepresentableInteractorByPerson(
     Long interactorId,
     Long personId
