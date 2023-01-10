@@ -9,7 +9,6 @@ import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,21 @@ public class JoinRequestService {
 
   public JoinRequest joinGroup(Long personId, Long groupId)
     throws NotAuthorizedException {
+    Interactor person = (Person) interactorService.getInteractor(personId);
+    PeopleGroup group = groupService.getGroup(groupId);
+    Interactor groupCreator = group.getInteractor();
+
+    if (
+      interactorService.isInteractorRepresentableByPerson(
+        groupCreator.getId(),
+        personId
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
+
     JoinRequest existing = getJoinRequestForPersonAndGroup(personId, groupId);
+
     if (existing != null) {
       logger.debug(
         "A join request for person {} and group {} already exists.",
@@ -57,13 +70,6 @@ public class JoinRequestService {
         groupId
       );
       return existing;
-    }
-
-    Interactor person = (Person) interactorService.getInteractor(personId);
-    PeopleGroup group = groupService.getGroup(groupId);
-
-    if (Objects.equals(person.getId(), group.getInteractor().getId())) {
-      throw new NotAuthorizedException();
     }
 
     logger.info("Person {} wants to join group {}", personId, groupId);
@@ -81,8 +87,18 @@ public class JoinRequestService {
       hostPersonId
     );
 
+    Interactor groupCreator = group.getInteractor();
     Interactor host = interactorService.getInteractor(hostPersonId);
     Interactor invited = interactorService.getInteractor(invitedPersonId);
+
+    if (
+      interactorService.isInteractorRepresentableByPerson(
+        groupCreator.getId(),
+        invitedPersonId
+      )
+    ) {
+      throw new NotAuthorizedException();
+    }
 
     JoinRequest existing = getJoinRequestForPersonAndGroup(
       invitedPersonId,
