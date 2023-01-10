@@ -19,7 +19,7 @@ public class PersonLocaleConfigService {
 
   public PersonLocaleConfig refreshForPerson(Long personId) {
     PersonLocaleConfig config = getConfig(personId);
-    String localeString = LocaleContextHolder.getLocale().toString();
+    String localeString = LocaleContextHolder.getLocale().getLanguage();
     config.setLocale(localeString);
 
     logger.info(
@@ -32,7 +32,7 @@ public class PersonLocaleConfigService {
 
   public PersonLocaleConfig updateUTCOffset(Long personId, int offsetFromUTC) {
     PersonLocaleConfig config = getConfig(personId);
-    String localeString = LocaleContextHolder.getLocale().toString();
+    String localeString = LocaleContextHolder.getLocale().getLanguage();
     config.setLocale(localeString);
     config.setOffsetFromUTC(offsetFromUTC);
 

@@ -7,10 +7,17 @@ import static org.mockito.ArgumentMatchers.any;
 import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
 import io.github.jmmedina00.adoolting.repository.cache.PersonLocaleConfigRepository;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +35,18 @@ public class PersonLocaleConfigServiceTest {
 
   @Autowired
   private PersonLocaleConfigService configService;
+
+  MockedStatic<LocaleContextHolder> utilities;
+
+  @BeforeEach
+  public void initializeLocaleContext() {
+    utilities = Mockito.mockStatic(LocaleContextHolder.class);
+  }
+
+  @AfterEach
+  public void closeLocaleContext() {
+    utilities.closeOnDemand();
+  }
 
   @Test
   public void getConfigGetsConfigFromRepositoryByPersonId() {
@@ -54,8 +73,27 @@ public class PersonLocaleConfigServiceTest {
     assertNull(config.getLocale());
   }
 
-  @Test
-  public void refreshForPersonOnlyChangesLocaleInConfig() {
+  private static Stream<Arguments> localesAndExpectedOutcomes() {
+    return List
+      .of(
+        Locale.CANADA,
+        Locale.CANADA_FRENCH,
+        Locale.US,
+        Locale.UK,
+        Locale.CHINA,
+        Locale.ITALY,
+        Locale.JAPAN
+      )
+      .stream()
+      .map(locale -> Arguments.of(locale, locale.getLanguage()));
+  }
+
+  @ParameterizedTest
+  @MethodSource("localesAndExpectedOutcomes")
+  public void refreshForPersonOnlyChangesLocaleInConfig(
+    Locale locale,
+    String expectedOutcome
+  ) {
     PersonLocaleConfig config = new PersonLocaleConfig();
     config.setLocale("old");
     config.setOffsetFromUTC(-60);
@@ -64,20 +102,20 @@ public class PersonLocaleConfigServiceTest {
     Mockito
       .when(configRepository.save(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
-    MockedStatic<LocaleContextHolder> utilities = Mockito.mockStatic(
-      LocaleContextHolder.class
-    );
-    utilities.when(LocaleContextHolder::getLocale).thenReturn(Locale.ENGLISH);
+
+    utilities.when(LocaleContextHolder::getLocale).thenReturn(locale);
 
     PersonLocaleConfig personConfig = configService.refreshForPerson(1L);
     assertEquals(-60, personConfig.getOffsetFromUTC());
-    assertEquals(Locale.ENGLISH.toString(), personConfig.getLocale());
-
-    utilities.closeOnDemand();
+    assertEquals(expectedOutcome, personConfig.getLocale());
   }
 
-  @Test
-  public void updateUTCOffsetChangesBothOffsetAndCurrentLocale() {
+  @ParameterizedTest
+  @MethodSource("localesAndExpectedOutcomes")
+  public void updateUTCOffsetChangesBothOffsetAndCurrentLocale(
+    Locale locale,
+    String expectedOutcome
+  ) {
     PersonLocaleConfig config = new PersonLocaleConfig();
     config.setLocale("old");
     config.setOffsetFromUTC(-60);
@@ -86,15 +124,10 @@ public class PersonLocaleConfigServiceTest {
     Mockito
       .when(configRepository.save(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
-    MockedStatic<LocaleContextHolder> utilities = Mockito.mockStatic(
-      LocaleContextHolder.class
-    );
-    utilities.when(LocaleContextHolder::getLocale).thenReturn(Locale.ENGLISH);
+    utilities.when(LocaleContextHolder::getLocale).thenReturn(locale);
 
     PersonLocaleConfig personConfig = configService.updateUTCOffset(1L, 120);
     assertEquals(120, personConfig.getOffsetFromUTC());
-    assertEquals(Locale.ENGLISH.toString(), personConfig.getLocale());
-
-    utilities.closeOnDemand();
+    assertEquals(expectedOutcome, personConfig.getLocale());
   }
 }
