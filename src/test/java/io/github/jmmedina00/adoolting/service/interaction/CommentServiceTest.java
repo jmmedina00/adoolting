@@ -2,15 +2,17 @@ package io.github.jmmedina00.adoolting.service.interaction;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
-import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.interaction.Post;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
@@ -45,44 +47,21 @@ public class CommentServiceTest {
   @Autowired
   private CommentService commentService;
 
-  // TODO: properly test this service
-
   @Test
   public void createCommentCreatesCommentWithPayloadData() throws Exception {
     Mockito
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
 
-    Mockito
-      .when(commentRepository.save(any()))
-      .thenAnswer(
-        invocation -> {
-          return invocation.getArgument(0);
-        }
-      );
+    Person commenter = new Person();
+    Person originalCreator = new Person();
+    Post post = new Post();
+    post.setInteractor(originalCreator);
 
     Mockito
-      .when(interactionService.getInteraction(any()))
-      .thenAnswer(
-        invocation -> {
-          Long id = invocation.getArgument(0);
-          Interaction interaction = new Interaction();
-          interaction.setId(id);
-          interaction.setInteractor(new Person());
-          return interaction;
-        }
-      );
-
-    Mockito
-      .when(interactorService.getRepresentableInteractorByPerson(any(), any()))
-      .thenAnswer(
-        invocation -> {
-          Long id = invocation.getArgument(0);
-          Interactor interactor = new Person();
-          interactor.setId(id);
-          return interactor;
-        }
-      );
+      .when(interactorService.getRepresentableInteractorByPerson(2L, 2L))
+      .thenReturn(commenter);
+    Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
 
     NewComment newComment = new NewComment();
     MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
@@ -91,11 +70,109 @@ public class CommentServiceTest {
     newComment.setFile(file);
 
     Comment comment = commentService.createComment(newComment, 2L, 3L);
-    assertEquals(comment.getContent(), newComment.getContent());
-    assertEquals(comment.getInteractor().getId(), 2L);
-    assertEquals(comment.getReceiverInteraction().getId(), 3L);
+    assertEquals(newComment.getContent(), comment.getContent());
+    assertEquals(commenter, comment.getInteractor());
+    assertEquals(post, comment.getReceiverInteraction());
 
     verify(mediumService, times(1)).saveAllFiles(List.of(file), comment);
+  }
+
+  @Test
+  public void createCommentCreatesCommentAsPageInInteractionCreatedByAnotherPage()
+    throws Exception {
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Page commenter = new Page();
+    Page originalCreator = new Page();
+    Post post = new Post();
+    post.setInteractor(originalCreator);
+
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(5L, 2L))
+      .thenReturn(commenter);
+    Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
+
+    NewComment newComment = new NewComment();
+    MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(5L);
+    newComment.setContent("Test");
+    newComment.setFile(file);
+
+    Comment comment = commentService.createComment(newComment, 2L, 3L);
+    assertEquals(newComment.getContent(), comment.getContent());
+    assertEquals(commenter, comment.getInteractor());
+    assertEquals(post, comment.getReceiverInteraction());
+  }
+
+  @Test
+  public void createCommentCreatesCommentWhenInteractionCreatedByPersonButReceivedByPage()
+    throws Exception {
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Page page = new Page();
+    Person originalCreator = new Person();
+    Post post = new Post();
+    post.setInteractor(originalCreator);
+    post.setReceiverInteractor(page);
+
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(5L, 2L))
+      .thenReturn(page);
+    Mockito
+      .when(interactionService.isInteractionDeletableByPerson(3L, 2L))
+      .thenReturn(true);
+    Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
+
+    NewComment newComment = new NewComment();
+    MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(5L);
+    newComment.setContent("Test");
+    newComment.setFile(file);
+
+    Comment comment = commentService.createComment(newComment, 2L, 3L);
+    assertEquals(newComment.getContent(), comment.getContent());
+    assertEquals(page, comment.getInteractor());
+    assertEquals(post, comment.getReceiverInteraction());
+  }
+
+  @Test
+  public void createCommentThrowsWhenPageTriesToCommentOnUndeletableAndUninvolvedInteractionCreatedByPerson()
+    throws Exception {
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Page commenter = new Page();
+    Page page = new Page();
+    Person originalCreator = new Person();
+    Post post = new Post();
+    post.setInteractor(originalCreator);
+    post.setReceiverInteractor(page);
+
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(5L, 2L))
+      .thenReturn(commenter);
+    Mockito
+      .when(interactionService.isInteractionDeletableByPerson(3L, 2L))
+      .thenReturn(false);
+    Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
+
+    NewComment newComment = new NewComment();
+    MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(5L);
+    newComment.setContent("Test");
+    newComment.setFile(file);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        commentService.createComment(newComment, 2L, 3L);
+      }
+    );
   }
 
   @Test
@@ -105,17 +182,15 @@ public class CommentServiceTest {
       .when(interactionService.saveInteraction(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
 
+    Person commenter = new Person();
+    Person originalCreator = new Person();
+    Post post = new Post();
+    post.setInteractor(originalCreator);
+
     Mockito
-      .when(interactionService.getInteraction(any()))
-      .thenAnswer(
-        invocation -> {
-          Long id = invocation.getArgument(0);
-          Interaction interaction = new Interaction();
-          interaction.setId(id);
-          interaction.setInteractor(new Person());
-          return interaction;
-        }
-      );
+      .when(interactorService.getRepresentableInteractorByPerson(2L, 2L))
+      .thenReturn(commenter);
+    Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
 
     Mockito
       .doThrow(Exception.class)

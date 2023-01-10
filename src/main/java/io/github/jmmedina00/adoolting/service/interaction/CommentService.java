@@ -58,7 +58,16 @@ public class CommentService {
 
     Interactor author = interaction.getInteractor();
 
-    if ((interactor instanceof Page) && (author instanceof Person)) {
+    if (
+      !(interactor instanceof Person) &&
+      (author instanceof Person) &&
+      !(
+        interactionService.isInteractionDeletableByPerson(
+          interactionId,
+          personId
+        )
+      )
+    ) {
       throw new NotAuthorizedException();
     }
 
