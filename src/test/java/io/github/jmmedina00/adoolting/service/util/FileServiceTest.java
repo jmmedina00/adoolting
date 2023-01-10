@@ -2,7 +2,8 @@ package io.github.jmmedina00.adoolting.service.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -101,9 +102,24 @@ public class FileServiceTest {
     String fullDir = mediaDir + "full" + File.separator;
     MultipartFile file = Mockito.mock(MultipartFile.class);
 
+    Mockito
+      .when(graphicsService.getImageMinimumDimension(anyString()))
+      .thenReturn(24);
+
     fileService.saveImage(file, "200.jpg");
 
     verify(file, times(1)).transferTo(new File(fullDir + "200.jpg"));
+    verify(jobScheduler, times(1)).enqueue(lambdaCaptor.capture());
+
+    JobLambda lambda = lambdaCaptor.getValue();
+    lambda.run();
+
+    verify(graphicsService, times(1))
+      .snipImageToSquare(
+        anyString(),
+        anyString(),
+        eq(GraphicsService.NO_OVERWRITING)
+      );
   }
 
   @Test
@@ -112,11 +128,25 @@ public class FileServiceTest {
     String fullDir = mediaDir + "full" + File.separator;
     String url = "http://test.local/image";
 
+    Mockito
+      .when(graphicsService.getImageMinimumDimension(anyString()))
+      .thenReturn(24);
+
     fileService.cacheImageForLinkMedium(url, 123L);
 
     verify(graphicsService, times(1))
       .saveImageFromNetwork(url, new File(fullDir + "123.png"));
-    verify(jobScheduler, times(1)).enqueue(any(JobLambda.class));
+    verify(jobScheduler, times(1)).enqueue(lambdaCaptor.capture());
+
+    JobLambda lambda = lambdaCaptor.getValue();
+    lambda.run();
+
+    verify(graphicsService, times(1))
+      .snipImageToSquare(
+        anyString(),
+        anyString(),
+        eq(GraphicsService.OVERWRITE_FILE)
+      );
   }
 
   private static Stream<Arguments> firstAvailableAndDesiredSizeCombinations() {
@@ -255,10 +285,14 @@ public class FileServiceTest {
       .when(graphicsService.getImageMinimumDimension(expectedFull))
       .thenReturn(minDimension);
 
-    fileService.setupImageScaling(filename);
+    fileService.setupImageScaling(filename, GraphicsService.NO_OVERWRITING);
 
     verify(graphicsService, times(1))
-      .snipImageToSquare(expectedFull, expectedSquare);
+      .snipImageToSquare(
+        expectedFull,
+        expectedSquare,
+        GraphicsService.NO_OVERWRITING
+      );
     verify(jobScheduler, atLeast(0)).enqueue(lambdaCaptor.capture());
 
     List<JobLambda> lambdas = lambdaCaptor.getAllValues();
@@ -273,7 +307,12 @@ public class FileServiceTest {
       )
       .getAbsolutePath();
       verify(graphicsService, minDimension < size ? never() : times(1))
-        .resizeSquare(expectedSquare, expectedSized, size);
+        .resizeSquare(
+          expectedSquare,
+          expectedSized,
+          size,
+          GraphicsService.NO_OVERWRITING
+        );
     }
   }
 }

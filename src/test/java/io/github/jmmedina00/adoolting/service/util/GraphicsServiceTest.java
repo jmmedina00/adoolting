@@ -132,7 +132,11 @@ public class GraphicsServiceTest {
       .when(() -> ImageIO.getImageWritersByMIMEType("image/jpeg"))
       .thenReturn(List.of(writer).iterator());
 
-    graphicsService.snipImageToSquare(sourcePath, destPath);
+    graphicsService.snipImageToSquare(
+      sourcePath,
+      destPath,
+      GraphicsService.NO_OVERWRITING
+    );
 
     verify(writer, times(1)).setOutput(any());
     verify(writer, times(1)).write(imageCaptor.capture());
@@ -160,7 +164,11 @@ public class GraphicsServiceTest {
 
     MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
 
-    graphicsService.snipImageToSquare(sourcePath, destPath);
+    graphicsService.snipImageToSquare(
+      sourcePath,
+      destPath,
+      GraphicsService.NO_OVERWRITING
+    );
 
     imageIoUtilities.verify(() -> ImageIO.read(any(File.class)), never());
     imageIoUtilities.verify(
@@ -172,7 +180,7 @@ public class GraphicsServiceTest {
   }
 
   @Test
-  public void snipImageToSquareExitsEarlyIfDestinationAlreadyExists()
+  public void snipImageToSquareExitsEarlyIfDestinationAlreadyExistsAndSpecifiedByFlag()
     throws Exception {
     String sourcePath =
       System.getProperty("java.io.tmpdir") + File.separator + "source.jpg";
@@ -186,13 +194,54 @@ public class GraphicsServiceTest {
 
     MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
 
-    graphicsService.snipImageToSquare(sourcePath, destPath);
+    graphicsService.snipImageToSquare(
+      sourcePath,
+      destPath,
+      GraphicsService.NO_OVERWRITING
+    );
 
     imageIoUtilities.verify(() -> ImageIO.read(any(File.class)), never());
     imageIoUtilities.verify(
       () -> ImageIO.getImageWritersByMIMEType("image/jpeg"),
       never()
     );
+
+    imageIoUtilities.closeOnDemand();
+  }
+
+  public void snipImageToSquareProceedsEvenIfDestinationAlreadyExistsWhenSpecifiedByFlag()
+    throws Exception {
+    String sourcePath =
+      System.getProperty("java.io.tmpdir") + File.separator + "source.jpg";
+    String destPath =
+      System.getProperty("java.io.tmpdir") + File.separator + "dest.jpg";
+
+    File source = new File(sourcePath);
+    source.createNewFile();
+    File dest = new File(destPath);
+    dest.createNewFile();
+
+    BufferedImage image = new BufferedImage(
+      200,
+      200,
+      BufferedImage.TYPE_4BYTE_ABGR
+    );
+    ImageWriter writer = Mockito.mock(ImageWriter.class);
+
+    MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
+    imageIoUtilities.when(() -> ImageIO.read(source)).thenReturn(image);
+    imageIoUtilities
+      .when(() -> ImageIO.getImageWritersByMIMEType("image/jpeg"))
+      .thenReturn(List.of(writer).iterator());
+
+    graphicsService.snipImageToSquare(
+      sourcePath,
+      destPath,
+      GraphicsService.OVERWRITE_FILE
+    );
+
+    verify(writer, times(1)).setOutput(any());
+    verify(writer, times(1)).write(any(BufferedImage.class));
 
     imageIoUtilities.closeOnDemand();
   }
@@ -233,7 +282,12 @@ public class GraphicsServiceTest {
       .when(() -> ImageIO.getImageWritersByMIMEType("image/jpeg"))
       .thenReturn(List.of(writer).iterator());
 
-    graphicsService.resizeSquare(sourcePath, destPath, size);
+    graphicsService.resizeSquare(
+      sourcePath,
+      destPath,
+      size,
+      GraphicsService.NO_OVERWRITING
+    );
 
     verify(writer, times(1)).setOutput(any());
     verify(writer, times(1)).write(imageCaptor.capture());
@@ -260,7 +314,12 @@ public class GraphicsServiceTest {
 
     MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
 
-    graphicsService.resizeSquare(sourcePath, destPath, 100);
+    graphicsService.resizeSquare(
+      sourcePath,
+      destPath,
+      100,
+      GraphicsService.NO_OVERWRITING
+    );
 
     imageIoUtilities.verify(() -> ImageIO.read(any(File.class)), never());
     imageIoUtilities.verify(
@@ -272,7 +331,7 @@ public class GraphicsServiceTest {
   }
 
   @Test
-  public void resizeSquareExitsEarlyIfDestinationAlreadyExists()
+  public void resizeSquareExitsEarlyIfDestinationAlreadyExistsAndSpecifiedByFlag()
     throws Exception {
     String sourcePath =
       System.getProperty("java.io.tmpdir") + File.separator + "source.jpg";
@@ -286,13 +345,58 @@ public class GraphicsServiceTest {
 
     MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
 
-    graphicsService.resizeSquare(sourcePath, destPath, 100);
+    graphicsService.resizeSquare(
+      sourcePath,
+      destPath,
+      100,
+      GraphicsService.NO_OVERWRITING
+    );
 
     imageIoUtilities.verify(() -> ImageIO.read(any(File.class)), never());
     imageIoUtilities.verify(
       () -> ImageIO.getImageWritersByMIMEType("image/jpeg"),
       never()
     );
+
+    imageIoUtilities.closeOnDemand();
+  }
+
+  @ParameterizedTest
+  @MethodSource("wantedSizes")
+  public void resizeSquareWritesSquareImageOfSpecifiedDimension()
+    throws Exception {
+    String sourcePath =
+      System.getProperty("java.io.tmpdir") + File.separator + "source.jpg";
+    String destPath =
+      System.getProperty("java.io.tmpdir") + File.separator + "dest.jpg";
+
+    File source = new File(sourcePath);
+    source.createNewFile();
+    File dest = new File(destPath);
+    dest.createNewFile();
+
+    BufferedImage image = new BufferedImage(
+      1000,
+      1000,
+      BufferedImage.TYPE_4BYTE_ABGR
+    );
+    ImageWriter writer = Mockito.mock(ImageWriter.class);
+
+    MockedStatic<ImageIO> imageIoUtilities = Mockito.mockStatic(ImageIO.class);
+    imageIoUtilities.when(() -> ImageIO.read(source)).thenReturn(image);
+    imageIoUtilities
+      .when(() -> ImageIO.getImageWritersByMIMEType("image/jpeg"))
+      .thenReturn(List.of(writer).iterator());
+
+    graphicsService.resizeSquare(
+      sourcePath,
+      destPath,
+      200,
+      GraphicsService.OVERWRITE_FILE
+    );
+
+    verify(writer, times(1)).setOutput(any());
+    verify(writer, times(1)).write(any(BufferedImage.class));
 
     imageIoUtilities.closeOnDemand();
   }

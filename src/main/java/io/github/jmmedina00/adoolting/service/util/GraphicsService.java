@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GraphicsService {
+  public static final int NO_OVERWRITING = 0;
+  public static final int OVERWRITE_FILE = 1;
+
   private static final Logger logger = LoggerFactory.getLogger(
     GraphicsService.class
   );
@@ -46,12 +49,19 @@ public class GraphicsService {
     stream.close();
   }
 
-  public void snipImageToSquare(String sourcePath, String destPath)
+  public void snipImageToSquare(
+    String sourcePath,
+    String destPath,
+    int overwriteFlag
+  )
     throws Exception {
     File source = new File(sourcePath);
     File destination = new File(destPath);
 
-    if (!source.exists() || destination.exists()) {
+    if (
+      !source.exists() ||
+      (overwriteFlag == NO_OVERWRITING && destination.exists())
+    ) {
       logger.debug("Unable to continue with snip of {}", sourcePath);
       return;
     }
@@ -74,12 +84,20 @@ public class GraphicsService {
   }
 
   @Job(name = "Scale squared image")
-  public void resizeSquare(String sourcePath, String destPath, int size)
+  public void resizeSquare(
+    String sourcePath,
+    String destPath,
+    int size,
+    int overwriteFlag
+  )
     throws Exception {
     File square = new File(sourcePath);
     File destination = new File(destPath);
 
-    if (!square.exists() || destination.exists()) {
+    if (
+      !square.exists() ||
+      (overwriteFlag == NO_OVERWRITING && destination.exists())
+    ) {
       logger.debug("Unable to continue scaling {} to {}", sourcePath, destPath);
       return;
     }

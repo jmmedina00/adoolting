@@ -69,7 +69,9 @@ public class FileService {
       "Transferring full file {} to full dir and setting up all scaling",
       filename
     );
-    jobScheduler.enqueue(() -> setupImageScaling(filename));
+    jobScheduler.enqueue(
+      () -> setupImageScaling(filename, GraphicsService.NO_OVERWRITING)
+    );
   }
 
   public void cacheImageForLinkMedium(String url, Long mediumId)
@@ -85,7 +87,9 @@ public class FileService {
       url,
       new File(mediaFullDir + filename)
     );
-    jobScheduler.enqueue(() -> setupImageScaling(filename));
+    jobScheduler.enqueue(
+      () -> setupImageScaling(filename, GraphicsService.OVERWRITE_FILE)
+    );
   }
 
   public String getExistingPathForFile(String filename, int desiredSize) {
@@ -118,13 +122,14 @@ public class FileService {
   }
 
   @Job(name = "Setup image scaling")
-  public void setupImageScaling(String filename) throws Exception {
+  public void setupImageScaling(String filename, int overwriteFlag)
+    throws Exception {
     String fullPath = mediaFullDir + filename;
     String squaredPath = mediaSquareDir + filename;
     int minDimension = graphicsService.getImageMinimumDimension(
       mediaFullDir + filename
     );
-    graphicsService.snipImageToSquare(fullPath, squaredPath);
+    graphicsService.snipImageToSquare(fullPath, squaredPath, overwriteFlag);
 
     logger.info("Preparing convenient resizes for file {}", filename);
 
@@ -140,7 +145,8 @@ public class FileService {
 
       String path = mediaDir + size + File.separator + filename;
       jobScheduler.enqueue(
-        () -> graphicsService.resizeSquare(squaredPath, path, size)
+        () ->
+          graphicsService.resizeSquare(squaredPath, path, size, overwriteFlag)
       );
     }
   }
