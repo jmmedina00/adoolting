@@ -5,7 +5,6 @@ import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
-import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,20 +117,19 @@ public class Notification implements Emailable {
     arguments.add(interaction.getInteractor().getFullName());
 
     if (interaction instanceof Comment) {
-      arguments.add(
-        ((Comment) interaction).getReceiverInteraction()
-          .getInteractor()
-          .getFullName()
-      );
+      Interaction commented = ((Comment) interaction).getReceiverInteraction();
+      arguments.add(commented.getInteractor().getFullName());
+
+      if (commented.getReceiverInteractor() != null) {
+        arguments.add(commented.getReceiverInteractor().getFullName());
+      }
     } else if (interaction.getReceiverInteractor() != null) {
       arguments.add(interaction.getReceiverInteractor().getFullName());
     }
 
-    if (
-      arguments.size() > 1 && !forPerson.getFullName().equals(arguments.get(1))
-    ) {
+    if (arguments.indexOf(forPerson.getFullName()) == -1) {
       data.setSubjectAddendum("page");
-    } else if (!(interaction.getInteractor() instanceof Page)) {
+    } else {
       data.setSubjectAddendum("profile");
     }
 
