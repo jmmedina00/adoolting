@@ -37,7 +37,7 @@ public class LinkInformation implements Serializable {
 
   public String getPage() {
     String withoutHttp = actualLink.replaceFirst("https?:\\/\\/", "");
-    String baseOnly = withoutHttp.replaceAll("\\/.+$", "");
+    String baseOnly = withoutHttp.replaceAll("\\/.*$", "");
     Matcher matcher = Pattern.compile("(.+\\.)?(.+\\..+)").matcher(baseOnly);
     return matcher.matches() ? matcher.group(2) : "";
   }
