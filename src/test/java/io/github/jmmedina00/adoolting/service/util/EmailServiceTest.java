@@ -61,13 +61,13 @@ public class EmailServiceTest {
   private TemplateEngine templateEngine;
 
   @MockBean
-  private MessageSource messageSource; // Mocking ApplicationContext doesn't work for some reason...
-
-  @MockBean
   private JobScheduler jobScheduler;
 
   @Value("${EMAIL_ADDRESS}")
   private String sender;
+
+  @Autowired
+  private MessageSource messageSource; // Makes more sense not to mock this with resolvables in place
 
   @Autowired
   private EmailService emailService;
@@ -130,15 +130,6 @@ public class EmailServiceTest {
       .thenReturn(Optional.of(data));
     Mockito.when(localeConfigService.getConfig(6L)).thenReturn(config);
     Mockito
-      .when(
-        messageSource.getMessage(
-          "email.template",
-          new String[] {  },
-          new Locale("es")
-        )
-      )
-      .thenReturn("Sujeto");
-    Mockito
       .when(templateEngine.process(eq("mail/template"), any()))
       .thenReturn("<p>Hola</p>");
     Mockito
@@ -199,15 +190,6 @@ public class EmailServiceTest {
       .thenReturn(Optional.of(data));
     Mockito.when(localeConfigService.getConfig(6L)).thenReturn(config);
     Mockito
-      .when(
-        messageSource.getMessage(
-          anyString(),
-          any(Object[].class),
-          any(Locale.class)
-        )
-      )
-      .thenReturn("Sujeto");
-    Mockito
       .when(emailSender.createMimeMessage())
       .thenReturn(
         new MimeMessage(Session.getDefaultInstance(new Properties()))
@@ -215,8 +197,9 @@ public class EmailServiceTest {
 
     emailService.prepareEmail("token", "template");
 
-    verify(messageSource, times(1))
-      .getMessage(eq("email.template.specialty.special"), any(), any());
+    verify(emailSender, times(1)).send(messageCaptor.capture());
+    MimeMessage message = messageCaptor.getValue();
+    assertEquals("Special subject", message.getSubject());
   }
 
   @Test
@@ -242,14 +225,41 @@ public class EmailServiceTest {
       .thenReturn(Optional.of(data));
     Mockito.when(localeConfigService.getConfig(6L)).thenReturn(config);
     Mockito
-      .when(
-        messageSource.getMessage(
-          anyString(),
-          any(Object[].class),
-          any(Locale.class)
-        )
-      )
-      .thenReturn("Sujeto");
+      .when(emailSender.createMimeMessage())
+      .thenReturn(
+        new MimeMessage(Session.getDefaultInstance(new Properties()))
+      );
+
+    emailService.prepareEmail("token", "parammed");
+
+    verify(emailSender, times(1)).send(messageCaptor.capture());
+    MimeMessage message = messageCaptor.getValue();
+    assertEquals("foo is bar", message.getSubject());
+  }
+
+  @Test
+  public void prepareEmailDefaultsToSimplerSubjectCodeWhenTemplatePlusAddendumCannotBeFound()
+    throws Exception {
+    SimplePerson person = new SimplePerson();
+    person.setId(6L);
+    person.setFirstName("Juanmi");
+    person.setEmail("juanmi@test.local");
+
+    EmailData data = new EmailData();
+    data.setPerson(person);
+    data.setParameters(
+      new HashMap<>(Map.of("theme", "foo", "coffee", "black"))
+    );
+    data.setSubjectAddendum("non-existent");
+
+    PersonLocaleConfig config = new PersonLocaleConfig();
+    config.setLocale("es");
+    config.setOffsetFromUTC(-60);
+
+    Mockito
+      .when(dataRepository.findById("token"))
+      .thenReturn(Optional.of(data));
+    Mockito.when(localeConfigService.getConfig(6L)).thenReturn(config);
     Mockito
       .when(emailSender.createMimeMessage())
       .thenReturn(
@@ -258,11 +268,49 @@ public class EmailServiceTest {
 
     emailService.prepareEmail("token", "template");
 
-    verify(messageSource, times(1))
-      .getMessage(
-        eq("email.template"),
-        eq(new String[] { "foo", "bar" }),
-        any()
+    verify(emailSender, times(1)).send(messageCaptor.capture());
+    MimeMessage message = messageCaptor.getValue();
+    assertEquals("Sujeto", message.getSubject());
+  }
+
+  @Test
+  public void prepareEmailDefaultsToGenericMessageWhenTemplateCannotBeFound()
+    throws Exception {
+    SimplePerson person = new SimplePerson();
+    person.setId(6L);
+    person.setFirstName("Juanmi");
+    person.setEmail("juanmi@test.local");
+
+    String defaultMessage = messageSource.getMessage(
+      "greeting",
+      new String[] {  },
+      Locale.forLanguageTag("es")
+    );
+
+    EmailData data = new EmailData();
+    data.setPerson(person);
+    data.setParameters(
+      new HashMap<>(Map.of("theme", "foo", "coffee", "black"))
+    );
+
+    PersonLocaleConfig config = new PersonLocaleConfig();
+    config.setLocale("es");
+    config.setOffsetFromUTC(-60);
+
+    Mockito
+      .when(dataRepository.findById("token"))
+      .thenReturn(Optional.of(data));
+    Mockito.when(localeConfigService.getConfig(6L)).thenReturn(config);
+    Mockito
+      .when(emailSender.createMimeMessage())
+      .thenReturn(
+        new MimeMessage(Session.getDefaultInstance(new Properties()))
       );
+
+    emailService.prepareEmail("token", "nonsense");
+
+    verify(emailSender, times(1)).send(messageCaptor.capture());
+    MimeMessage message = messageCaptor.getValue();
+    assertEquals(defaultMessage, message.getSubject());
   }
 }
