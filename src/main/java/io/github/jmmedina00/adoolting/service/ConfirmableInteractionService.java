@@ -33,6 +33,10 @@ public class ConfirmableInteractionService {
     ConfirmableInteractionService.class
   );
 
+  public ConfirmableInteraction getConfirmableInteraction(Long interactionId) {
+    return cInteractionRepository.findById(interactionId).orElseThrow();
+  } // Needed for certain email templates
+
   public List<ConfirmableInteraction> getPendingInteractionsForPerson(
     Long personId
   ) {
