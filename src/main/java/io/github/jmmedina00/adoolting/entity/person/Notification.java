@@ -148,12 +148,9 @@ public class Notification implements Emailable {
       String subjectAdd =
         "group" +
         (
-          Objects.equals(
-              interaction.getInteractor().getId(),
-              joinRequest.getGroup().getInteractor().getId()
-            )
-            ? ".invite"
-            : ".request"
+          Objects.equals(interaction.getInteractor().getId(), forPerson.getId())
+            ? ".request"
+            : ".invite"
         );
 
       data.setSubjectAddendum(subjectAdd);

@@ -256,7 +256,7 @@ public class NotificationTest {
   }
 
   @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestCreatedByGroupCreator() {
+  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestNotCreatedByJoiningPerson() {
     Person commenter = Mockito.mock(Person.class);
     Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
     Mockito.when(commenter.getId()).thenReturn(2L);
@@ -279,7 +279,34 @@ public class NotificationTest {
   }
 
   @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestCreatedByJoiningPerson() {
+  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestNotCreatedByJoiningPersonInEvent() {
+    Person commenter = Mockito.mock(Person.class);
+    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
+    Mockito.when(commenter.getId()).thenReturn(2L);
+
+    Page page = new Page();
+    page.setName("Page");
+    page.setId(18L);
+
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(page);
+    group.setName("Group");
+
+    JoinRequest joinRequest = new JoinRequest();
+    joinRequest.setId(18L);
+    joinRequest.setInteractor(commenter); // commenter is manager of page
+    joinRequest.setReceiverInteractor(person);
+    joinRequest.setGroup(group);
+
+    notification.setInteraction(joinRequest);
+    EmailData data = notification.getEmailData();
+    assertEquals("group.invite", data.getSubjectAddendum());
+    assertEquals(3, data.getSubjectArguments().size());
+    assertEquals("Group", data.getSubjectArguments().get(2));
+  }
+
+  @Test
+  public void getEmailDataAddsGroupAndToArgumentsAndHasRequestAddendumIfInteractionIsJoinRequestCreatedByJoiningPerson() {
     Person commenter = Mockito.mock(Person.class);
     Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
     Mockito.when(commenter.getId()).thenReturn(2L);
