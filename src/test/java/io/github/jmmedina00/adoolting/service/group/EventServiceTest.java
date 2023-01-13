@@ -7,6 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
+import io.github.jmmedina00.adoolting.dto.common.TimeExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
 import io.github.jmmedina00.adoolting.entity.group.Event;
@@ -58,8 +60,8 @@ public class EventServiceTest {
     newEvent.setAccessLevel(GroupAccessLevel.OPEN);
     newEvent.setLocation("Somewhere");
     newEvent.setCreateAs(1L);
-    newEvent.setDate(new Date(1899331200000L)); // 2030/03/10
-    newEvent.setTime(new Date(44580000L)); // 12:23
+    newEvent.setDate(new DateExtractOfDate(new Date(1899331200000L))); // 2030/03/10
+    newEvent.setTime(new TimeExtractOfDate(new Date(44580000L))); // 12:23
     newEvent.setOffsetFromUTC(30);
   }
 

@@ -1,30 +1,28 @@
 package io.github.jmmedina00.adoolting.dto.group;
 
 import io.github.jmmedina00.adoolting.dto.annotation.HasFutureThreshold;
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
+import io.github.jmmedina00.adoolting.dto.common.TimeExtractOfDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 @HasFutureThreshold
 public class NewEvent extends NewGroup {
   @NotNull(message = "{error.not_empty}")
   @NotEmpty(message = "{error.not_empty}")
-  private String location; // temporary
+  private String location;
 
   @NotNull
   private Long createAs;
 
-  @NotNull
-  @DateTimeFormat(iso = ISO.DATE)
-  private Date date;
+  @NotEmpty
+  private DateExtractOfDate date;
 
-  @NotNull
-  @DateTimeFormat(pattern = "HH:mm")
-  private Date time;
+  @NotEmpty
+  private TimeExtractOfDate time;
 
   @NotNull
   private int offsetFromUTC;
@@ -45,19 +43,19 @@ public class NewEvent extends NewGroup {
     this.createAs = createAs;
   }
 
-  public Date getDate() {
+  public DateExtractOfDate getDate() {
     return date;
   }
 
-  public void setDate(Date date) {
+  public void setDate(DateExtractOfDate date) {
     this.date = date;
   }
 
-  public Date getTime() {
+  public TimeExtractOfDate getTime() {
     return time;
   }
 
-  public void setTime(Date time) {
+  public void setTime(TimeExtractOfDate time) {
     this.time = time;
   }
 
@@ -70,14 +68,14 @@ public class NewEvent extends NewGroup {
   }
 
   public Date getFinalizedDate() {
-    if (date == null || time == null) {
+    if (date.getValue() == null || time.getValue() == null) {
       return new Date(Long.MAX_VALUE);
     }
 
     Calendar calendarDate = Calendar.getInstance();
-    calendarDate.setTime(date);
+    calendarDate.setTime(date.getValue());
     Calendar calendarTime = Calendar.getInstance();
-    calendarTime.setTime(time);
+    calendarTime.setTime(time.getValue());
 
     calendarDate.setTimeZone(TimeZone.getTimeZone("UTC"));
     calendarDate.set(
