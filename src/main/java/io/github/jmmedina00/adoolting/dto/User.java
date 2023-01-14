@@ -3,13 +3,11 @@ package io.github.jmmedina00.adoolting.dto;
 import io.github.jmmedina00.adoolting.dto.annotation.EmailMatches;
 import io.github.jmmedina00.adoolting.dto.annotation.HasMinimumAge;
 import io.github.jmmedina00.adoolting.dto.annotation.PasswordMatches;
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.entity.enums.Gender;
-import java.util.Date;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 @EmailMatches
 @PasswordMatches
@@ -33,9 +31,9 @@ public class User extends WithConfirmablePassword {
   @NotNull(message = "{error.gender}")
   private Gender gender;
 
-  @DateTimeFormat(iso = ISO.DATE)
+  @NotEmpty
   @HasMinimumAge
-  private Date birthday;
+  private DateExtractOfDate birthday;
 
   public String getFirstName() {
     return firstName;
@@ -53,7 +51,7 @@ public class User extends WithConfirmablePassword {
     return confirmEmail;
   }
 
-  public Date getBirthday() {
+  public DateExtractOfDate getBirthday() {
     return birthday;
   }
 
@@ -77,7 +75,7 @@ public class User extends WithConfirmablePassword {
     this.confirmEmail = confirmEmail;
   }
 
-  public void setBirthday(Date birthday) {
+  public void setBirthday(DateExtractOfDate birthday) {
     this.birthday = birthday;
   }
 

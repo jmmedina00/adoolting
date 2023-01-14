@@ -3,6 +3,7 @@ package io.github.jmmedina00.adoolting.dto.validator;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,7 +27,7 @@ public class MinimumAgeValidatorTest {
 
     Date birthday = calendar.getTime();
 
-    assertTrue(validator.isValid(birthday, null));
+    assertTrue(validator.isValid(new DateExtractOfDate(birthday), null));
   }
 
   @Test
@@ -36,11 +37,13 @@ public class MinimumAgeValidatorTest {
 
     Date birthday = calendar.getTime();
 
-    assertFalse(validator.isValid(birthday, null));
+    assertFalse(validator.isValid(new DateExtractOfDate(birthday), null));
   }
 
   @Test
-  public void isValidReturnsFalseWhenProvidedWithNull() {
-    assertFalse(validator.isValid(null, null));
+  public void isValidReturnsFalseWhenProvidedWithEmptyOrNonValidDate() {
+    assertFalse(
+      validator.isValid(new DateExtractOfDate("This is nonsense"), null)
+    );
   }
 }

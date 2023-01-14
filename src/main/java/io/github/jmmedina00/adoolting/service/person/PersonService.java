@@ -137,7 +137,7 @@ public class PersonService implements UserDetailsService {
     person.setFirstName(userDto.getFirstName());
     person.setLastName(userDto.getLastName());
     person.setEmail(userDto.getEmail());
-    person.setBirthDate(userDto.getBirthday());
+    person.setBirthDate(userDto.getBirthday().getValue());
     person.setGender(userDto.getGender());
     person.setPassword(passwordEncoder.encode(userDto.getPassword()));
 

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.dto.User;
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.enums.Gender;
 import io.github.jmmedina00.adoolting.entity.person.Person;
@@ -18,7 +19,6 @@ import io.github.jmmedina00.adoolting.repository.PersonRepository;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
-import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
@@ -234,7 +234,7 @@ public class PersonServiceTest {
     user.setPassword("123456");
     user.setConfirmPassword("123456");
     user.setGender(Gender.HE);
-    user.setBirthday(new Date(950659200000L)); // 2000/02/16
+    user.setBirthday(new DateExtractOfDate("2000-02-16")); // 2000/02/16
 
     Mockito.when(passwordEncoder.encode(anyString())).thenReturn("ENCODED");
     Mockito.when(personRepository.findByEmail(unusedEmail)).thenReturn(null);
@@ -250,7 +250,7 @@ public class PersonServiceTest {
     assertEquals(user.getFirstName(), person.getFirstName());
     assertEquals(user.getLastName(), person.getLastName());
     assertEquals(user.getEmail(), person.getEmail());
-    assertEquals(user.getBirthday(), person.getBirthDate());
+    assertEquals(user.getBirthday().getValue(), person.getBirthDate());
     assertEquals("ENCODED", person.getPassword());
     assertEquals(user.getGender(), person.getGender());
 
@@ -270,6 +270,7 @@ public class PersonServiceTest {
       );
 
     User user = new User();
+    user.setBirthday(new DateExtractOfDate("2000-02-16")); // 2000/02/16
     Person person = personService.createPersonFromUser(user);
     verify(confirmationService, times(1)).createTokenforPerson(person);
     verify(settingsService, times(1)).createSettingsForPerson(person);
