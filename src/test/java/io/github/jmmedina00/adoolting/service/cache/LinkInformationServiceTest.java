@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.entity.Medium;
 import io.github.jmmedina00.adoolting.entity.cache.LinkInformation;
 import io.github.jmmedina00.adoolting.repository.cache.LinkInformationRepository;
@@ -16,7 +17,6 @@ import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import io.github.jmmedina00.adoolting.util.SelfReturningAnswer;
 import java.io.File;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 import org.jobrunr.jobs.lambdas.JobLambda;
@@ -85,19 +85,19 @@ public class LinkInformationServiceTest {
   @Test
   public void getLinkInfoEnqueuesJobIfDataNotFoundInRepository() {
     Calendar fixedCalendar = Calendar.getInstance();
-    fixedCalendar.setTime(new Date(1655085600000L)); // 2022/06/13 at 2:00AM
+    fixedCalendar.setTime(new DateExtractOfDate("2022-06-13").getValue()); // Settings things manually in this calendar won't behave for some reason
 
     MockedStatic<Calendar> utilities = Mockito.mockStatic(Calendar.class);
     utilities.when(Calendar::getInstance).thenReturn(fixedCalendar);
 
     infoService.getLinkInfo(125L);
+    utilities.closeOnDemand();
 
     verify(jobScheduler, times(1))
       .enqueue(
         eq(UUID.nameUUIDFromBytes("Link process: 125 @ 13".getBytes())),
         any(JobLambda.class)
       );
-    utilities.closeOnDemand();
   }
 
   @Test

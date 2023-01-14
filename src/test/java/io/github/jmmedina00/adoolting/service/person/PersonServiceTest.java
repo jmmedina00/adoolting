@@ -234,7 +234,7 @@ public class PersonServiceTest {
     user.setPassword("123456");
     user.setConfirmPassword("123456");
     user.setGender(Gender.HE);
-    user.setBirthday(new DateExtractOfDate("2000-02-16")); // 2000/02/16
+    user.setBirthday(new DateExtractOfDate("2000-02-16"));
 
     Mockito.when(passwordEncoder.encode(anyString())).thenReturn("ENCODED");
     Mockito.when(personRepository.findByEmail(unusedEmail)).thenReturn(null);
@@ -270,7 +270,7 @@ public class PersonServiceTest {
       );
 
     User user = new User();
-    user.setBirthday(new DateExtractOfDate("2000-02-16")); // 2000/02/16
+    user.setBirthday(new DateExtractOfDate("2000-02-16"));
     Person person = personService.createPersonFromUser(user);
     verify(confirmationService, times(1)).createTokenforPerson(person);
     verify(settingsService, times(1)).createSettingsForPerson(person);

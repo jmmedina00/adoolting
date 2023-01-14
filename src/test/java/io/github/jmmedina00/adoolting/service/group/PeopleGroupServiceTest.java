@@ -274,7 +274,7 @@ public class PeopleGroupServiceTest {
 
   @Test
   public void getGroupFormSetsDateAndTimeCorrectlyInEventDto() {
-    long savedTimestamp = 1584026760_000L; // 2020/03/12 at 15:26
+    long savedTimestamp = 1584026760_000L; // 2020/03/12 at 15:26 UTC
     Date resultingDate = new Date(savedTimestamp); // Gets converted to local timezone (CET -> 16:26)
 
     Event event = new Event();
@@ -300,10 +300,10 @@ public class PeopleGroupServiceTest {
       .when(groupRepository.findActiveGroup(1L))
       .thenReturn(Optional.of(event));
     NewEvent dto = (NewEvent) groupService.getGroupForm(1L);
+    authPersonUtilities.closeOnDemand();
+
     assertEquals("2020-03-12", dto.getDate().toString());
     assertEquals("13:26", dto.getTime().toString());
-
-    authPersonUtilities.closeOnDemand();
   }
 
   @Test

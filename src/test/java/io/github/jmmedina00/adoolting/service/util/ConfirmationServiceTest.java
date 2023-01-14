@@ -48,7 +48,7 @@ public class ConfirmationServiceTest {
     UUID testUuid = UUID.nameUUIDFromBytes("Testing".getBytes());
     String uuidResult = testUuid.toString();
     Calendar fixedCalendar = Calendar.getInstance();
-    fixedCalendar.setTime(new Date(1655085600000L)); // 2022/06/13 at 2:00AM
+    fixedCalendar.setTime(new Date(1655085600000L)); // 2022/06/13 at 2:00AM UTC
 
     MockedStatic<Calendar> calendarUtilities = Mockito.mockStatic(
       Calendar.class
@@ -63,6 +63,9 @@ public class ConfirmationServiceTest {
 
     ConfirmationToken token = confirmationService.createTokenforPerson(person);
 
+    calendarUtilities.closeOnDemand();
+    uuidUtilities.closeOnDemand();
+
     assertEquals(person, token.getPerson());
     assertEquals(uuidResult, token.getToken());
     assertEquals(
@@ -71,9 +74,6 @@ public class ConfirmationServiceTest {
     );
 
     verify(emailService, times(1)).setUpEmailJob(token, "confirm");
-
-    calendarUtilities.closeOnDemand();
-    uuidUtilities.closeOnDemand();
   }
 
   @Test
