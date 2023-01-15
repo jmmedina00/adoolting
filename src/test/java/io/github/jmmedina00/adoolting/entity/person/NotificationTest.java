@@ -323,4 +323,31 @@ public class NotificationTest {
     assertEquals(3, data.getSubjectArguments().size());
     assertEquals("Group", data.getSubjectArguments().get(2));
   }
+
+  @Test
+  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestCreatedByManager() {
+    Page page = new Page(); // person manages this page;
+    page.setName("Test");
+    page.setId(18L);
+
+    Person commenter = Mockito.mock(Person.class);
+    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
+    Mockito.when(commenter.getId()).thenReturn(2L);
+
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(page);
+    group.setName("Group");
+
+    JoinRequest joinRequest = new JoinRequest();
+    joinRequest.setId(19L);
+    joinRequest.setInteractor(page);
+    joinRequest.setReceiverInteractor(commenter);
+    joinRequest.setGroup(group);
+
+    notification.setInteraction(joinRequest);
+    EmailData data = notification.getEmailData();
+    assertEquals("group.invite", data.getSubjectAddendum());
+    assertEquals(3, data.getSubjectArguments().size());
+    assertEquals("Group", data.getSubjectArguments().get(2));
+  }
 }

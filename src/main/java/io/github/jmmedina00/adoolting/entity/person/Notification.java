@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.entity.person;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
@@ -145,12 +146,17 @@ public class Notification implements Emailable {
     if (interaction instanceof JoinRequest) {
       JoinRequest joinRequest = (JoinRequest) interaction;
       arguments.add(joinRequest.getGroup().getName());
+
+      Interactor groupCreator = joinRequest.getGroup().getInteractor();
       String subjectAdd =
         "group" +
         (
-          Objects.equals(interaction.getInteractor().getId(), forPerson.getId())
-            ? ".request"
-            : ".invite"
+          Objects.equals(
+              interaction.getInteractor().getId(),
+              groupCreator.getId()
+            )
+            ? ".invite"
+            : ".request"
         );
 
       data.setSubjectAddendum(subjectAdd);
