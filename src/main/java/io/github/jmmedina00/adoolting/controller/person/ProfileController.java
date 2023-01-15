@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.NewConfirmableInteraction;
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
@@ -11,11 +12,13 @@ import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.PeopleGroupService;
 import io.github.jmmedina00.adoolting.service.interaction.PostService;
+import io.github.jmmedina00.adoolting.service.person.PersonAccessLevelService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
-import io.github.jmmedina00.adoolting.service.person.PersonSettingsService;
 import io.github.jmmedina00.adoolting.service.person.PersonStatusService;
 import java.util.Objects;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,9 +36,6 @@ public class ProfileController {
   private PersonService personService;
 
   @Autowired
-  private PersonSettingsService settingsService;
-
-  @Autowired
   private PersonStatusService statusService;
 
   @Autowired
@@ -49,6 +49,13 @@ public class ProfileController {
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
+
+  @Autowired
+  private PersonAccessLevelService accessLevelService;
+
+  private static final Logger logger = LoggerFactory.getLogger(
+    ProfileController.class
+  );
 
   @RequestMapping(method = RequestMethod.GET)
   public String redirectToAuthenticatedPersonProfile() {
@@ -74,18 +81,16 @@ public class ProfileController {
       personId
     );
 
+    AccessLevel accessLevel = accessLevelService.getAccessLevelThatPersonHasOnInteractor(
+      personId,
+      authenticatedPersonId
+    );
+    logger.debug("accessLevel of person {} is {}", personId, accessLevel);
+
     model.addAttribute("person", person);
     model.addAttribute("friendship", friendship);
     model.addAttribute("cInteraction", cInteraction);
-    model.addAttribute(
-      "notAllowedByPerson",
-      !Objects.equals(personId, authenticatedPersonId) &&
-      (friendship == null || friendship.getConfirmedAt() == null) &&
-      !settingsService.isAllowedByPerson(
-        personId,
-        PersonSettingsService.ENTER_PROFILE
-      )
-    );
+    model.addAttribute("accessLevel", accessLevel);
     model.addAttribute("status", statusService.getPersonStatus(personId));
     model.addAttribute(
       "groups",

@@ -119,6 +119,8 @@ public class JoinRequestService {
     Long groupId
   )
     throws NotAuthorizedException {
+    // TODO: check invited person settings before proceeding
+
     PeopleGroup group = groupService.getGroupManagedByPerson(
       groupId,
       hostPersonId

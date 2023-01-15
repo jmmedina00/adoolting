@@ -3,12 +3,14 @@ package io.github.jmmedina00.adoolting.controller;
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
 import io.github.jmmedina00.adoolting.entity.Interaction;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.group.JoinRequestService;
 import io.github.jmmedina00.adoolting.service.interaction.CommentService;
+import io.github.jmmedina00.adoolting.service.person.PersonAccessLevelService;
 import javax.validation.Valid;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -34,6 +36,9 @@ public class InteractionController {
 
   @Autowired
   private JoinRequestService joinRequestService;
+
+  @Autowired
+  private PersonAccessLevelService accessLevelService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     InteractionController.class
@@ -72,7 +77,18 @@ public class InteractionController {
         );
       }
     }
+    AccessLevel accessLevel = accessLevelService.getAccessLevelThatPersonHasOnInteraction(
+      personId,
+      interactionId
+    );
 
+    logger.debug(
+      "accessLevel of interaction {} is {}",
+      interactionId,
+      accessLevel
+    );
+
+    model.addAttribute("accessLevel", accessLevel);
     model.addAttribute(
       "interactors",
       interactionService.getAppropriateInteractorListForPerson(

@@ -36,15 +36,17 @@
     <button type="submit">Delete</button>
   </form>
 </div>
-<div>
+<div th:remove="${accessLevel == 'CLOSED'} ? all : none">
   <p th:each="p : ${interaction.getParagraphs()}" th:text="${p}"></p>
 </div>
 <img
+  th:remove="${accessLevel.name() == 'CLOSED'} ? all : none"
   th:each="medium : ${interaction.media}"
   th:src="@{/media/thumbnail/512/{id}(id=${medium.id})}"
 />
 <p th:text="${@relativeTimeService.getRelativeTime(interaction.createdAt)}"></p>
 <form
+  th:remove="${accessLevel.name() != 'OPEN'} ? all : none"
   th:action="@{/interaction/{id}/comment(id=${interaction.id})}"
   th:object="${newComment}"
   method="post"
@@ -58,8 +60,11 @@
   </div>
   <button type="submit">Send</button>
 </form>
-<h3>Comments</h3>
-<div th:each="comment : ${comments}">
+<h3 th:remove="${accessLevel.name() == 'CLOSED'} ? all : none">Comments</h3>
+<div
+  th:remove="${accessLevel.name() == 'CLOSED'} ? all : none"
+  th:each="comment : ${comments}"
+>
   <h4 th:text="${comment.interactor.getFullName()}"></h4>
   <p th:text="${comment.content}"></p>
   <img

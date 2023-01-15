@@ -12,13 +12,14 @@ import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewPost;
 import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
-import io.github.jmmedina00.adoolting.service.page.PageService;
+import io.github.jmmedina00.adoolting.service.person.PersonAccessLevelService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ public class PostServiceTest {
   private InteractionService interactionService;
 
   @MockBean
-  private PageService pageService;
+  private PersonAccessLevelService accessLevelService;
 
   @Autowired
   private PostService postService;
@@ -91,10 +92,32 @@ public class PostServiceTest {
     newPost.setPostAs(1L);
     newPost.setContent(content);
 
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteractor(1L, 2L))
+      .thenReturn(AccessLevel.OPEN);
     Post post = postService.postOnProfile(1L, 2L, newPost);
     assertEquals(1L, post.getInteractor().getId());
     assertEquals(2L, post.getReceiverInteractor().getId());
     assertEquals(content, post.getContent());
+  }
+
+  @Test
+  public void postOnProfileThrowsIfTargetInteractionIsNotOpenAccordingToAccessLevel()
+    throws NotAuthorizedException {
+    String content = "This is content";
+    NewPost newPost = new NewPost();
+    newPost.setPostAs(1L);
+    newPost.setContent(content);
+
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteractor(1L, 2L))
+      .thenReturn(AccessLevel.WATCH_ONLY);
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        postService.postOnProfile(1L, 2L, newPost);
+      }
+    );
   }
 
   @Test

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.dto.interaction.NewComment;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
 import io.github.jmmedina00.adoolting.entity.page.Page;
@@ -17,6 +18,7 @@ import io.github.jmmedina00.adoolting.repository.interaction.CommentRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.MediumService;
+import io.github.jmmedina00.adoolting.service.person.PersonAccessLevelService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -44,6 +46,9 @@ public class CommentServiceTest {
   @MockBean
   private InteractionService interactionService;
 
+  @MockBean
+  private PersonAccessLevelService accessLevelService;
+
   @Autowired
   private CommentService commentService;
 
@@ -62,6 +67,9 @@ public class CommentServiceTest {
       .when(interactorService.getRepresentableInteractorByPerson(2L, 2L))
       .thenReturn(commenter);
     Mockito.when(interactionService.getInteraction(3L)).thenReturn(post);
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteraction(2L, 3L))
+      .thenReturn(AccessLevel.OPEN);
 
     NewComment newComment = new NewComment();
     MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
@@ -89,6 +97,9 @@ public class CommentServiceTest {
     Post post = new Post();
     post.setInteractor(originalCreator);
 
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteraction(2L, 3L))
+      .thenReturn(AccessLevel.OPEN);
     Mockito
       .when(interactorService.getRepresentableInteractorByPerson(5L, 2L))
       .thenReturn(commenter);
@@ -119,6 +130,9 @@ public class CommentServiceTest {
     post.setInteractor(originalCreator);
     post.setReceiverInteractor(page);
 
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteraction(2L, 3L))
+      .thenReturn(AccessLevel.OPEN);
     Mockito
       .when(interactorService.getRepresentableInteractorByPerson(5L, 2L))
       .thenReturn(page);
@@ -176,6 +190,49 @@ public class CommentServiceTest {
   }
 
   @Test
+  public void createCommentThrowsWhenPersonTriesToCommentOnNonOpenInteraction()
+    throws NotAuthorizedException {
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Person creator = new Person();
+    creator.setId(7L);
+    Page receiver = new Page();
+    receiver.setId(8L);
+
+    Post post = new Post();
+    post.setInteractor(creator);
+    post.setReceiverInteractor(receiver);
+
+    Person commenter = new Person();
+    commenter.setId(4L);
+
+    NewComment newComment = new NewComment();
+    MockMultipartFile file = new MockMultipartFile("test", "test".getBytes());
+    newComment.setPostAs(4L);
+    newComment.setContent("Test");
+    newComment.setFile(file);
+
+    Mockito
+      .when(
+        accessLevelService.getAccessLevelThatPersonHasOnInteraction(4L, 12L)
+      )
+      .thenReturn(AccessLevel.WATCH_ONLY);
+    Mockito
+      .when(interactorService.getRepresentableInteractorByPerson(4L, 4L))
+      .thenReturn(commenter);
+    Mockito.when(interactionService.getInteraction(12L)).thenReturn(post);
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        commentService.createComment(newComment, 4L, 12L);
+      }
+    );
+  }
+
+  @Test
   public void createCommentNotDisruptedByMediumServiceException()
     throws Exception {
     Mockito
@@ -187,6 +244,9 @@ public class CommentServiceTest {
     Post post = new Post();
     post.setInteractor(originalCreator);
 
+    Mockito
+      .when(accessLevelService.getAccessLevelThatPersonHasOnInteraction(2L, 3L))
+      .thenReturn(AccessLevel.OPEN);
     Mockito
       .when(interactorService.getRepresentableInteractorByPerson(2L, 2L))
       .thenReturn(commenter);

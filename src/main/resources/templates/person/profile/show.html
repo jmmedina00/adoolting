@@ -2,11 +2,11 @@
   Watching profile of:
   <span th:text="${person.getFullName()}"></span>
 </p>
-<p th:remove="${notAllowedByPerson} ? all : none">
+<p th:remove="${accessLevel.name() == 'CLOSED'} ? all : none">
   <span th:if="${status}" th:text="${status.content}"></span>
   <span th:unless="${status}">Not set</span>
 </p>
-<ul th:remove="${notAllowedByPerson} ? all : none">
+<ul th:remove="${accessLevel.name() == 'CLOSED'} ? all : none">
   <li th:each="friend : ${friends}" th:text="${friend.getFullName()}"></li>
 </ul>
 <span th:unless="${friendship == null}">
@@ -25,7 +25,7 @@
   <span th:unless="${friendship.confirmedAt == null}">Confirmed</span>
   <!-- <span th:unless="${friendship.ignoredAt == null}">Ignored</span> -->
 </span>
-<ul th:remove="${notAllowedByPerson} ? all : none">
+<ul th:remove="${accessLevel.name() == 'CLOSED'} ? all : none">
   <li th:each="group : ${groups}">
     <span th:text="${group.name}"></span>
     <form
@@ -51,7 +51,7 @@
   method="post"
   th:object="${newPost}"
   th:action="@{/profile/{personId}(personId=${person.id})}"
-  th:remove="${notAllowedByPerson} ? all : none"
+  th:remove="${accessLevel.name() != 'OPEN'} ? all : none"
   enctype="multipart/form-data"
 >
   <h6>New post</h6>
@@ -67,8 +67,13 @@
   </div>
   <button type="submit">Send</button>
 </form>
-<div th:each="post : ${posts}" th:remove="${notAllowedByPerson} ? all : none">
+<div
+  th:each="post : ${posts}"
+  th:remove="${accessLevel.name() == 'CLOSED'} ? all : none"
+>
   <div th:replace="common/interaction :: card (interaction=${post})"></div>
 </div>
 
-<p th:remove="${notAllowedByPerson} ? none : all">Profile is locked</p>
+<p th:remove="${accessLevel.name() != 'CLOSED'} ? all : none">
+  Profile is locked
+</p>
