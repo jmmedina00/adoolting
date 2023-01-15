@@ -46,6 +46,43 @@ public class JoinRequestService {
     return joinRequestRepository.findExistingForGroup(groupId);
   }
 
+  public List<Interactor> getGroupMembers(Long groupId) {
+    PeopleGroup group = groupService.getGroup(groupId);
+    Long interactorId = group.getInteractor().getId();
+    List<JoinRequest> existing = getExistingForGroup(groupId);
+
+    return existing
+      .stream()
+      .filter(req -> req.getConfirmedAt() != null)
+      .map(
+        req ->
+          req.getInteractor().getId() == interactorId
+            ? req.getReceiverInteractor()
+            : req.getInteractor()
+      )
+      .toList();
+  }
+
+  public boolean isMemberOfGroup(Long groupId, Long personId) {
+    PeopleGroup group = groupService.getGroup(groupId);
+    Long interactorId = group.getInteractor().getId();
+
+    if (
+      interactorService.isInteractorRepresentableByPerson(
+        interactorId,
+        personId
+      )
+    ) {
+      return true;
+    }
+
+    return getGroupMembers(groupId)
+      .stream()
+      .filter(interactor -> interactor.getId() == personId)
+      .findFirst()
+      .isPresent();
+  }
+
   public JoinRequest joinGroup(Long personId, Long groupId)
     throws NotAuthorizedException {
     Interactor person = (Person) interactorService.getInteractor(personId);
@@ -88,7 +125,6 @@ public class JoinRequestService {
     );
 
     Interactor groupCreator = group.getInteractor();
-    Interactor host = interactorService.getInteractor(hostPersonId);
     Interactor invited = interactorService.getInteractor(invitedPersonId);
 
     if (
@@ -123,7 +159,7 @@ public class JoinRequestService {
       invitedPersonId,
       groupId
     );
-    return createJoinRequest(host, invited, group);
+    return createJoinRequest(groupCreator, invited, group);
   }
 
   private JoinRequest createJoinRequest(

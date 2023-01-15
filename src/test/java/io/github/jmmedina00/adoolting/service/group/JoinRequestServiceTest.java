@@ -1,12 +1,16 @@
 package io.github.jmmedina00.adoolting.service.group;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.entity.Interactor;
+import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.page.Page;
@@ -16,6 +20,8 @@ import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import java.util.Date;
+import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -42,6 +48,211 @@ public class JoinRequestServiceTest {
 
   @Autowired
   private JoinRequestService joinRequestService;
+
+  @Test
+  public void getGroupMembersReturnsInteractorInEachJoinRequestWhichIsNotGroupCreator() {
+    Person creator = new Person();
+    creator.setId(14L);
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(creator);
+
+    Person foo = new Person();
+    foo.setId(15L);
+
+    JoinRequest reqFoo = new JoinRequest();
+    reqFoo.setInteractor(foo);
+    reqFoo.setReceiverInteractor(creator);
+    reqFoo.setConfirmedAt(new Date());
+
+    Person bar = new Person();
+    bar.setId(16L);
+
+    JoinRequest reqBar = new JoinRequest();
+    reqBar.setInteractor(creator);
+    reqBar.setReceiverInteractor(bar);
+    reqBar.setConfirmedAt(new Date());
+
+    Person baz = new Person();
+    baz.setId(17L);
+
+    JoinRequest reqBaz = new JoinRequest();
+    reqBaz.setInteractor(creator);
+    reqBaz.setReceiverInteractor(baz);
+
+    Person bat = new Person();
+    bat.setId(18L);
+
+    JoinRequest reqBat = new JoinRequest();
+    reqBat.setInteractor(bat);
+    reqBat.setReceiverInteractor(creator);
+    reqBat.setConfirmedAt(new Date());
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(group);
+    Mockito
+      .when(joinRequestRepository.findExistingForGroup(22L))
+      .thenReturn(List.of(reqFoo, reqBar, reqBaz, reqBat));
+
+    List<Interactor> result = joinRequestService.getGroupMembers(22L);
+    assertEquals(List.of(foo, bar, bat), result);
+  }
+
+  @Test
+  public void getGroupMembersReturnsInteractorInEachJoinRequestWhichIsNotEventCreator() {
+    Page creator = new Page();
+    creator.setId(14L);
+    Event group = new Event();
+    group.setInteractor(creator);
+
+    Person foo = new Person();
+    foo.setId(15L);
+
+    JoinRequest reqFoo = new JoinRequest();
+    reqFoo.setInteractor(foo);
+    reqFoo.setReceiverInteractor(creator);
+    reqFoo.setConfirmedAt(new Date());
+
+    Person bar = new Person();
+    bar.setId(16L);
+
+    JoinRequest reqBar = new JoinRequest();
+    reqBar.setInteractor(creator);
+    reqBar.setReceiverInteractor(bar);
+    reqBar.setConfirmedAt(new Date());
+
+    Person baz = new Person();
+    baz.setId(17L);
+
+    JoinRequest reqBaz = new JoinRequest();
+    reqBaz.setInteractor(creator);
+    reqBaz.setReceiverInteractor(baz);
+
+    Person bat = new Person();
+    bat.setId(18L);
+
+    JoinRequest reqBat = new JoinRequest();
+    reqBat.setInteractor(bat);
+    reqBat.setReceiverInteractor(creator);
+    reqBat.setConfirmedAt(new Date());
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(group);
+    Mockito
+      .when(joinRequestRepository.findExistingForGroup(22L))
+      .thenReturn(List.of(reqFoo, reqBar, reqBaz, reqBat));
+
+    List<Interactor> result = joinRequestService.getGroupMembers(22L);
+    assertEquals(List.of(foo, bar, bat), result);
+  }
+
+  @Test
+  public void isMemberOfGroupReturnsTrueIfPersonManagesGroupCreator() {
+    Page creator = new Page();
+    creator.setId(14L);
+    Event event = new Event();
+    event.setInteractor(creator);
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(event);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(14L, 5L))
+      .thenReturn(true);
+
+    assertTrue(joinRequestService.isMemberOfGroup(22L, 5L));
+  }
+
+  @Test
+  public void isMemberOfGroupReturnsTrueIfPersonDoesNotManageGroupCreatorButIsMemberOfGroup() {
+    Person creator = new Person();
+    creator.setId(14L);
+    Event event = new Event();
+    event.setInteractor(creator);
+
+    Person foo = new Person();
+    foo.setId(15L);
+
+    JoinRequest reqFoo = new JoinRequest();
+    reqFoo.setInteractor(foo);
+    reqFoo.setReceiverInteractor(creator);
+    reqFoo.setConfirmedAt(new Date());
+
+    Person bar = new Person();
+    bar.setId(16L);
+    JoinRequest reqBar = new JoinRequest();
+    reqBar.setInteractor(creator);
+    reqBar.setReceiverInteractor(bar);
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(event);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(14L, 15L))
+      .thenReturn(false);
+    Mockito
+      .when(joinRequestRepository.findExistingForGroup(22L))
+      .thenReturn(List.of(reqFoo, reqBar));
+
+    assertTrue(joinRequestService.isMemberOfGroup(22L, 15L));
+  }
+
+  @Test
+  public void isMemberOfGroupReturnsFalseIfPersonDoesNotManageGroupCreatorAndIsNotMemberOfGroup() {
+    Person creator = new Person();
+    creator.setId(14L);
+    Event event = new Event();
+    event.setInteractor(creator);
+
+    Person foo = new Person();
+    foo.setId(15L);
+
+    JoinRequest reqFoo = new JoinRequest();
+    reqFoo.setInteractor(foo);
+    reqFoo.setReceiverInteractor(creator);
+    reqFoo.setConfirmedAt(new Date());
+
+    Person bar = new Person();
+    bar.setId(16L);
+    JoinRequest reqBar = new JoinRequest();
+    reqBar.setInteractor(creator);
+    reqBar.setReceiverInteractor(bar);
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(event);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(14L, 16L))
+      .thenReturn(false);
+    Mockito
+      .when(joinRequestRepository.findExistingForGroup(22L))
+      .thenReturn(List.of(reqFoo, reqBar));
+
+    assertFalse(joinRequestService.isMemberOfGroup(22L, 16L));
+  }
+
+  @Test
+  public void isMemberOfGroupReturnsFalseIfPersonDoesNotManageGroupCreatorAndHasNoJoinRequest() {
+    Person creator = new Person();
+    creator.setId(14L);
+    Event event = new Event();
+    event.setInteractor(creator);
+
+    Person foo = new Person();
+    foo.setId(15L);
+
+    JoinRequest reqFoo = new JoinRequest();
+    reqFoo.setInteractor(foo);
+    reqFoo.setReceiverInteractor(creator);
+    reqFoo.setConfirmedAt(new Date());
+
+    Person bar = new Person();
+    bar.setId(16L);
+    JoinRequest reqBar = new JoinRequest();
+    reqBar.setInteractor(creator);
+    reqBar.setReceiverInteractor(bar);
+
+    Mockito.when(groupService.getGroup(22L)).thenReturn(event);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(14L, 17L))
+      .thenReturn(false);
+    Mockito
+      .when(joinRequestRepository.findExistingForGroup(22L))
+      .thenReturn(List.of(reqFoo, reqBar));
+
+    assertFalse(joinRequestService.isMemberOfGroup(22L, 17L));
+  }
 
   @Test
   public void joinGroupCreatesRequestWherePersonIsCreatorAndGroupCreatorIsReceiver()
@@ -120,7 +331,7 @@ public class JoinRequestServiceTest {
   }
 
   @Test
-  public void inviteToGroupCreatesRequestCreatedByAttemptingPerson()
+  public void inviteToGroupCreatesRequestCreatedByGroupCreator()
     throws NotAuthorizedException {
     Person host = new Person();
     host.setId(35L);
@@ -144,6 +355,38 @@ public class JoinRequestServiceTest {
     JoinRequest joinRequest = joinRequestService.inviteToGroup(35L, 24L, 12L);
 
     assertEquals(host, joinRequest.getInteractor());
+    assertEquals(invited, joinRequest.getReceiverInteractor());
+    assertEquals(group, joinRequest.getGroup());
+
+    verify(interactionService, times(1)).saveInteraction(joinRequest);
+  }
+
+  @Test
+  public void inviteToGroupCreatesRequestCreatedByEventCreator()
+    throws NotAuthorizedException {
+    Person host = new Person();
+    host.setId(35L);
+    Person invited = new Person();
+    invited.setId(24L);
+    PeopleGroup group = new PeopleGroup();
+    Page creator = new Page();
+    group.setInteractor(creator);
+
+    Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
+    Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(35L, 24L))
+      .thenReturn(false);
+    Mockito
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    JoinRequest joinRequest = joinRequestService.inviteToGroup(35L, 24L, 12L);
+
+    assertEquals(creator, joinRequest.getInteractor());
     assertEquals(invited, joinRequest.getReceiverInteractor());
     assertEquals(group, joinRequest.getGroup());
 

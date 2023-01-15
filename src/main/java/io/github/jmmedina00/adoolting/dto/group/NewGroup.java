@@ -1,6 +1,6 @@
 package io.github.jmmedina00.adoolting.dto.group;
 
-import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import java.io.Serializable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -15,7 +15,7 @@ public class NewGroup implements Serializable {
   private String description;
 
   @NotNull
-  private GroupAccessLevel accessLevel;
+  private AccessLevel accessLevel;
 
   public String getName() {
     return name;
@@ -33,11 +33,11 @@ public class NewGroup implements Serializable {
     this.description = description;
   }
 
-  public GroupAccessLevel getAccessLevel() {
+  public AccessLevel getAccessLevel() {
     return accessLevel;
   }
 
-  public void setAccessLevel(GroupAccessLevel accessLevel) {
+  public void setAccessLevel(AccessLevel accessLevel) {
     this.accessLevel = accessLevel;
   }
 }

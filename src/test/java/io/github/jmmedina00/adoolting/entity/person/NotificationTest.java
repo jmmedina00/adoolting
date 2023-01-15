@@ -280,10 +280,6 @@ public class NotificationTest {
 
   @Test
   public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestNotCreatedByJoiningPersonInEvent() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-    Mockito.when(commenter.getId()).thenReturn(2L);
-
     Page page = new Page();
     page.setName("Page");
     page.setId(18L);
@@ -294,7 +290,7 @@ public class NotificationTest {
 
     JoinRequest joinRequest = new JoinRequest();
     joinRequest.setId(18L);
-    joinRequest.setInteractor(commenter); // commenter is manager of page
+    joinRequest.setInteractor(page);
     joinRequest.setReceiverInteractor(person);
     joinRequest.setGroup(group);
 

@@ -1,7 +1,7 @@
 package io.github.jmmedina00.adoolting.entity.group;
 
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -24,7 +24,7 @@ public class PeopleGroup extends Interaction {
 
   @Enumerated(EnumType.STRING)
   @Column
-  private GroupAccessLevel accessLevel;
+  private AccessLevel accessLevel;
 
   @UpdateTimestamp
   private Date updatedAt;
@@ -48,11 +48,11 @@ public class PeopleGroup extends Interaction {
     this.description = description;
   }
 
-  public GroupAccessLevel getAccessLevel() {
+  public AccessLevel getAccessLevel() {
     return accessLevel;
   }
 
-  public void setAccessLevel(GroupAccessLevel accessLevel) {
+  public void setAccessLevel(AccessLevel accessLevel) {
     this.accessLevel = accessLevel;
   }
 

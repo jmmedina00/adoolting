@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.common.TimeExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
-import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
@@ -57,7 +57,7 @@ public class EventServiceTest {
   public void prepareDto() {
     newEvent.setName("My event");
     newEvent.setDescription("This is an event");
-    newEvent.setAccessLevel(GroupAccessLevel.OPEN);
+    newEvent.setAccessLevel(AccessLevel.OPEN);
     newEvent.setLocation("Somewhere");
     newEvent.setCreateAs(1L);
     newEvent.setDate(new DateExtractOfDate(new Date(1899331200000L))); // 2030/03/10

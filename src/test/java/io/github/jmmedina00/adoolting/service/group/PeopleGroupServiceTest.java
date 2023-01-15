@@ -15,7 +15,7 @@ import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
-import io.github.jmmedina00.adoolting.entity.enums.GroupAccessLevel;
+import io.github.jmmedina00.adoolting.entity.enums.AccessLevel;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.page.Page;
@@ -143,7 +143,7 @@ public class PeopleGroupServiceTest {
     NewGroup newGroup = new NewGroup();
     newGroup.setName("My group");
     newGroup.setDescription("This is a group");
-    newGroup.setAccessLevel(GroupAccessLevel.WATCH_ONLY);
+    newGroup.setAccessLevel(AccessLevel.WATCH_ONLY);
 
     Person person = new Person();
     Mockito.when(personService.getPerson(1L)).thenReturn(person);
@@ -197,7 +197,7 @@ public class PeopleGroupServiceTest {
     NewGroup newGroup = new NewGroup();
     newGroup.setName("My group");
     newGroup.setDescription("This is a group");
-    newGroup.setAccessLevel(GroupAccessLevel.WATCH_ONLY);
+    newGroup.setAccessLevel(AccessLevel.WATCH_ONLY);
 
     Mockito
       .when(groupRepository.findActiveGroup(2L))
@@ -224,7 +224,7 @@ public class PeopleGroupServiceTest {
     PeopleGroup group = new PeopleGroup();
     group.setName("My group");
     group.setDescription("This is a group");
-    group.setAccessLevel(GroupAccessLevel.WATCH_ONLY);
+    group.setAccessLevel(AccessLevel.WATCH_ONLY);
 
     Mockito
       .when(groupRepository.findActiveGroup(1L))
@@ -244,7 +244,7 @@ public class PeopleGroupServiceTest {
     person.setId(4L);
     event.setName("My group");
     event.setDescription("This is a group");
-    event.setAccessLevel(GroupAccessLevel.WATCH_ONLY);
+    event.setAccessLevel(AccessLevel.WATCH_ONLY);
     event.setLocation("Somewhere");
     event.setHappeningAt(new Date());
     event.setInteractor(person);
@@ -282,7 +282,7 @@ public class PeopleGroupServiceTest {
     person.setId(4L);
     event.setName("My group");
     event.setDescription("This is a group");
-    event.setAccessLevel(GroupAccessLevel.WATCH_ONLY);
+    event.setAccessLevel(AccessLevel.WATCH_ONLY);
     event.setLocation("Somewhere");
     event.setHappeningAt(resultingDate);
     event.setInteractor(person);
