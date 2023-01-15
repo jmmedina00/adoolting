@@ -2,6 +2,8 @@ package io.github.jmmedina00.adoolting.service.group;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
@@ -17,8 +20,10 @@ import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
+import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
+import io.github.jmmedina00.adoolting.service.person.PersonSettingsService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +50,12 @@ public class JoinRequestServiceTest {
 
   @MockBean
   private InteractionService interactionService;
+
+  @MockBean
+  private ConfirmableInteractionService cInteractionService;
+
+  @MockBean
+  private PersonSettingsService settingsService;
 
   @Autowired
   private JoinRequestService joinRequestService;
@@ -340,6 +351,11 @@ public class JoinRequestServiceTest {
     PeopleGroup group = new PeopleGroup();
     group.setInteractor(host);
 
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(interaction);
     Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
     Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
     Mockito
@@ -357,6 +373,7 @@ public class JoinRequestServiceTest {
     assertEquals(host, joinRequest.getInteractor());
     assertEquals(invited, joinRequest.getReceiverInteractor());
     assertEquals(group, joinRequest.getGroup());
+    assertNull(joinRequest.getConfirmedAt());
 
     verify(interactionService, times(1)).saveInteraction(joinRequest);
   }
@@ -372,6 +389,11 @@ public class JoinRequestServiceTest {
     Page creator = new Page();
     group.setInteractor(creator);
 
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(interaction);
     Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
     Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
     Mockito
@@ -389,6 +411,7 @@ public class JoinRequestServiceTest {
     assertEquals(creator, joinRequest.getInteractor());
     assertEquals(invited, joinRequest.getReceiverInteractor());
     assertEquals(group, joinRequest.getGroup());
+    assertNull(joinRequest.getConfirmedAt());
 
     verify(interactionService, times(1)).saveInteraction(joinRequest);
   }
@@ -403,6 +426,12 @@ public class JoinRequestServiceTest {
     JoinRequest existing = new JoinRequest();
     PeopleGroup group = new PeopleGroup();
     group.setInteractor(host);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(interaction);
 
     Mockito
       .when(groupService.getGroupManagedByPerson(12L, 35L))
@@ -477,6 +506,11 @@ public class JoinRequestServiceTest {
     PeopleGroup group = new PeopleGroup();
     group.setInteractor(creator);
 
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(interaction);
     Mockito
       .when(groupService.getGroupManagedByPerson(12L, 35L))
       .thenReturn(group);
@@ -492,5 +526,134 @@ public class JoinRequestServiceTest {
         joinRequestService.inviteToGroup(35L, 24L, 12L);
       }
     );
+  }
+
+  @Test
+  public void inviteToGroupOnlyProceedsWhenThereIsNotFriendshipIfTheInvitedPersonExplicitlyAllowsInvitesFromStrangers()
+    throws NotAuthorizedException {
+    Person host = new Person();
+    host.setId(35L);
+    Person invited = new Person();
+    invited.setId(24L);
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(host);
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(null);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          24L,
+          PersonSettingsService.INVITE_TO_GROUP
+        )
+      )
+      .thenReturn(true);
+    Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
+    Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(35L, 24L))
+      .thenReturn(false);
+    Mockito
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    JoinRequest joinRequest = joinRequestService.inviteToGroup(35L, 24L, 12L);
+
+    assertEquals(host, joinRequest.getInteractor());
+    assertEquals(invited, joinRequest.getReceiverInteractor());
+    assertEquals(group, joinRequest.getGroup());
+    assertNull(joinRequest.getConfirmedAt());
+
+    verify(interactionService, times(1)).saveInteraction(joinRequest);
+  }
+
+  @Test
+  public void inviteToGroupThrowsWhenThereIsNoFriendshipAndInvitedPersonDisallowsInvitesFromStrangers()
+    throws NotAuthorizedException {
+    Person host = new Person();
+    host.setId(35L);
+    Person invited = new Person();
+    invited.setId(24L);
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(host);
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(null);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          24L,
+          PersonSettingsService.INVITE_TO_GROUP
+        )
+      )
+      .thenReturn(false);
+    Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
+    Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(35L, 24L))
+      .thenReturn(false);
+    Mockito
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        joinRequestService.inviteToGroup(35L, 24L, 12L);
+      }
+    );
+  }
+
+  @Test
+  public void inviteToGroupAlsoFillsInConfirmedDateIfBothPersonsAreFriendsAndInvitedHasSettingToggled()
+    throws NotAuthorizedException {
+    Person host = new Person();
+    host.setId(35L);
+    Person invited = new Person();
+    invited.setId(24L);
+    PeopleGroup group = new PeopleGroup();
+    group.setInteractor(host);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+
+    Mockito
+      .when(cInteractionService.getPersonFriendship(35L, 24L))
+      .thenReturn(interaction);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          24L,
+          PersonSettingsService.AUTO_ACCEPT_INVITE
+        )
+      )
+      .thenReturn(true);
+    Mockito.when(interactorService.getInteractor(35L)).thenReturn(host);
+    Mockito.when(interactorService.getInteractor(24L)).thenReturn(invited);
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(35L, 24L))
+      .thenReturn(false);
+    Mockito
+      .when(groupService.getGroupManagedByPerson(12L, 35L))
+      .thenReturn(group);
+    Mockito
+      .when(interactionService.saveInteraction(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    JoinRequest joinRequest = joinRequestService.inviteToGroup(35L, 24L, 12L);
+
+    assertEquals(host, joinRequest.getInteractor());
+    assertEquals(invited, joinRequest.getReceiverInteractor());
+    assertEquals(group, joinRequest.getGroup());
+    assertNotNull(joinRequest.getConfirmedAt());
+
+    verify(interactionService, times(2)).saveInteraction(joinRequest);
   }
 }

@@ -82,8 +82,8 @@ public class ProfileController {
     );
 
     AccessLevel accessLevel = accessLevelService.getAccessLevelThatPersonHasOnInteractor(
-      personId,
-      authenticatedPersonId
+      authenticatedPersonId,
+      personId
     );
     logger.debug("accessLevel of person {} is {}", personId, accessLevel);
 

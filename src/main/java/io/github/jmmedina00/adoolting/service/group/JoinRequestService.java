@@ -1,13 +1,17 @@
 package io.github.jmmedina00.adoolting.service.group;
 
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.JoinRequestRepository;
+import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
+import io.github.jmmedina00.adoolting.service.person.PersonSettingsService;
+import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,12 @@ public class JoinRequestService {
 
   @Autowired
   private InteractionService interactionService;
+
+  @Autowired
+  private ConfirmableInteractionService cInteractionService;
+
+  @Autowired
+  private PersonSettingsService settingsService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     JoinRequestService.class
@@ -119,8 +129,6 @@ public class JoinRequestService {
     Long groupId
   )
     throws NotAuthorizedException {
-    // TODO: check invited person settings before proceeding
-
     PeopleGroup group = groupService.getGroupManagedByPerson(
       groupId,
       hostPersonId
@@ -155,13 +163,51 @@ public class JoinRequestService {
       throw new NotAuthorizedException();
     }
 
+    ConfirmableInteraction friendship = cInteractionService.getPersonFriendship(
+      hostPersonId,
+      invitedPersonId
+    );
+
+    if (
+      friendship == null &&
+      !settingsService.isAllowedByPerson(
+        invitedPersonId,
+        PersonSettingsService.INVITE_TO_GROUP
+      )
+    ) {
+      logger.debug(
+        "Person {} is not friends with host {} and does not allow invites from strangers.",
+        invitedPersonId,
+        hostPersonId
+      );
+      throw new NotAuthorizedException();
+    }
+
     logger.info(
       "Person {} is inviting person {} to group {}",
       hostPersonId,
       invitedPersonId,
       groupId
     );
-    return createJoinRequest(groupCreator, invited, group);
+
+    JoinRequest joinRequest = createJoinRequest(groupCreator, invited, group);
+
+    if (
+      friendship != null &&
+      settingsService.isAllowedByPerson(
+        invitedPersonId,
+        PersonSettingsService.AUTO_ACCEPT_INVITE
+      )
+    ) {
+      joinRequest.setConfirmedAt(new Date());
+      interactionService.saveInteraction(joinRequest);
+      logger.info(
+        "Join request {} has been automatically confirmed.",
+        joinRequest.getId()
+      );
+    }
+
+    return joinRequest;
   }
 
   private JoinRequest createJoinRequest(
