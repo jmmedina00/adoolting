@@ -2,6 +2,7 @@ package io.github.jmmedina00.adoolting.controller.page;
 
 import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.interaction.ProfilePictureFile;
+import io.github.jmmedina00.adoolting.dto.page.NewPage;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
@@ -42,6 +43,7 @@ public class PageManagementController {
     }
 
     model.addAttribute("page", page);
+    model.addAttribute("form", pageService.getPageForm(pageId));
     model.addAttribute("pfp", new ProfilePictureFile());
     model.addAttribute("managers", pageService.getPageManagers(pageId));
     model.addAttribute(
@@ -64,6 +66,17 @@ public class PageManagementController {
     model.addAttribute("page", page);
     model.addAttribute("confirm", new SecureDeletion());
     return "page/delete";
+  }
+
+  @RequestMapping(method = RequestMethod.POST)
+  public String updatePage(
+    @PathVariable("id") Long pageId,
+    @ModelAttribute("form") @Valid NewPage form
+  )
+    throws NotAuthorizedException {
+    pageService.updatePage(pageId, AuthenticatedPerson.getPersonId(), form);
+
+    return "redirect:/page/" + pageId + "/manage";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{personId}")

@@ -10,6 +10,16 @@
     <input type="submit" value="Send" />
   </p>
 </form>
+<form
+  th:action="@{/page/{id}/manage(id=${page.id})}"
+  method="post"
+  th:object="${form}"
+>
+  <div th:replace="common/form :: field (label='Name', name='name')"></div>
+  <div th:replace="common/form :: bigfield (label='About', name='about')"></div>
+  <div th:replace="common/form :: field (label='Webpage', name='url')"></div>
+  <button type="submit">Update</button>
+</form>
 <ul>
   <li th:each="person : ${managers}">
     <span th:text="${person.firstName}"></span>

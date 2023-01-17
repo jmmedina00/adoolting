@@ -75,6 +75,33 @@ public class PageService {
     return finalized;
   }
 
+  public NewPage getPageForm(Long pageId) {
+    Page page = getPage(pageId);
+    NewPage form = new NewPage();
+    form.setName(page.getName());
+    form.setAbout(page.getAbout());
+    form.setUrl(page.getUrl());
+
+    return form;
+  }
+
+  public Page updatePage(Long pageId, Long personId, NewPage form)
+    throws NotAuthorizedException {
+    Page page = getPage(pageId);
+
+    if (!Objects.equals(personId, page.getCreatedByPerson().getId())) {
+      throw new NotAuthorizedException();
+    }
+
+    page.setName(form.getName());
+    page.setAbout(form.getAbout());
+    page.setUrl(form.getUrl());
+
+    Page saved = pageRepository.save(page);
+    logger.info("Page {} has been updated by person {}", pageId, personId);
+    return saved;
+  }
+
   public Page createPage(NewPage newPage, Long personId) {
     Person person = personService.getPerson(personId);
     Page page = new Page();

@@ -145,6 +145,83 @@ public class PageServiceTest {
   }
 
   @Test
+  public void getPageFormTransfersPageInfoBackIntoForm() {
+    Page page = new Page();
+    page.setName("Page");
+    page.setAbout("This is a page");
+    page.setUrl("http://test.local");
+
+    Mockito
+      .when(pageRepository.findActivePage(4L))
+      .thenReturn(Optional.of(page));
+
+    NewPage form = pageService.getPageForm(4L);
+
+    assertEquals(page.getName(), form.getName());
+    assertEquals(page.getAbout(), form.getAbout());
+    assertEquals(page.getUrl(), form.getUrl());
+  }
+
+  @Test
+  public void updatePageUpdatesPageInformationAndSavesToRepository()
+    throws NotAuthorizedException {
+    Person person = new Person();
+    person.setId(3L);
+
+    Page page = new Page();
+    page.setName("Test");
+    page.setAbout("Testing");
+    page.setUrl("www.test.local");
+    page.setCreatedByPerson(person);
+
+    NewPage newPage = new NewPage();
+    newPage.setName("Page");
+    newPage.setAbout("This is a page");
+    newPage.setUrl("http://test.local");
+
+    Mockito
+      .when(pageRepository.findActivePage(4L))
+      .thenReturn(Optional.of(page));
+    Mockito
+      .when(pageRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Page saved = pageService.updatePage(4L, 3L, newPage);
+    assertEquals(page, saved);
+    assertEquals(newPage.getName(), saved.getName());
+    assertEquals(newPage.getAbout(), saved.getAbout());
+    assertEquals(newPage.getUrl(), saved.getUrl());
+  }
+
+  @Test
+  public void updatePageThrowsIfSomeoneOtherThanPageCreatorTriesToUpdateThePage() {
+    Person person = new Person();
+    person.setId(3L);
+
+    Page page = new Page();
+    page.setName("Test");
+    page.setAbout("Testing");
+    page.setUrl("www.test.local");
+    page.setCreatedByPerson(person);
+
+    NewPage newPage = new NewPage();
+    newPage.setName("Page");
+    newPage.setAbout("This is a page");
+    newPage.setUrl("http://test.local");
+
+    Mockito
+      .when(pageRepository.findActivePage(4L))
+      .thenReturn(Optional.of(page));
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        pageService.updatePage(4L, 5L, newPage);
+      }
+    );
+  }
+
+  @Test
   public void createPageCreatesPageWithSpecifiedDetails() {
     Person creator = new Person();
 
