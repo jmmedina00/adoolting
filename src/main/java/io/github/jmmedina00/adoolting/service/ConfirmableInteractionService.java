@@ -74,7 +74,7 @@ public class ConfirmableInteractionService {
     throws NotAuthorizedException {
     ConfirmableInteraction interaction = cInteractionRepository
       .findById(interactionId)
-      .orElseThrow(NotAuthorizedException::new); // TODO keep representing persons in mind
+      .orElseThrow(NotAuthorizedException::new);
 
     Long receiverId = interaction.getReceiverInteractor().getId();
 
