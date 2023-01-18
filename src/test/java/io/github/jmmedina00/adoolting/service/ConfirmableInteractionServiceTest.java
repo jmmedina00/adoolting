@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
@@ -40,6 +41,9 @@ public class ConfirmableInteractionServiceTest {
 
   @MockBean
   private InteractionService interactionService;
+
+  @MockBean
+  private InteractorService interactorService;
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
@@ -77,15 +81,17 @@ public class ConfirmableInteractionServiceTest {
   @Test
   public void decideInteractionResultSetsConfirmedIfAcceptedAndSavesThroughInteractionService()
     throws NotAuthorizedException {
+    Person person = new Person();
+    person.setId(7L);
+
     ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setReceiverInteractor(person);
 
     Mockito
-      .when(
-        cInteractionRepository.findPendingConfirmableInteractionForInteractor(
-          20L,
-          7L
-        )
-      )
+      .when(interactorService.isInteractorRepresentableByPerson(7L, 7L))
+      .thenReturn(true);
+    Mockito
+      .when(cInteractionRepository.findById(20L))
       .thenReturn(Optional.of(interaction));
     Mockito
       .when(interactionService.saveInteraction(any()))
@@ -104,15 +110,17 @@ public class ConfirmableInteractionServiceTest {
   @Test
   public void decideInteractionResultSetsIgnoredAtIfIgnoredAndSavesThroughInteractionService()
     throws NotAuthorizedException {
+    Person person = new Person();
+    person.setId(7L);
+
     ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setReceiverInteractor(person);
 
     Mockito
-      .when(
-        cInteractionRepository.findPendingConfirmableInteractionForInteractor(
-          20L,
-          7L
-        )
-      )
+      .when(interactorService.isInteractorRepresentableByPerson(7L, 7L))
+      .thenReturn(true);
+    Mockito
+      .when(cInteractionRepository.findById(20L))
       .thenReturn(Optional.of(interaction));
     Mockito
       .when(interactionService.saveInteraction(any()))
@@ -131,13 +139,33 @@ public class ConfirmableInteractionServiceTest {
   @Test
   public void decideInteractionResultThrowsIfInteractionCannotBefound() {
     Mockito
-      .when(
-        cInteractionRepository.findPendingConfirmableInteractionForInteractor(
-          20L,
-          7L
-        )
-      )
+      .when(cInteractionRepository.findById(20L))
       .thenReturn(Optional.empty());
+
+    assertThrows(
+      NotAuthorizedException.class,
+      () -> {
+        cInteractionService.decideInteractionResult(20L, 7L, false);
+      }
+    );
+
+    verify(interactionService, never()).saveInteraction(any());
+  }
+
+  @Test
+  public void decideInteractionResultThrowsIfInteractorReceiverIsNotRepresentableByAttemptingPerson() {
+    Page page = new Page();
+    page.setId(9L);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setReceiverInteractor(page);
+
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(9L, 7L))
+      .thenReturn(false);
+    Mockito
+      .when(cInteractionRepository.findById(20L))
+      .thenReturn(Optional.of(interaction));
 
     assertThrows(
       NotAuthorizedException.class,

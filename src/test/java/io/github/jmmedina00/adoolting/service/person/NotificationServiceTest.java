@@ -12,10 +12,14 @@ import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
+import io.github.jmmedina00.adoolting.entity.group.Event;
+import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.util.EmailService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
@@ -47,6 +51,9 @@ public class NotificationServiceTest {
 
   @MockBean
   private EmailService emailService;
+
+  @MockBean
+  private InteractorService interactorService;
 
   @Autowired
   private NotificationService notificationService;
@@ -318,5 +325,173 @@ public class NotificationServiceTest {
 
     verify(emailService, times(1)).setUpEmailJob(notification, "accepted");
     verify(settingsService, never()).getNotificationSetting(14L, 0);
+  }
+
+  @Test
+  public void createNotificationsCreatesNotificationAndSendsEmailForGroupCreatorWhenItIsReceiver() {
+    Person sender = new Person();
+    sender.setId(14L);
+    Person notiReceiever = new Person();
+    notiReceiever.setId(15L);
+
+    Page eventCreator = new Page();
+    eventCreator.setId(17L);
+
+    Event event = new Event();
+    event.setInteractor(eventCreator);
+
+    JoinRequest request = new JoinRequest();
+    request.setInteractor(sender);
+    request.setReceiverInteractor(eventCreator);
+    request.setGroup(event);
+
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(17L, 15L))
+      .thenReturn(true);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          15L,
+          PersonSettingsService.EMAIL_CONFIRMABLE
+        )
+      )
+      .thenReturn(true);
+    Mockito
+      .when(notificationRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+    notificationService.createNotifications(request, notiReceiever, 0);
+
+    verify(notificationRepository, times(1)).save(notificationCaptor.capture());
+    Notification notification = notificationCaptor.getValue();
+    assertEquals(notiReceiever, notification.getForPerson());
+    assertEquals(request, notification.getInteraction());
+
+    verify(emailService, times(1)).setUpEmailJob(notification, "pending");
+    verify(settingsService, never()).getNotificationSetting(14L, 0);
+  }
+
+  @Test
+  public void createNotificationsCreatesNotificationAndSendsEmailForGroupCreatorWhenItIsSender() {
+    Person sender = new Person();
+    sender.setId(14L);
+    Person receiver = new Person();
+    receiver.setId(15L);
+
+    Page eventCreator = new Page();
+    eventCreator.setId(17L);
+
+    Event event = new Event();
+    event.setInteractor(eventCreator);
+
+    JoinRequest request = new JoinRequest();
+    request.setInteractor(eventCreator);
+    request.setReceiverInteractor(receiver);
+    request.setGroup(event);
+
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(17L, 14L))
+      .thenReturn(true);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          14L,
+          PersonSettingsService.EMAIL_CONFIRMABLE
+        )
+      )
+      .thenReturn(true);
+    Mockito
+      .when(notificationRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+    notificationService.createNotifications(request, sender, 0);
+
+    verify(notificationRepository, times(1)).save(notificationCaptor.capture());
+    Notification notification = notificationCaptor.getValue();
+    assertEquals(sender, notification.getForPerson());
+    assertEquals(request, notification.getInteraction());
+
+    verify(emailService, times(1)).setUpEmailJob(notification, "accepted");
+    verify(settingsService, never()).getNotificationSetting(14L, 0);
+  }
+
+  @Test
+  public void createNotificationsCreatesNotificationAndSendsEmailForSenderWhenItHasRequestedToJoinGroup() {
+    Person sender = new Person();
+    sender.setId(15L);
+
+    Page eventCreator = new Page();
+    eventCreator.setId(17L);
+
+    Event event = new Event();
+    event.setInteractor(eventCreator);
+
+    JoinRequest request = new JoinRequest();
+    request.setInteractor(sender);
+    request.setReceiverInteractor(eventCreator);
+    request.setGroup(event);
+
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(17L, 15L))
+      .thenReturn(false);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          15L,
+          PersonSettingsService.EMAIL_CONFIRMABLE
+        )
+      )
+      .thenReturn(true);
+    Mockito
+      .when(notificationRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+    notificationService.createNotifications(request, sender, 0);
+
+    verify(notificationRepository, times(1)).save(notificationCaptor.capture());
+    Notification notification = notificationCaptor.getValue();
+    assertEquals(sender, notification.getForPerson());
+    assertEquals(request, notification.getInteraction());
+
+    verify(emailService, times(1)).setUpEmailJob(notification, "accepted");
+    verify(settingsService, never()).getNotificationSetting(15L, 0);
+  }
+
+  @Test
+  public void createNotificationsCreatesNotificationAndSendsEmailForReceiverWhenItHasBeenInvitedToJoinGroup() {
+    Person receiver = new Person();
+    receiver.setId(15L);
+
+    Page eventCreator = new Page();
+    eventCreator.setId(17L);
+
+    Event event = new Event();
+    event.setInteractor(eventCreator);
+
+    JoinRequest request = new JoinRequest();
+    request.setInteractor(eventCreator);
+    request.setReceiverInteractor(receiver);
+    request.setGroup(event);
+
+    Mockito
+      .when(interactorService.isInteractorRepresentableByPerson(17L, 15L))
+      .thenReturn(false);
+    Mockito
+      .when(
+        settingsService.isAllowedByPerson(
+          15L,
+          PersonSettingsService.EMAIL_CONFIRMABLE
+        )
+      )
+      .thenReturn(true);
+    Mockito
+      .when(notificationRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+    notificationService.createNotifications(request, receiver, 0);
+
+    verify(notificationRepository, times(1)).save(notificationCaptor.capture());
+    Notification notification = notificationCaptor.getValue();
+    assertEquals(receiver, notification.getForPerson());
+    assertEquals(request, notification.getInteraction());
+
+    verify(emailService, times(1)).setUpEmailJob(notification, "pending");
+    verify(settingsService, never()).getNotificationSetting(15L, 0);
   }
 }

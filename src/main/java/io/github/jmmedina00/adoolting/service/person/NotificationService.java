@@ -3,9 +3,11 @@ package io.github.jmmedina00.adoolting.service.person;
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.enums.NotificationSetting;
+import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.person.Notification;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.repository.person.NotificationRepository;
+import io.github.jmmedina00.adoolting.service.InteractorService;
 import io.github.jmmedina00.adoolting.service.util.EmailService;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +29,9 @@ public class NotificationService {
 
   @Autowired
   private EmailService emailService;
+
+  @Autowired
+  private InteractorService interactorService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     NotificationService.class
@@ -185,6 +190,19 @@ public class NotificationService {
       interaction.getReceiverInteractor().getId()
     );
     int position = interactorIds.indexOf(person.getId());
+
+    if (interaction instanceof JoinRequest) {
+      Long groupCreatorId =
+        ((JoinRequest) interaction).getGroup().getInteractor().getId();
+
+      if (
+        interactorService.isInteractorRepresentableByPerson(
+          groupCreatorId,
+          personId
+        )
+      ) position = interactorIds.indexOf(groupCreatorId);
+    }
+
     String wantedTemplate = (position == 1) ? "pending" : "accepted"; // Assuming anything other than 1 to be (manager of) interactor
 
     logger.debug(

@@ -29,6 +29,9 @@ public class ConfirmableInteractionService {
   @Autowired
   private InteractionService interactionService;
 
+  @Autowired
+  private InteractorService interactorService;
+
   private static final Logger logger = LoggerFactory.getLogger(
     ConfirmableInteractionService.class
   );
@@ -36,14 +39,6 @@ public class ConfirmableInteractionService {
   public ConfirmableInteraction getConfirmableInteraction(Long interactionId) {
     return cInteractionRepository.findById(interactionId).orElseThrow();
   } // Needed for certain email templates
-
-  public List<ConfirmableInteraction> getPendingInteractionsForPerson(
-    Long personId
-  ) {
-    return cInteractionRepository.findPendingConfirmableInteractionsByInteractorId(
-      personId
-    );
-  }
 
   public ConfirmableInteraction getPersonFriendship(
     Long personId,
@@ -78,8 +73,16 @@ public class ConfirmableInteractionService {
   )
     throws NotAuthorizedException {
     ConfirmableInteraction interaction = cInteractionRepository
-      .findPendingConfirmableInteractionForInteractor(interactionId, personId)
-      .orElseThrow(() -> new NotAuthorizedException());
+      .findById(interactionId)
+      .orElseThrow(NotAuthorizedException::new); // TODO keep representing persons in mind
+
+    Long receiverId = interaction.getReceiverInteractor().getId();
+
+    if (
+      !interactorService.isInteractorRepresentableByPerson(receiverId, personId)
+    ) {
+      throw new NotAuthorizedException();
+    }
 
     Date now = new Date();
     if (isAccepted) {
