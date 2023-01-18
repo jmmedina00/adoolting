@@ -24,6 +24,13 @@
   <li th:each="person : ${managers}">
     <span th:text="${person.firstName}"></span>
     <span th:text="${person.lastName}"></span>
+    <form
+      th:action="@{/page/{pageId}/manage/{personId}/remove(pageId=${page.id},personId=${person.id})}"
+      method="post"
+      th:object="${form}"
+    >
+      <button type="submit">Remove</button>
+    </form>
   </li>
 </ul>
 <h3>Add as managers</h3>

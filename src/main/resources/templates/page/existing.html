@@ -1,6 +1,14 @@
 <h1 th:text="${page.name}"></h1>
 <p th:text="${page.about}"></p>
 <p th:if="${!#strings.isEmpty(page.url)}" th:text="${page.url}"></p>
+<form
+  th:action="@{/page/{pageId}/manage/{personId}/remove(pageId=${page.id},personId=${personId})}"
+  method="post"
+  th:object="${form}"
+  th:if="${managing}"
+>
+  <button type="submit">Remove myself</button>
+</form>
 <div>
   <span>
     <span th:text="${likeCount}"></span>

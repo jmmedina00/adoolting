@@ -60,6 +60,11 @@ public class PageController {
       "interactors",
       interactorService.getRepresentableInteractorsByPerson(personId, pageId)
     );
+    model.addAttribute("personId", personId);
+    model.addAttribute(
+      "managing",
+      pageService.isPageManagedByPerson(pageId, personId)
+    );
     model.addAttribute(
       "posts",
       interactionService.getInteractionsFromInteractor(pageId, pageable)

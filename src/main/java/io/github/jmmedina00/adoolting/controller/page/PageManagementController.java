@@ -8,6 +8,7 @@ import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.service.ConfirmableInteractionService;
+import io.github.jmmedina00.adoolting.service.page.PageManagerService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import java.util.Objects;
 import javax.validation.Valid;
@@ -25,6 +26,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class PageManagementController {
   @Autowired
   private PageService pageService;
+
+  @Autowired
+  private PageManagerService managerService;
 
   @Autowired
   private ConfirmableInteractionService cInteractionService;
@@ -91,6 +95,20 @@ public class PageManagementController {
       pageId
     );
     return "redirect:/page/" + pageId + "/manage";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/{personId}/remove")
+  public String removePersonFromManagingPage(
+    @PathVariable("id") Long pageId,
+    @PathVariable("personId") Long personId
+  )
+    throws NotAuthorizedException {
+    Long authPersonId = AuthenticatedPerson.getPersonId();
+    managerService.removeManagerFromPage(pageId, personId, authPersonId);
+
+    return Objects.equals(authPersonId, personId)
+      ? "redirect:/profile"
+      : "redirect:/page/" + pageId + "/manage";
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/delete")

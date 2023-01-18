@@ -3,8 +3,11 @@ package io.github.jmmedina00.adoolting.service.page;
 import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.page.PageManager;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageManagerRepository;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,45 @@ public class PageManagerService {
       page.getId(),
       saved.getId()
     );
+    return saved;
+  }
+
+  public PageManager removeManagerFromPage(
+    Long pageId,
+    Long personId,
+    Long attemptingPersonId
+  )
+    throws NotAuthorizedException {
+    PageManager manager = pageManagerRepository
+      .findPageManagerInstance(pageId, personId)
+      .orElseThrow(NotAuthorizedException::new);
+
+    Long actualPageCreatorId = manager.getPage().getCreatedByPerson().getId();
+
+    if (
+      List.of(personId, actualPageCreatorId).indexOf(attemptingPersonId) == -1
+    ) {
+      throw new NotAuthorizedException();
+    }
+
+    manager.setDeletedAt(new Date());
+    PageManager saved = pageManagerRepository.save(manager);
+
+    if (Objects.equals(attemptingPersonId, personId)) {
+      logger.info(
+        "Person {} has removed themselves from managing page {}",
+        personId,
+        pageId
+      );
+    } else {
+      logger.info(
+        "Person {} has revoked person {} from managing page {}",
+        attemptingPersonId,
+        personId,
+        pageId
+      );
+    }
+
     return saved;
   }
 }
