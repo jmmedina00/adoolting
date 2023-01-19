@@ -88,7 +88,20 @@ public class NotificationService {
       interaction.getId(),
       person.getId()
     );
-    notifyPersonIfWanted(interaction, person, code);
+
+    if (interaction instanceof ConfirmableInteraction) {
+      logger.debug(
+        "Interaction {} is confirmable, using special flow",
+        interaction.getId()
+      );
+      notifyConfirmable((ConfirmableInteraction) interaction, person);
+    } else {
+      logger.debug(
+        "Interaction {} is not confirmable, using normal flow.",
+        interaction.getId()
+      );
+      notifyPersonIfWanted(interaction, person, code);
+    }
   }
 
   private void notifyPersonIfWanted(
@@ -98,15 +111,6 @@ public class NotificationService {
   ) {
     Long personId = person.getId();
     Long interactionId = interaction.getId();
-
-    if (interaction instanceof ConfirmableInteraction) {
-      logger.debug(
-        "Interaction {} is confirmable, resorting to confirmable flow",
-        interactionId
-      );
-      notifyConfirmable((ConfirmableInteraction) interaction, person);
-      return;
-    }
 
     if (Objects.equals(personId, interaction.getInteractor().getId())) {
       logger.debug(
@@ -140,22 +144,7 @@ public class NotificationService {
         notification.getId()
       );
 
-      String template;
-
-      switch (code) {
-        case PersonSettingsService.NOTIFY_COMMENT:
-          template = "comment";
-          break;
-        case PersonSettingsService.NOTIFY_PAGE_INTERACTION:
-          template = "page-activity";
-          break;
-        case PersonSettingsService.NOTIFY_POST_FROM_OTHER:
-        default:
-          template = "new-post";
-          break;
-      }
-
-      emailService.setUpEmailJob(notification, template);
+      emailNotification(notification, code);
     }
   }
 
@@ -189,21 +178,10 @@ public class NotificationService {
       interaction.getInteractor().getId(),
       interaction.getReceiverInteractor().getId()
     );
-    int position = interactorIds.indexOf(person.getId());
-
-    if (interaction instanceof JoinRequest) {
-      Long groupCreatorId =
-        ((JoinRequest) interaction).getGroup().getInteractor().getId();
-
-      if (
-        interactorService.isInteractorRepresentableByPerson(
-          groupCreatorId,
-          personId
-        )
-      ) position = interactorIds.indexOf(groupCreatorId);
-    }
-
-    String wantedTemplate = (position == 1) ? "pending" : "accepted"; // Assuming anything other than 1 to be (manager of) interactor
+    int position = interactorIds.indexOf(
+      getInterestingInteractorIdToLookFor(notification)
+    );
+    String wantedTemplate = (position == 1) ? "pending" : "accepted";
 
     logger.debug(
       "Wanted template for notification {} is {}",
@@ -230,5 +208,45 @@ public class NotificationService {
     );
 
     return saved;
+  }
+
+  private void emailNotification(
+    Notification notification,
+    int notificationCode
+  ) {
+    String template;
+
+    switch (notificationCode) {
+      case PersonSettingsService.NOTIFY_COMMENT:
+        template = "comment";
+        break;
+      case PersonSettingsService.NOTIFY_PAGE_INTERACTION:
+        template = "page-activity";
+        break;
+      case PersonSettingsService.NOTIFY_POST_FROM_OTHER:
+      default:
+        template = "new-post";
+        break;
+    }
+
+    emailService.setUpEmailJob(notification, template);
+  }
+
+  private Long getInterestingInteractorIdToLookFor(Notification notification) {
+    Long personId = notification.getForPerson().getId();
+    ConfirmableInteraction interaction = (ConfirmableInteraction) notification.getInteraction();
+
+    if (!(interaction instanceof JoinRequest)) {
+      return personId;
+    }
+
+    Long groupCreatorId =
+      ((JoinRequest) interaction).getGroup().getInteractor().getId();
+    return interactorService.isInteractorRepresentableByPerson(
+        groupCreatorId,
+        personId
+      )
+      ? groupCreatorId
+      : personId;
   }
 }
