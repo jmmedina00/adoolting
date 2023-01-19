@@ -12,7 +12,6 @@ import io.github.jmmedina00.adoolting.entity.person.notification.InteractionStra
 import io.github.jmmedina00.adoolting.entity.person.notification.JoinRequestStrategy;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
 import java.util.Date;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -94,16 +93,13 @@ public class Notification implements Emailable {
     this.deletedAt = deletedAt;
   }
 
-  public boolean isActionable() { // TODO test/fix this method
+  public boolean isActionable() {
     if (!(interaction instanceof ConfirmableInteraction)) {
       return false;
     }
 
     ConfirmableInteraction cInteraction = (ConfirmableInteraction) interaction;
-    return Objects.equals(
-      cInteraction.getReceiverInteractor().getId(),
-      forPerson.getId()
-    );
+    return cInteraction.getConfirmedAt() == null;
   }
 
   @Override

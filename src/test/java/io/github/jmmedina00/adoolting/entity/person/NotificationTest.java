@@ -1,5 +1,7 @@
 package io.github.jmmedina00.adoolting.entity.person;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
@@ -11,12 +13,14 @@ import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
+import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.notification.CommentStrategy;
 import io.github.jmmedina00.adoolting.entity.person.notification.ConfirmableStrategy;
 import io.github.jmmedina00.adoolting.entity.person.notification.DataStrategy;
 import io.github.jmmedina00.adoolting.entity.person.notification.InteractionStrategy;
 import io.github.jmmedina00.adoolting.entity.person.notification.JoinRequestStrategy;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +59,80 @@ public class NotificationTest {
     commentMock.closeOnDemand();
     confirmableMock.closeOnDemand();
     joinRequestMock.closeOnDemand();
+  }
+
+  @Test
+  public void isActionableReturnsFalseIfInteractionIsNotConfirmable() {
+    Person sender = new Person();
+    sender.setId(16L);
+    Person receiver = new Person();
+    receiver.setId(17L);
+
+    Post post = new Post();
+    post.setInteractor(sender);
+
+    Notification notification = new Notification();
+    notification.setForPerson(receiver);
+    notification.setInteraction(post);
+
+    assertFalse(notification.isActionable());
+  }
+
+  @Test
+  public void isActionableReturnsTrueWhenInteractionIsConfirmable() {
+    Person sender = new Person();
+    sender.setId(16L);
+    Person receiver = new Person();
+    receiver.setId(17L);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setInteractor(sender);
+    interaction.setReceiverInteractor(receiver);
+
+    Notification notification = new Notification();
+    notification.setForPerson(receiver);
+    notification.setInteraction(interaction);
+
+    assertTrue(notification.isActionable());
+  }
+
+  @Test
+  public void isActionableReturnsTrueWhenInteractionIsConfirmableForPage() {
+    Person sender = new Person();
+    sender.setId(16L);
+    Person receiver = new Person();
+    receiver.setId(17L);
+    Page page = new Page();
+    page.setId(18L);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setInteractor(sender);
+    interaction.setReceiverInteractor(page);
+
+    Notification notification = new Notification();
+    notification.setForPerson(receiver);
+    notification.setInteraction(interaction);
+
+    assertTrue(notification.isActionable());
+  }
+
+  @Test
+  public void isActionableReturnsFalseWhenConfirmableInteractionHasAlreadyBeenConfirmed() {
+    Person sender = new Person();
+    sender.setId(16L);
+    Person receiver = new Person();
+    receiver.setId(17L);
+
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+    interaction.setInteractor(sender);
+    interaction.setReceiverInteractor(receiver);
+    interaction.setConfirmedAt(new Date());
+
+    Notification notification = new Notification();
+    notification.setForPerson(receiver);
+    notification.setInteraction(interaction);
+
+    assertFalse(notification.isActionable());
   }
 
   @Test
