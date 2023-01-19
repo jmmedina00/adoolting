@@ -2,15 +2,16 @@ package io.github.jmmedina00.adoolting.entity.person;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
-import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.cache.EmailData;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
+import io.github.jmmedina00.adoolting.entity.person.notification.CommentStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.ConfirmableStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.DataStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.InteractionStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.JoinRequestStrategy;
 import io.github.jmmedina00.adoolting.entity.util.Emailable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -93,7 +94,7 @@ public class Notification implements Emailable {
     this.deletedAt = deletedAt;
   }
 
-  public boolean isActionable() {
+  public boolean isActionable() { // TODO test/fix this method
     if (!(interaction instanceof ConfirmableInteraction)) {
       return false;
     }
@@ -107,63 +108,13 @@ public class Notification implements Emailable {
 
   @Override
   public EmailData getEmailData() {
-    EmailData data = new EmailData();
-    data.setPerson(forPerson);
+    DataStrategy strategy = new InteractionStrategy();
+    if (interaction instanceof Comment) strategy = new CommentStrategy();
+    if (interaction instanceof ConfirmableInteraction) strategy =
+      new ConfirmableStrategy();
+    if (interaction instanceof JoinRequest) strategy =
+      new JoinRequestStrategy();
 
-    HashMap<String, String> parameters = new HashMap<>();
-    parameters.put("interaction", interaction.getId().toString());
-    data.setParameters(parameters);
-
-    ArrayList<String> arguments = new ArrayList<>();
-    arguments.add(interaction.getInteractor().getFullName());
-
-    if (interaction instanceof Comment) {
-      Interaction commented = ((Comment) interaction).getReceiverInteraction();
-      arguments.add(commented.getInteractor().getFullName());
-
-      if (commented.getReceiverInteractor() != null) {
-        arguments.add(commented.getReceiverInteractor().getFullName());
-      }
-    } else if (interaction.getReceiverInteractor() != null) {
-      arguments.add(interaction.getReceiverInteractor().getFullName());
-    }
-
-    if (arguments.indexOf(forPerson.getFullName()) == -1) {
-      data.setSubjectAddendum("page");
-    } else {
-      data.setSubjectAddendum("profile");
-    }
-
-    if (interaction instanceof ConfirmableInteraction) {
-      ConfirmableInteraction cInteraction = (ConfirmableInteraction) interaction;
-
-      if (cInteraction.getConfirmedAt() != null) {
-        Collections.reverse(arguments);
-      }
-      data.setSubjectAddendum("friend");
-    }
-
-    if (interaction instanceof JoinRequest) {
-      JoinRequest joinRequest = (JoinRequest) interaction;
-      arguments.add(joinRequest.getGroup().getName());
-
-      Interactor groupCreator = joinRequest.getGroup().getInteractor();
-      String subjectAdd =
-        "group" +
-        (
-          Objects.equals(
-              interaction.getInteractor().getId(),
-              groupCreator.getId()
-            )
-            ? ".invite"
-            : ".request"
-        );
-
-      data.setSubjectAddendum(subjectAdd);
-    }
-
-    data.setSubjectArguments(arguments);
-
-    return data;
+    return strategy.generateData(interaction, forPerson);
   }
 }

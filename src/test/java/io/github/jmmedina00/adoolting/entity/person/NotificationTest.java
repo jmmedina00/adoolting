@@ -1,23 +1,29 @@
 package io.github.jmmedina00.adoolting.entity.person;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
-import io.github.jmmedina00.adoolting.entity.cache.EmailData;
-import io.github.jmmedina00.adoolting.entity.enums.Gender;
+import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.group.JoinRequest;
-import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.interaction.Comment;
 import io.github.jmmedina00.adoolting.entity.interaction.Post;
-import io.github.jmmedina00.adoolting.entity.page.Page;
+import io.github.jmmedina00.adoolting.entity.person.notification.CommentStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.ConfirmableStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.DataStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.InteractionStrategy;
+import io.github.jmmedina00.adoolting.entity.person.notification.JoinRequestStrategy;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.MockedConstruction;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
@@ -25,329 +31,127 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DisplayNameGeneration(MethodDoesThatNameGenerator.class)
 public class NotificationTest {
-  Person person;
-  Notification notification;
+  MockedConstruction<InteractionStrategy> interactionMock;
+  MockedConstruction<CommentStrategy> commentMock;
+  MockedConstruction<ConfirmableStrategy> confirmableMock;
+  MockedConstruction<JoinRequestStrategy> joinRequestMock;
+
+  List<MockedConstruction<? extends DataStrategy>> mocks;
 
   @BeforeEach
-  public void setUpPerson() {
-    person = new Person();
-    person.setId(13L);
-    person.setFirstName("Juan");
-    person.setLastName("Medina");
-    person.setEmail("juanmi@test.local");
-    person.setGender(Gender.HE);
+  public void initializeConstructorMocks() {
+    interactionMock = mockConstruction(InteractionStrategy.class);
+    commentMock = mockConstruction(CommentStrategy.class);
+    confirmableMock = mockConstruction(ConfirmableStrategy.class);
+    joinRequestMock = mockConstruction(JoinRequestStrategy.class);
 
-    notification = new Notification();
+    mocks =
+      List.of(interactionMock, commentMock, confirmableMock, joinRequestMock);
+  }
+
+  @AfterEach
+  public void closeConstructorMocks() {
+    interactionMock.closeOnDemand();
+    commentMock.closeOnDemand();
+    confirmableMock.closeOnDemand();
+    joinRequestMock.closeOnDemand();
+  }
+
+  @Test
+  public void getEmailDataGoesWithInteractionStrategyByDefault() {
+    Post post = new Post();
+    Person person = new Person();
+
+    Notification notification = new Notification();
     notification.setForPerson(person);
-  }
-
-  @Test
-  public void getEmailDataPopulatesPersonAndParametersWithMinimumInformation() {
-    Person creator = Mockito.mock(Person.class);
-    Mockito.when(creator.getFullName()).thenReturn("Maria Hernandez");
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(creator);
-
     notification.setInteraction(post);
 
-    EmailData data = notification.getEmailData();
-    assertEquals(person.getId(), data.getPerson().getId());
-    assertEquals(Map.of("interaction", "12"), data.getParameters());
+    notification.getEmailData();
+
+    assertWantedMethodWasCalled(interactionMock, post, person);
   }
 
   @Test
-  public void getEmailDataPopulatesInteractorNameIntoArguments() {
-    Page page = new Page();
-    page.setName("Test Page");
+  public void getEmailDataChoosesCommentStrategyIfInteractionIsAComment() {
+    Comment interaction = new Comment();
+    Person person = new Person();
 
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(page);
-
-    notification.setInteraction(post);
-    EmailData data = notification.getEmailData();
-    assertEquals(List.of("Test Page"), data.getSubjectArguments());
-  }
-
-  @Test
-  public void getEmailDataPopulatesInteractorInvolvedNamesIntoArguments() {
-    Page foo = new Page();
-    foo.setName("Alpha");
-    Page bar = new Page();
-    bar.setName("Bravo");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(foo);
-    post.setReceiverInteractor(bar);
-
-    notification.setInteraction(post);
-    EmailData data = notification.getEmailData();
-    assertEquals(List.of("Alpha", "Bravo"), data.getSubjectArguments());
-  }
-
-  @Test
-  public void getEmailDataAppendsOriginalInteractionCreatorIfInteractionIsAComment() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    Page page = new Page();
-    page.setName("Test Page");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(page);
-
-    Comment comment = new Comment();
-    comment.setId(14L);
-    comment.setInteractor(commenter);
-    comment.setReceiverInteraction(post);
-
-    notification.setInteraction(comment);
-    EmailData data = notification.getEmailData();
-    assertEquals(
-      List.of("Maria Hernandez", "Test Page"),
-      data.getSubjectArguments()
-    );
-  }
-
-  @Test
-  public void getEmailDataAppendsOriginalInteractionInvolvedInteractorsIfInteractionIsAComment() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    Page foo = new Page();
-    foo.setName("Alpha");
-    Page bar = new Page();
-    bar.setName("Bravo");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(foo);
-    post.setReceiverInteractor(bar);
-
-    Comment comment = new Comment();
-    comment.setId(14L);
-    comment.setInteractor(commenter);
-    comment.setReceiverInteraction(post);
-
-    notification.setInteraction(comment);
-    EmailData data = notification.getEmailData();
-    assertEquals(
-      List.of("Maria Hernandez", "Alpha", "Bravo"),
-      data.getSubjectArguments()
-    );
-  }
-
-  @Test
-  public void getEmailDataHasPageAddendumIfReceiverPersonIsNotInvolved() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    Page page = new Page();
-    page.setName("Page");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(commenter);
-    post.setReceiverInteractor(page);
-
-    notification.setInteraction(post);
-    EmailData data = notification.getEmailData();
-    assertEquals("page", data.getSubjectAddendum());
-  }
-
-  @Test
-  public void getEmailDataHasPageAddendumIfReceiverPersonIsNotInvolvedInComment() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    Page page = new Page();
-    page.setName("Page");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(page);
-
-    Comment comment = new Comment();
-    comment.setId(14L);
-    comment.setInteractor(commenter);
-    comment.setReceiverInteraction(post);
-
-    notification.setInteraction(comment);
-    EmailData data = notification.getEmailData();
-    assertEquals("page", data.getSubjectAddendum());
-  }
-
-  @Test
-  public void getEmailDataHasProfileAddendumIfReceiverPersonIsInvolved() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(commenter);
-    post.setReceiverInteractor(person);
-
-    notification.setInteraction(post);
-    EmailData data = notification.getEmailData();
-    assertEquals("profile", data.getSubjectAddendum());
-  }
-
-  @Test
-  public void getEmailDataHasProfileAddendumIfReceiverPersonIsInvolvedInComment() {
-    Page page = new Page();
-    page.setName("Page");
-
-    Post post = new Post();
-    post.setId(12L);
-    post.setInteractor(person);
-    post.setReceiverInteractor(page);
-
-    Comment comment = new Comment();
-    comment.setId(14L);
-    comment.setInteractor(page);
-    comment.setReceiverInteraction(post);
-
-    notification.setInteraction(comment);
-    EmailData data = notification.getEmailData();
-    assertEquals("profile", data.getSubjectAddendum());
-  }
-
-  @Test
-  public void getEmailDataHasFriendAddendumIfInteractionIsConfirmable() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
-    ConfirmableInteraction interaction = new ConfirmableInteraction();
-    interaction.setId(18L);
-    interaction.setConfirmedAt(null);
-    interaction.setInteractor(commenter);
-    interaction.setReceiverInteractor(person);
-
+    Notification notification = new Notification();
+    notification.setForPerson(person);
     notification.setInteraction(interaction);
-    EmailData data = notification.getEmailData();
-    assertEquals("friend", data.getSubjectAddendum());
-    assertEquals(
-      List.of("Maria Hernandez", "Juan Medina"),
-      data.getSubjectArguments()
-    );
+
+    notification.getEmailData();
+
+    assertWantedMethodWasCalled(commentMock, interaction, person);
   }
 
   @Test
-  public void getEmailDataReversesArgumentsOrderIfConfirmableInteractionIsAccepted() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-
+  public void getEmailDataChoosesConfirmableStrategyIfInteractionIsConfirmable() {
     ConfirmableInteraction interaction = new ConfirmableInteraction();
-    interaction.setId(18L);
-    interaction.setConfirmedAt(new Date(500));
-    interaction.setInteractor(person);
-    interaction.setReceiverInteractor(commenter);
+    Person person = new Person();
 
+    Notification notification = new Notification();
+    notification.setForPerson(person);
     notification.setInteraction(interaction);
-    EmailData data = notification.getEmailData();
-    assertEquals("friend", data.getSubjectAddendum());
-    assertEquals(
-      List.of("Maria Hernandez", "Juan Medina"),
-      data.getSubjectArguments()
-    );
+
+    notification.getEmailData();
+
+    assertWantedMethodWasCalled(confirmableMock, interaction, person);
   }
 
   @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestNotCreatedByJoiningPerson() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-    Mockito.when(commenter.getId()).thenReturn(2L);
+  public void getEmailDataChoosesJoinRequestStrategyIfInteractionIsAJoinRequest() {
+    JoinRequest interaction = new JoinRequest();
+    Person person = new Person();
 
-    PeopleGroup group = new PeopleGroup();
-    group.setInteractor(commenter);
-    group.setName("Group");
+    Notification notification = new Notification();
+    notification.setForPerson(person);
+    notification.setInteraction(interaction);
 
-    JoinRequest joinRequest = new JoinRequest();
-    joinRequest.setId(18L);
-    joinRequest.setInteractor(commenter);
-    joinRequest.setReceiverInteractor(person);
-    joinRequest.setGroup(group);
+    notification.getEmailData();
 
-    notification.setInteraction(joinRequest);
-    EmailData data = notification.getEmailData();
-    assertEquals("group.invite", data.getSubjectAddendum());
-    assertEquals(3, data.getSubjectArguments().size());
-    assertEquals("Group", data.getSubjectArguments().get(2));
+    assertWantedMethodWasCalled(joinRequestMock, interaction, person);
   }
 
-  @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestNotCreatedByJoiningPersonInEvent() {
-    Page page = new Page();
-    page.setName("Page");
-    page.setId(18L);
+  private void assertWantedMethodWasCalled(
+    MockedConstruction<? extends DataStrategy> strategyMock,
+    Interaction interaction,
+    Person person
+  ) {
+    int index = mocks.indexOf(strategyMock);
 
-    PeopleGroup group = new PeopleGroup();
-    group.setInteractor(page);
-    group.setName("Group");
+    IntStream
+      .range(0, mocks.size())
+      .filter(i -> i != index)
+      .mapToObj(i -> mocks.get(i))
+      .forEach(mock -> assertItWasNotCalled(mock, interaction, person));
 
-    JoinRequest joinRequest = new JoinRequest();
-    joinRequest.setId(18L);
-    joinRequest.setInteractor(page);
-    joinRequest.setReceiverInteractor(person);
-    joinRequest.setGroup(group);
-
-    notification.setInteraction(joinRequest);
-    EmailData data = notification.getEmailData();
-    assertEquals("group.invite", data.getSubjectAddendum());
-    assertEquals(3, data.getSubjectArguments().size());
-    assertEquals("Group", data.getSubjectArguments().get(2));
+    assertItWasCalled(strategyMock, interaction, person);
   }
 
-  @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasRequestAddendumIfInteractionIsJoinRequestCreatedByJoiningPerson() {
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-    Mockito.when(commenter.getId()).thenReturn(2L);
+  private void assertItWasCalled(
+    MockedConstruction<? extends DataStrategy> strategyMock,
+    Interaction interaction,
+    Person person
+  ) {
+    if (strategyMock.constructed().isEmpty()) {
+      fail("Mock was not used");
+    }
 
-    PeopleGroup group = new PeopleGroup();
-    group.setInteractor(commenter);
-    group.setName("Group");
-
-    JoinRequest joinRequest = new JoinRequest();
-    joinRequest.setId(18L);
-    joinRequest.setInteractor(person);
-    joinRequest.setReceiverInteractor(commenter);
-    joinRequest.setGroup(group);
-
-    notification.setInteraction(joinRequest);
-    EmailData data = notification.getEmailData();
-    assertEquals("group.request", data.getSubjectAddendum());
-    assertEquals(3, data.getSubjectArguments().size());
-    assertEquals("Group", data.getSubjectArguments().get(2));
+    verify(strategyMock.constructed().get(0), times(1))
+      .generateData(interaction, person);
   }
 
-  @Test
-  public void getEmailDataAddsGroupAndToArgumentsAndHasInviteAddendumIfInteractionIsJoinRequestCreatedByManager() {
-    Page page = new Page(); // person manages this page;
-    page.setName("Test");
-    page.setId(18L);
+  private void assertItWasNotCalled(
+    MockedConstruction<? extends DataStrategy> strategyMock,
+    Interaction interaction,
+    Person person
+  ) {
+    if (strategyMock.constructed().isEmpty()) {
+      return;
+    }
 
-    Person commenter = Mockito.mock(Person.class);
-    Mockito.when(commenter.getFullName()).thenReturn("Maria Hernandez");
-    Mockito.when(commenter.getId()).thenReturn(2L);
-
-    PeopleGroup group = new PeopleGroup();
-    group.setInteractor(page);
-    group.setName("Group");
-
-    JoinRequest joinRequest = new JoinRequest();
-    joinRequest.setId(19L);
-    joinRequest.setInteractor(page);
-    joinRequest.setReceiverInteractor(commenter);
-    joinRequest.setGroup(group);
-
-    notification.setInteraction(joinRequest);
-    EmailData data = notification.getEmailData();
-    assertEquals("group.invite", data.getSubjectAddendum());
-    assertEquals(3, data.getSubjectArguments().size());
-    assertEquals("Group", data.getSubjectArguments().get(2));
+    verify(strategyMock.constructed().get(0), never())
+      .generateData(interaction, person);
   }
 }
