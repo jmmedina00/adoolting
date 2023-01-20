@@ -1,5 +1,6 @@
 package io.github.jmmedina00.adoolting.service;
 
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
@@ -9,7 +10,9 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.NotificationService;
-import io.github.jmmedina00.adoolting.service.person.NotifiedInteractorService;
+import io.github.jmmedina00.adoolting.service.person.notification.CombinationSelector;
+import io.github.jmmedina00.adoolting.service.person.notification.ConfirmableSelector;
+import io.github.jmmedina00.adoolting.service.person.notification.PersonSelector;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,10 +31,7 @@ public class InteractionService {
   private InteractionRepository interactionRepository;
 
   @Autowired
-  private NotificationService notificationService; // ALL INTERACTIONS GO THROUGH HERE OwO
-
-  @Autowired
-  private NotifiedInteractorService notifiedInteractorService;
+  private NotificationService notificationService;
 
   @Autowired
   private InteractorService interactorService;
@@ -39,14 +39,38 @@ public class InteractionService {
   @Autowired
   private PageService pageService;
 
+  @Autowired
+  private ConfirmableSelector confirmableSelector;
+
+  @Autowired
+  private CombinationSelector comboSelector;
+
   private static final Logger logger = LoggerFactory.getLogger(
     InteractionService.class
   );
 
   public Interaction saveInteraction(Interaction interaction) {
     Interaction saved = interactionRepository.save(interaction);
+    Long savedId = saved.getId();
 
-    Map<Person, Integer> interestedInteractors = notifiedInteractorService.getInteractorsInterestedInInteraction(
+    if (interaction.getDeletedAt() != null) {
+      logger.debug(
+        "Interaction {} was deleted. No one to be notified.",
+        savedId
+      );
+      return saved;
+    }
+
+    PersonSelector selector = interaction instanceof ConfirmableInteraction
+      ? confirmableSelector
+      : comboSelector;
+    logger.debug(
+      "Selected person selector for interaction {} is {}",
+      savedId,
+      selector.getClass().getName()
+    );
+
+    Map<Person, Integer> interestedInteractors = selector.getPersonNotificationMap(
       saved
     );
     for (Map.Entry<Person, Integer> entry : interestedInteractors.entrySet()) {

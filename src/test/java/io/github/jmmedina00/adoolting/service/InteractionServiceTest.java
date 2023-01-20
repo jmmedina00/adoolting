@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.Interaction;
 import io.github.jmmedina00.adoolting.entity.Interactor;
 import io.github.jmmedina00.adoolting.entity.group.Event;
@@ -22,10 +23,11 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.InteractionRepository;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.NotificationService;
-import io.github.jmmedina00.adoolting.service.person.NotifiedInteractorService;
+import io.github.jmmedina00.adoolting.service.person.notification.CombinationSelector;
+import io.github.jmmedina00.adoolting.service.person.notification.ConfirmableSelector;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -45,10 +47,7 @@ public class InteractionServiceTest {
   private InteractionRepository interactionRepository;
 
   @MockBean
-  private NotificationService notificationService; // ALL INTERACTIONS GO THROUGH HERE OwO
-
-  @MockBean
-  private NotifiedInteractorService notifiedInteractorService;
+  private NotificationService notificationService;
 
   @MockBean
   private InteractorService interactorService;
@@ -56,26 +55,28 @@ public class InteractionServiceTest {
   @MockBean
   private PageService pageService;
 
+  @MockBean
+  private ConfirmableSelector confirmableSelector;
+
+  @MockBean
+  private CombinationSelector comboSelector;
+
   @Autowired
   private InteractionService interactionService;
 
   @Test
-  public void saveInteractionSavesToRepositoryAndNotifiesPersonsAccordingToNotifiedInteractorService() {
+  public void saveInteractionSavesToRepositoryAndNotifiesPersonsAccordingToComboSelector() {
     Post post = new Post();
     Person foo = new Person();
     Person bar = new Person();
     Person baz = new Person();
 
-    HashMap<Person, Integer> interested = new HashMap<>();
-    interested.put(foo, 1);
-    interested.put(bar, 2);
-    interested.put(baz, 3);
-
     Mockito
-      .when(
-        notifiedInteractorService.getInteractorsInterestedInInteraction(post)
-      )
-      .thenReturn(interested);
+      .when(comboSelector.getPersonNotificationMap(post))
+      .thenReturn(Map.of(foo, 1, bar, 2));
+    Mockito
+      .when(confirmableSelector.getPersonNotificationMap(post))
+      .thenReturn(Map.of(baz, 3));
     Mockito
       .when(interactionRepository.save(any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
@@ -85,6 +86,31 @@ public class InteractionServiceTest {
 
     verify(notificationService, times(1)).createNotifications(saved, foo, 1);
     verify(notificationService, times(1)).createNotifications(saved, bar, 2);
+    verify(notificationService, never()).createNotifications(saved, baz, 3);
+  }
+
+  @Test
+  public void saveInteractionSavesToRepositoryAndNotifiesPersonsAccordingToConfirmableSelector() {
+    ConfirmableInteraction interaction = new ConfirmableInteraction();
+    Person foo = new Person();
+    Person bar = new Person();
+    Person baz = new Person();
+
+    Mockito
+      .when(comboSelector.getPersonNotificationMap(interaction))
+      .thenReturn(Map.of(foo, 1, bar, 2));
+    Mockito
+      .when(confirmableSelector.getPersonNotificationMap(interaction))
+      .thenReturn(Map.of(baz, 3));
+    Mockito
+      .when(interactionRepository.save(any()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Interaction saved = interactionService.saveInteraction(interaction);
+    assertEquals(interaction, saved);
+
+    verify(notificationService, never()).createNotifications(saved, foo, 1);
+    verify(notificationService, never()).createNotifications(saved, bar, 2);
     verify(notificationService, times(1)).createNotifications(saved, baz, 3);
   }
 
