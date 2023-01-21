@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
@@ -14,6 +15,7 @@ import io.github.jmmedina00.adoolting.entity.page.Page;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
+import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
 import java.util.Date;
@@ -38,6 +40,9 @@ public class ConfirmableInteractionServiceTest {
 
   @MockBean
   private PersonService personService;
+
+  @MockBean
+  private NotificationService notificationService;
 
   @MockBean
   private InteractionService interactionService;
@@ -105,6 +110,7 @@ public class ConfirmableInteractionServiceTest {
     assertEquals(interaction, saved);
     assertNull(saved.getIgnoredAt());
     assertNotNull(saved.getConfirmedAt());
+    verify(notificationService, times(1)).deleteInteractionNotifications(20L);
   }
 
   @Test
@@ -134,6 +140,7 @@ public class ConfirmableInteractionServiceTest {
     assertEquals(interaction, saved);
     assertNotNull(saved.getIgnoredAt());
     assertNull(saved.getConfirmedAt());
+    verify(notificationService, times(1)).deleteInteractionNotifications(20L);
   }
 
   @Test
@@ -150,6 +157,7 @@ public class ConfirmableInteractionServiceTest {
     );
 
     verify(interactionService, never()).saveInteraction(any());
+    verify(notificationService, never()).deleteInteractionNotifications(20L);
   }
 
   @Test
@@ -175,6 +183,7 @@ public class ConfirmableInteractionServiceTest {
     );
 
     verify(interactionService, never()).saveInteraction(any());
+    verify(notificationService, never()).deleteInteractionNotifications(20L);
   }
 
   @Test

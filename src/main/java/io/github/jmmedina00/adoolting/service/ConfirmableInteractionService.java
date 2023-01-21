@@ -4,6 +4,7 @@ import io.github.jmmedina00.adoolting.entity.ConfirmableInteraction;
 import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.ConfirmableInteractionRepository;
+import io.github.jmmedina00.adoolting.service.person.NotificationService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +26,9 @@ public class ConfirmableInteractionService {
 
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private NotificationService notificationService;
 
   @Autowired
   private InteractionService interactionService;
@@ -100,6 +104,8 @@ public class ConfirmableInteractionService {
       );
       interaction.setIgnoredAt(now);
     }
+
+    notificationService.deleteInteractionNotifications(interactionId);
 
     return (ConfirmableInteraction) interactionService.saveInteraction(
       interaction

@@ -37,6 +37,10 @@ public class NotificationService {
     NotificationService.class
   );
 
+  public void deleteInteractionNotifications(Long interactionId) {
+    notificationRepository.deleteAllByInteractionId(interactionId);
+  }
+
   public Page<Notification> getNotificationsForPerson(
     Long personId,
     Pageable pageable

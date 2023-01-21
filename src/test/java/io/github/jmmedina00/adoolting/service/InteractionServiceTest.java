@@ -165,6 +165,7 @@ public class InteractionServiceTest {
 
     assertNotNull(post.getDeletedAt());
     verify(interactionRepository, times(1)).save(post);
+    verify(notificationService, times(1)).deleteInteractionNotifications(5L);
   }
 
   @Test
@@ -179,6 +180,7 @@ public class InteractionServiceTest {
         interactionService.deleteInteraction(5L, 2L);
       }
     );
+    verify(notificationService, never()).deleteInteractionNotifications(5L);
   }
 
   @Test
@@ -198,6 +200,7 @@ public class InteractionServiceTest {
         interactionService.deleteInteraction(5L, 2L);
       }
     );
+    verify(notificationService, never()).deleteInteractionNotifications(5L);
   }
 
   @Test

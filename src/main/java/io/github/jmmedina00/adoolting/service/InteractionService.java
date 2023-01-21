@@ -120,11 +120,12 @@ public class InteractionService {
     interaction.setDeletedAt(new Date());
 
     logger.info(
-      "Interactor {} has deleted interaction {}",
+      "Person {} has deleted interaction {}",
       personId,
       interactionId
     );
     interactionRepository.save(interaction);
+    notificationService.deleteInteractionNotifications(interactionId);
   }
 
   public boolean isInteractionDeletableByPerson(
