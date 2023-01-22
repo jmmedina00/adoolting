@@ -1,0 +1,20 @@
+<h1>Persons</h1>
+<ul>
+  <li th:each="person : ${persons}">
+    <a
+      th:href="@{/profile/{id}(id=${person.id})}"
+      th:text="${person.getFullName()}"
+    ></a>
+  </li>
+</ul>
+<p th:if="${persons.hasNext()}">
+  <a th:href="@{/search/person(terms=${param.terms})}">Search more</a>
+</p>
+<h1>Pages</h1>
+<ul>
+  <li th:each="page: ${pages}" th:text="${page.getFullName()}"></li>
+</ul>
+<p th:if="${pages.hasNext()}">
+  <a href="@{/search/page(terms=${param.terms})}">Search more</a>
+</p>
+<p th:text="${param.terms}"></p>

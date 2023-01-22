@@ -4,14 +4,20 @@ import io.github.jmmedina00.adoolting.dto.PersonInfo;
 import io.github.jmmedina00.adoolting.dto.User;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.person.Person;
+import io.github.jmmedina00.adoolting.entity.util.ConfirmationToken;
 import io.github.jmmedina00.adoolting.entity.util.PersonDetails;
 import io.github.jmmedina00.adoolting.repository.PersonRepository;
+import io.github.jmmedina00.adoolting.repository.person.PersonSpecs;
 import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.util.ConfirmationService;
 import java.util.List;
+import javax.persistence.criteria.Join;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -54,6 +60,30 @@ public class PersonService implements UserDetailsService {
 
   public List<Person> getPersonsWhoLikedPage(Long pageId) {
     return personRepository.findPersonsWhoLikedPage(pageId);
+  }
+
+  public Page<Person> getPersonsBySearchTerm(
+    String searchTerms,
+    Pageable pageable
+  ) {
+    Specification<Person> possible = null;
+
+    String[] separatedTerms = searchTerms.trim().split(" ");
+
+    Specification<Person> confirmed = (person, query, builder) -> {
+      Join<Person, ConfirmationToken> cToken = builder.treat(
+        person.join("confirmationToken"),
+        ConfirmationToken.class
+      );
+      return builder.isNotNull(cToken.get("confirmedAt"));
+    };
+
+    for (String term : separatedTerms) {
+      Specification<Person> spec = PersonSpecs.firstOrLastNameContains(term);
+      possible = possible == null ? spec : possible.or(spec);
+    }
+
+    return personRepository.findAll(possible.and(confirmed), pageable);
   }
 
   public PersonInfo getPersonInfo(Long personId) {

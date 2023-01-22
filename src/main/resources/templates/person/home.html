@@ -6,6 +6,11 @@
   th:src="@{/pfp/interactor/{id}(id=${#authentication.principal.person.id})}"
 />
 
+<form th:action="@{/search}">
+  <input type="text" name="terms" />
+  <input type="submit" />
+</form>
+
 <ul>
   <li th:each="entry : ${commonfriends}">
     <span th:text="${entry.getKey().getFullName()}"></span>

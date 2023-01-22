@@ -8,6 +8,7 @@ import io.github.jmmedina00.adoolting.entity.person.Person;
 import io.github.jmmedina00.adoolting.exception.AlreadyInPlaceException;
 import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.page.PageRepository;
+import io.github.jmmedina00.adoolting.repository.page.PageSpecs;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,6 +51,25 @@ public class PageService {
       .filter(foundPerson -> Objects.equals(foundPerson.getId(), personId))
       .findFirst();
     return found.isPresent();
+  }
+
+  public org.springframework.data.domain.Page<Page> getPagesBySearchTerm(
+    String searchTerms,
+    Pageable pageable
+  ) {
+    Specification<Page> possible = null;
+
+    String[] separatedTerms = searchTerms.trim().split(" ");
+
+    Specification<Page> notDeleted = (page, query, builder) ->
+      builder.isNull(page.get("deletedAt"));
+
+    for (String term : separatedTerms) {
+      Specification<Page> spec = PageSpecs.pageNameContains(term);
+      possible = possible == null ? spec : possible.or(spec);
+    }
+
+    return pageRepository.findAll(possible.and(notDeleted), pageable);
   }
 
   public List<Page> getAllPersonPages(Long personId) {
