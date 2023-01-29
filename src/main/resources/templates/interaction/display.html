@@ -45,6 +45,9 @@
   th:src="@{/media/thumbnail/512/{id}(id=${medium.id})}"
 />
 <p th:text="${@relativeTimeService.getRelativeTime(interaction.createdAt)}"></p>
+<p
+  th:text="${@relativeTimeService.getPrettyDateInCorrectTimezone(interaction.createdAt)}"
+></p>
 <form
   th:remove="${accessLevel.name() != 'OPEN'} ? all : none"
   th:action="@{/interaction/{id}/comment(id=${interaction.id})}"

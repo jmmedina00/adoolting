@@ -1,13 +1,11 @@
 package io.github.jmmedina00.adoolting.service.group;
 
-import io.github.jmmedina00.adoolting.controller.common.AuthenticatedPerson;
 import io.github.jmmedina00.adoolting.dto.common.DateExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.common.TimeExtractOfDate;
 import io.github.jmmedina00.adoolting.dto.group.NewEvent;
 import io.github.jmmedina00.adoolting.dto.group.NewGroup;
 import io.github.jmmedina00.adoolting.dto.util.SecureDeletion;
 import io.github.jmmedina00.adoolting.entity.Interactor;
-import io.github.jmmedina00.adoolting.entity.cache.PersonLocaleConfig;
 import io.github.jmmedina00.adoolting.entity.group.Event;
 import io.github.jmmedina00.adoolting.entity.group.PeopleGroup;
 import io.github.jmmedina00.adoolting.entity.person.Person;
@@ -15,14 +13,12 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
-import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.util.RelativeTimeService;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +42,7 @@ public class PeopleGroupService {
   private InteractorService interactorService;
 
   @Autowired
-  private PersonLocaleConfigService localeConfigService;
+  private RelativeTimeService timeService;
 
   private static final Logger logger = LoggerFactory.getLogger(
     PeopleGroupService.class
@@ -118,22 +114,13 @@ public class PeopleGroupService {
 
     if (group instanceof Event) {
       Event event = (Event) group;
-      PersonLocaleConfig locale = localeConfigService.getConfig(
-        AuthenticatedPerson.getPersonId()
-      );
       NewEvent eventForm = new NewEvent();
       eventForm.setLocation(event.getLocation());
       eventForm.setCreateAs(group.getInteractor().getId());
 
-      Calendar happeningAtCalendar = Calendar.getInstance();
-      TimeZone tz = happeningAtCalendar.getTimeZone();
-      logger.debug("Date time is: {}", happeningAtCalendar.getTimeZone());
-      happeningAtCalendar.setTime(event.getHappeningAt());
-      happeningAtCalendar.add(Calendar.MILLISECOND, tz.getRawOffset() * -1);
-      happeningAtCalendar.add(Calendar.MINUTE, locale.getOffsetFromUTC() * -1);
-
-      Date convertedHappeningAt = happeningAtCalendar.getTime();
-
+      Date convertedHappeningAt = timeService.convertDateToCorrectTimezoneDate(
+        event.getHappeningAt()
+      );
       eventForm.setDate(new DateExtractOfDate(convertedHappeningAt));
       eventForm.setTime(new TimeExtractOfDate(convertedHappeningAt));
 

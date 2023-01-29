@@ -24,10 +24,11 @@ import io.github.jmmedina00.adoolting.exception.NotAuthorizedException;
 import io.github.jmmedina00.adoolting.repository.group.PeopleGroupRepository;
 import io.github.jmmedina00.adoolting.service.InteractionService;
 import io.github.jmmedina00.adoolting.service.InteractorService;
-import io.github.jmmedina00.adoolting.service.cache.PersonLocaleConfigService;
 import io.github.jmmedina00.adoolting.service.page.PageService;
 import io.github.jmmedina00.adoolting.service.person.PersonService;
+import io.github.jmmedina00.adoolting.service.util.RelativeTimeService;
 import io.github.jmmedina00.adoolting.util.MethodDoesThatNameGenerator;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class PeopleGroupServiceTest {
   private InteractorService interactorService;
 
   @MockBean
-  private PersonLocaleConfigService localeConfigService;
+  private RelativeTimeService timeService;
 
   @Autowired
   private PeopleGroupService groupService;
@@ -256,7 +257,6 @@ public class PeopleGroupServiceTest {
       AuthenticatedPerson.class
     );
     authPersonUtilities.when(AuthenticatedPerson::getPersonId).thenReturn(4L);
-    Mockito.when(localeConfigService.getConfig(4L)).thenReturn(config);
 
     Mockito
       .when(groupRepository.findActiveGroup(1L))
@@ -274,8 +274,15 @@ public class PeopleGroupServiceTest {
 
   @Test
   public void getGroupFormSetsDateAndTimeCorrectlyInEventDto() {
-    long savedTimestamp = 1584026760_000L; // 2020/03/12 at 15:26 UTC
-    Date resultingDate = new Date(savedTimestamp); // Gets converted to local timezone (CET -> 16:26)
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(0);
+    calendar.set(Calendar.HOUR_OF_DAY, 20);
+    calendar.set(Calendar.MINUTE, 8);
+    calendar.set(Calendar.YEAR, 2024);
+    calendar.set(Calendar.MONTH, Calendar.SEPTEMBER);
+    calendar.set(Calendar.DAY_OF_MONTH, 29);
+
+    Date date = calendar.getTime();
 
     Event event = new Event();
     Person person = new Person();
@@ -284,7 +291,7 @@ public class PeopleGroupServiceTest {
     event.setDescription("This is a group");
     event.setAccessLevel(AccessLevel.WATCH_ONLY);
     event.setLocation("Somewhere");
-    event.setHappeningAt(resultingDate);
+    event.setHappeningAt(new Date());
     event.setInteractor(person);
 
     PersonLocaleConfig config = new PersonLocaleConfig();
@@ -294,7 +301,9 @@ public class PeopleGroupServiceTest {
       AuthenticatedPerson.class
     );
     authPersonUtilities.when(AuthenticatedPerson::getPersonId).thenReturn(4L);
-    Mockito.when(localeConfigService.getConfig(4L)).thenReturn(config);
+    Mockito
+      .when(timeService.convertDateToCorrectTimezoneDate(any(Date.class)))
+      .thenReturn(date);
 
     Mockito
       .when(groupRepository.findActiveGroup(1L))
@@ -302,8 +311,8 @@ public class PeopleGroupServiceTest {
     NewEvent dto = (NewEvent) groupService.getGroupForm(1L);
     authPersonUtilities.closeOnDemand();
 
-    assertEquals("2020-03-12", dto.getDate().toString());
-    assertEquals("13:26", dto.getTime().toString());
+    assertEquals("2024-09-29", dto.getDate().toString());
+    assertEquals("20:08", dto.getTime().toString());
   }
 
   @Test
