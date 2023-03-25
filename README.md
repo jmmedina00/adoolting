@@ -15,7 +15,7 @@ Social network experiment fully done with static pages as an artificial constrai
 
 It is "functional", yet incomplete. Navigation and certain features are not fully implemented. I decided to move on due to change in circumstances and this project dragging on for too long.
 
-Partial prototype of UI is available at (include screens repo).
+Partial prototype of UI is available at [adoolting-screens](https://github.com/jmmedina00/adoolting-screens).
 
 ## Prerequisites
 
